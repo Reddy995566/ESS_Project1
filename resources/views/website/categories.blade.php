@@ -19,7 +19,7 @@
                 Explore Our Collections
             </h1>
             <p class="text-white/80 text-sm md:text-base max-w-2xl mx-auto">
-                Discover our exquisite range of handcrafted sarees, each piece telling a unique story of tradition and elegance
+                It's time to design your new wardrobe with our elegant and trendy DUST Collections
             </p>
             
             <!-- Breadcrumb -->
