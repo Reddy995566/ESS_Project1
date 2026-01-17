@@ -195,8 +195,13 @@ class CartController extends Controller
         }
 
         foreach ($sessionCart as $key => $item) {
-            // Map color_id to variant_id as per our schema decision
-            $variantId = isset($item['color_id']) ? $item['color_id'] : null;
+            // Get variant_id from session cart
+            $variantId = $item['variant_id'] ?? null;
+            
+            // Skip if variant doesn't exist in database
+            if ($variantId && !\App\Models\ProductVariant::where('id', $variantId)->exists()) {
+                continue;
+            }
 
             Cart::updateOrCreate(
                 [
