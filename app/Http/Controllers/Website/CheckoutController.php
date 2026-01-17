@@ -42,6 +42,7 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {
+
         // Validation
         $request->validate([
             'payment_method' => 'required',
@@ -54,6 +55,13 @@ class CheckoutController extends Controller
             'state' => 'required_without:shipping_address_id',
             'zipcode' => 'required_without:shipping_address_id',
             'phone' => 'required_without:shipping_address_id',
+            // Billing Address Validation
+            'billing_selection' => 'required|in:same,different',
+            'billing_first_name' => 'required_if:billing_selection,different',
+            'billing_address' => 'required_if:billing_selection,different',
+            'billing_city' => 'required_if:billing_selection,different',
+            'billing_state' => 'required_if:billing_selection,different',
+            'billing_zipcode' => 'required_if:billing_selection,different',
         ]);
 
         $cart = session()->get('cart', []);
@@ -102,6 +110,36 @@ class CheckoutController extends Controller
                 ];
             }
 
+            // Billing Address Data
+            if($request->billing_selection == 'different') {
+                $billingData = [
+                    'billing_first_name' => $request->billing_first_name,
+                    'billing_last_name' => $request->billing_last_name ?? '',
+                    'billing_email' => $request->billing_email ?? $user->email, // Often same email, or add field
+                    'billing_phone' => $request->billing_phone,
+                    'billing_country' => $request->billing_country ?? 'India',
+                    'billing_address' => $request->billing_address,
+                    'billing_address_line_2' => $request->billing_address_line_2,
+                    'billing_city' => $request->billing_city,
+                    'billing_state' => $request->billing_state,
+                    'billing_zipcode' => $request->billing_zipcode,
+                ];
+            } else {
+                // Copy shipping address to billing address
+                 $billingData = [
+                    'billing_first_name' => $addressData['first_name'],
+                    'billing_last_name' => $addressData['last_name'],
+                    'billing_email' => $addressData['email'],
+                    'billing_phone' => $addressData['phone'],
+                    'billing_country' => $addressData['country'],
+                    'billing_address' => $addressData['address'],
+                    'billing_address_line_2' => $addressData['address_line_2'],
+                    'billing_city' => $addressData['city'],
+                    'billing_state' => $addressData['state'],
+                    'billing_zipcode' => $addressData['zipcode'],
+                ];
+            }
+
             // Calculate Totals again for security
             $subtotal = 0;
             foreach($cart as $item) {
@@ -111,7 +149,7 @@ class CheckoutController extends Controller
 
             // Create Order
             $orderNumber = 'ORD-' . strtoupper(Str::random(10));
-            $order = Order::create(array_merge($addressData, [
+            $order = Order::create(array_merge($addressData, $billingData, [
                 'order_number' => $orderNumber,
                 'user_id' => $user->id,
                 'session_id' => session()->getId(),

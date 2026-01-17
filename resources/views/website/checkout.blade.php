@@ -167,6 +167,73 @@
                 </div>
             </div>
 
+            <!-- Billing Address Section -->
+            <div class="mb-10">
+                <h2 class="text-lg font-medium text-[#333] mb-4">Billing address</h2>
+                
+                <div class="border border-gray-200 rounded overflow-hidden mb-4">
+                    <label class="flex items-center p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 bg-white">
+                        <input type="radio" name="billing_selection" value="same" class="w-4 h-4 text-[#4b0f27] border-gray-300 focus:ring-[#4b0f27] accent-[#4b0f27]" checked onchange="toggleBillingAddress(false)">
+                        <span class="ml-3 text-sm font-medium text-gray-900">Same as shipping address</span>
+                    </label>
+                    <label class="flex items-center p-4 cursor-pointer hover:bg-gray-50 bg-white">
+                        <input type="radio" name="billing_selection" value="different" class="w-4 h-4 text-[#4b0f27] border-gray-300 focus:ring-[#4b0f27] accent-[#4b0f27]" onchange="toggleBillingAddress(true)">
+                        <span class="ml-3 text-sm font-medium text-gray-900">Use a different billing address</span>
+                    </label>
+                </div>
+
+                <div id="billingAddressForm" class="hidden bg-gray-50 p-4 rounded border border-gray-200 space-y-3">
+                     <!-- Country -->
+                     <div class="relative">
+                        <input type="text" name="billing_country" value="India" readonly class="w-full h-12 px-3 border border-gray-300 rounded bg-gray-100 text-gray-600 outline-none text-sm shadow-sm cursor-not-allowed">
+                        <label class="absolute text-[10px] text-gray-500 top-2 left-3 opacity-0">Country/Region</label>
+                    </div>
+
+                    <!-- Name Row -->
+                    <div class="flex gap-3">
+                        <div class="w-1/2">
+                            <input type="text" name="billing_first_name" placeholder="First name" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        </div>
+                        <div class="w-1/2">
+                            <input type="text" name="billing_last_name" placeholder="Last name" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        </div>
+                    </div>
+
+                     <!-- Address -->
+                     <div class="relative">
+                        <input type="text" name="billing_address" placeholder="Address" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                    </div>
+
+                    <!-- Apartment -->
+                    <input type="text" name="billing_address_line_2" placeholder="Apartment, suite, etc. (optional)" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow">
+
+                    <!-- City State Zip -->
+                    <div class="flex gap-3">
+                        <div class="w-1/3">
+                            <input type="text" name="billing_city" placeholder="City" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        </div>
+                        <div class="w-1/3 relative">
+                            <select name="billing_state" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none text-gray-800 text-sm bg-white shadow-sm appearance-none form-select">
+                                <option value="">Select State</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <!-- Add more states as needed -->
+                            </select>
+                        </div>
+                        <div class="w-1/3">
+                            <input type="text" name="billing_zipcode" placeholder="PIN code" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="relative">
+                        <input type="text" name="billing_phone" placeholder="Phone" class="w-full h-12 pl-3 pr-10 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                    </div>
+                </div>
+            </div>
+
             <!-- Payment -->
             <div class="mb-10">
                 <h2 class="text-lg font-medium text-[#333] mb-1">Payment</h2>
@@ -275,6 +342,15 @@
     <script>
         function toggleNewAddress(show) {
             const form = document.getElementById('newAddressForm');
+            if (show) {
+                form.classList.remove('hidden');
+            } else {
+                form.classList.add('hidden');
+            }
+        }
+
+        function toggleBillingAddress(show) {
+            const form = document.getElementById('billingAddressForm');
             if (show) {
                 form.classList.remove('hidden');
             } else {
