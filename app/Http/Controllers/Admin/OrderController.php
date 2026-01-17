@@ -178,12 +178,19 @@ class OrderController extends Controller
         fclose($output);
         exit;
     }
-    public function shipToShiprocket($id, \App\Services\ShiprocketService $shiprocket)
+    public function shipToShiprocket(Request $request, $id, \App\Services\ShiprocketService $shiprocket)
     {
         try {
             $order = Order::with(['items', 'items.variant', 'items.product'])->findOrFail($id);
             
             if ($order->shiprocket_order_id) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Order is already pushed to Shiprocket',
+                        'order_id' => $order->shiprocket_order_id
+                    ]);
+                }
                 return back()->with('error', 'Order is already pushed to Shiprocket');
             }
 
@@ -195,10 +202,72 @@ class OrderController extends Controller
             $order->awb_code = $response['awb_code'] ?? null;
             $order->save();
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order successfully pushed to Shiprocket!',
+                    'order_id' => $response['order_id'],
+                    'shipment_id' => $response['shipment_id']
+                ]);
+            }
+
             return back()->with('success', 'Order successfully pushed to Shiprocket! Order ID: ' . $response['order_id']);
 
         } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Shiprocket Error: ' . $e->getMessage()
+                ], 500);
+            }
             return back()->with('error', 'Shiprocket Error: ' . $e->getMessage());
+        }
+    }
+
+    public function getCouriers($id, \App\Services\ShiprocketService $shiprocket)
+    {
+        try {
+            $order = Order::findOrFail($id);
+            $couriers = $shiprocket->getAvailableCouriers($order);
+            
+            return response()->json([
+                'success' => true,
+                'couriers' => $couriers
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function generateAwb(Request $request, $id, \App\Services\ShiprocketService $shiprocket)
+    {
+        try {
+            $request->validate([
+                'courier_id' => 'required',
+                'shipment_id' => 'required'
+            ]);
+
+            $order = Order::findOrFail($id);
+            $response = $shiprocket->generateAwb($request->shipment_id, $request->courier_id);
+
+            // Update with AWB
+            $order->awb_code = $response['awb_code'] ?? $response['response']['data']['awb_code'] ?? null;
+            $order->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'AWB Generated Successfully!',
+                'awb_code' => $order->awb_code
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

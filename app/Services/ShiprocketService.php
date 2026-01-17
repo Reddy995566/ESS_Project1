@@ -121,4 +121,66 @@ class ShiprocketService
 
         throw new \Exception('Shiprocket order creation failed: ' . $errorMessage);
     }
+
+
+    public function getAvailableCouriers($order)
+    {
+        if (!$this->token) {
+            $this->login();
+        }
+
+        if (!$order->shiprocket_order_id) {
+             throw new \Exception('Order must be pushed to Shiprocket first.');
+        }
+
+        // 1. Get pickup location (assuming Primary for now, ideally strictly from settings or previous context)
+        $pickupPostcode = '110001'; // Default or fetch from settings if implemented
+
+        $deliveryPostcode = $order->billing_zipcode ?? $order->zipcode;
+        $weight = 0.5; // Default or calculate from order items
+        $cod = $order->payment_method === 'cod' ? 1 : 0;
+
+        $params = [
+            'pickup_postcode' => $pickupPostcode,
+            'delivery_postcode' => $deliveryPostcode,
+            'weight' => $weight,
+            'cod' => $cod,
+            'order_id' => $order->shiprocket_order_id,
+        ];
+
+        $response = Http::withToken($this->token)->get("{$this->baseUrl}/courier/serviceability", $params);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            if (isset($data['data']['available_courier_companies']) && !empty($data['data']['available_courier_companies'])) {
+                return $data['data']['available_courier_companies'];
+            }
+             // Sometimes recommendations are in 'courier_company_id' key in different endpoint, but for serviceability:
+            return []; // Return empty if no couriers found or structure differs
+        }
+
+        Log::error('Shiprocket Fetch Couriers Failed: ' . $response->body());
+        throw new \Exception('Failed to fetch available couriers: ' . ($response->json()['message'] ?? 'Unknown error'));
+    }
+
+    public function generateAwb($shipmentId, $courierId)
+    {
+         if (!$this->token) {
+            $this->login();
+        }
+
+        $data = [
+            'shipment_id' => $shipmentId,
+            'courier_id' => $courierId,
+        ];
+
+        $response = Http::withToken($this->token)->post("{$this->baseUrl}/courier/assign/awb", $data);
+
+        if ($response->successful()) {
+            return $response->json();
+        }
+
+        Log::error('Shiprocket Generate AWB Failed: ' . $response->body());
+        throw new \Exception('Failed to generate AWB: ' . ($response->json()['message'] ?? 'Unknown error'));
+    }
 }

@@ -27,22 +27,29 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     @if(!$order->shiprocket_order_id)
-                        <form action="{{ route('admin.orders.shiprocket', $order->id) }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                </svg>
-                                Ship with Shiprocket
-                            </button>
-                        </form>
-                    @else
-                        <span class="inline-flex items-center px-5 py-2.5 bg-green-100 text-green-700 text-sm font-semibold rounded-xl border border-green-200">
+                    @if(!$order->shiprocket_order_id)
+                        <button onclick="shipOrder({{ $order->id }})" id="shipBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
-                            Pushed to Shiprocket
-                        </span>
+                            <span id="shipBtnText">Ship with Shiprocket</span>
+                        </button>
+                    @else
+                        @if(!$order->awb_code)
+                             <button onclick="fetchCouriers()" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                </svg>
+                                Select Courier & Generate AWB
+                            </button>
+                        @else
+                            <span class="inline-flex items-center px-5 py-2.5 bg-green-100 text-green-700 text-sm font-semibold rounded-xl border border-green-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                AWB: {{ $order->awb_code }}
+                            </span>
+                        @endif
                     @endif
 
                     <button onclick="window.print()" class="inline-flex items-center px-5 py-2.5 bg-white text-gray-700 text-sm font-semibold rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
@@ -339,6 +346,196 @@
     </div>
 
 @endsection
+
+<!-- Shiprocket Courier Modal -->
+<div id="courierModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeCourierModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Select Courier Service</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500 mb-4">Choose a courier partner to ship this order.</p>
+                            <div id="courierList" class="space-y-3 max-h-96 overflow-y-auto">
+                                <!-- Loading State -->
+                                <div class="flex justify-center py-4">
+                                    <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="closeCourierModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const shiprocketOrderUrl = "{{ route('admin.orders.shiprocket', $order->id) }}";
+    const shiprocketCouriersUrl = "{{ route('admin.orders.shiprocket.couriers', $order->id) }}";
+    const shiprocketAwbUrl = "{{ route('admin.orders.shiprocket.awb', $order->id) }}";
+    const csrfToken = "{{ csrf_token() }}";
+
+    function shipOrder(orderId) {
+        const btn = document.getElementById('shipBtn');
+        const btnText = document.getElementById('shipBtnText');
+        
+        // Loading State
+        btn.disabled = true;
+        btnText.innerHTML = 'Creating Order...';
+        
+        fetch(shiprocketOrderUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Success: Open Modal to select courier
+                // btnText.innerHTML = 'Order Created!';
+                // setTimeout(() => fetchCouriers(orderId), 1000); instead of direct open, update button to "Select Courier"
+                 window.location.reload(); 
+            } else {
+                alert('Error: ' + data.message);
+                btn.disabled = false;
+                btnText.innerHTML = 'Ship with Shiprocket';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Something went wrong!');
+            btn.disabled = false;
+            btnText.innerHTML = 'Ship with Shiprocket';
+        });
+    }
+
+    // Check if order is already created but not shipped (can be handled via backend logic or checking DOM)
+    // For now, let's assume if the user clicks "Ship" it creates order. 
+    // If order exists, backend returns success:false but we might want to handle "already pushed" by showing couriers.
+    
+    // Better Approach: 
+    // If order is pushed (we check blade directive), show "Select Courier" button instead of "Pushed".
+    // Or add a separate logic. 
+    // Based on requirement: "Select Courier & Generate AWB" flow.
+    
+    function fetchCouriers() {
+        const modal = document.getElementById('courierModal');
+        const list = document.getElementById('courierList');
+        
+        modal.classList.remove('hidden');
+        list.innerHTML = '<div class="flex justify-center py-4"><svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
+        
+        fetch(shiprocketCouriersUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderCouriers(data.couriers);
+            } else {
+                list.innerHTML = `<div class="text-red-500 text-center p-4">Error: ${data.message}</div>`;
+            }
+        })
+        .catch(error => {
+            list.innerHTML = `<div class="text-red-500 text-center p-4">Failed to load couriers.</div>`;
+        });
+    }
+
+    function renderCouriers(couriers) {
+        const list = document.getElementById('courierList');
+        if (couriers.length === 0) {
+            list.innerHTML = '<div class="text-gray-500 text-center p-4">No couriers available.</div>';
+            return;
+        }
+
+        let html = '';
+        couriers.forEach(courier => {
+            html += `
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-all cursor-pointer" onclick="selectCourier('${courier.courier_company_id}', '${courier.courier_name}')">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white rounded-lg border border-gray-200 flex items-center justify-center font-bold text-gray-500">
+                            ${courier.courier_name.charAt(0)}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">${courier.courier_name}</h4>
+                            <p class="text-xs text-gray-500">Rate: ₹${courier.rate} | ETA: ${courier.etd} days</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 bg-white border border-indigo-200 text-indigo-600 text-xs font-bold rounded-lg hover:bg-indigo-600 hover:text-white transition-colors">
+                        Select
+                    </button>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+    }
+
+    function selectCourier(courierId, courierName) {
+        if (!confirm(`Generate AWB with ${courierName}?`)) return;
+
+        const list = document.getElementById('courierList');
+        // Show loading overlay or replace content
+        list.innerHTML = '<div class="flex flex-col items-center justify-center py-8"><svg class="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="text-gray-600 font-medium">Generating AWB...</p></div>';
+
+        // We need shipment_id. For now, let's assume we pass it or it's on the order object.
+        // Wait, request requires 'shipment_id'. My shiprocket_shipment_id is on the order.
+        // I can pass it via blade to JS variable or fetch it.
+        // Let's pass it from Blade.
+        const shipmentId = "{{ $order->shiprocket_shipment_id }}";
+
+        fetch(shiprocketAwbUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                courier_id: courierId,
+                shipment_id: shipmentId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('AWB Generated Successfully: ' + data.awb_code);
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
+                closeCourierModal();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to generate AWB.');
+            closeCourierModal();
+        });
+    }
+
+    function closeCourierModal() {
+        document.getElementById('courierModal').classList.add('hidden');
+    }
+</script>
+
 
 @push('scripts')
 <style>

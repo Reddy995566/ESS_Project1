@@ -451,6 +451,8 @@ Route::prefix('admin')->group(function () {
         Route::post('/settings/generate-sitemap', [App\Http\Controllers\Admin\SettingsController::class, 'generateSitemap'])->name('admin.settings.generateSitemap');
         Route::post('/settings/shiprocket', [App\Http\Controllers\Admin\SettingsController::class, 'updateShiprocket'])->name('admin.settings.shiprocket');
         Route::post('/orders/{id}/shiprocket', [App\Http\Controllers\Admin\OrderController::class, 'shipToShiprocket'])->name('admin.orders.shiprocket');
+        Route::get('/orders/{id}/shiprocket/couriers', [App\Http\Controllers\Admin\OrderController::class, 'getCouriers'])->name('admin.orders.shiprocket.couriers');
+        Route::post('/orders/{id}/shiprocket/awb', [App\Http\Controllers\Admin\OrderController::class, 'generateAwb'])->name('admin.orders.shiprocket.awb');
 
 
         // Banner Management
