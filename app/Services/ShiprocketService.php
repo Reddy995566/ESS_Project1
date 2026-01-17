@@ -73,7 +73,7 @@ class ShiprocketService
         $data = [
             'order_id' => (string) $order->order_number,
             'order_date' => $orderDate,
-            'pickup_location' => 'Primary', // Default pickup location name configured in Shiprocket
+            'pickup_location' => 'Home', // Default pickup location from Shiprocket account
             'billing_customer_name' => $order->billing_first_name ?? $order->first_name,
             'billing_last_name' => $order->billing_last_name ?? $order->last_name,
             'billing_address' => $order->billing_address ?? $order->address,
