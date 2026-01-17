@@ -212,7 +212,12 @@ class CheckoutController extends Controller
             // For COD, clear cart and redirect
             session()->forget('cart');
             DB::commit();
-            return redirect()->route('order.success', $order->id);
+
+            return response()->json([
+                'success' => true,
+                'redirect' => route('order.success', $order->id),
+                'order_id' => $order->id
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();

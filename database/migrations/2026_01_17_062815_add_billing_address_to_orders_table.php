@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('billing_first_name')->nullable()->after('session_id');
-            $table->string('billing_last_name')->nullable()->after('billing_first_name');
-            $table->string('billing_email')->nullable()->after('billing_last_name');
-            $table->string('billing_phone')->nullable()->after('billing_email');
-            $table->string('billing_country')->nullable()->after('billing_phone');
-            $table->text('billing_address')->nullable()->after('billing_country');
-            $table->text('billing_address_line_2')->nullable()->after('billing_address');
-            $table->string('billing_city')->nullable()->after('billing_address_line_2');
-            $table->string('billing_state')->nullable()->after('billing_city');
-            $table->string('billing_zipcode')->nullable()->after('billing_state');
+            $table->string('billing_first_name')->nullable();
+            $table->string('billing_last_name')->nullable();
+            $table->string('billing_email')->nullable();
+            $table->string('billing_phone')->nullable();
+            $table->string('billing_country')->nullable();
+            $table->text('billing_address')->nullable();
+            $table->text('billing_address_line_2')->nullable();
+            $table->string('billing_city')->nullable();
+            $table->string('billing_state')->nullable();
+            $table->string('billing_zipcode')->nullable();
         });
     }
 
