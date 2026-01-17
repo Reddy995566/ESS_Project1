@@ -13,26 +13,32 @@
             </h1>
 
             <p class="text-sm md:text-base font-medium text-[#2B2B2B] mb-8">
-                Welcome to Fashion Store!
+                Welcome to Switch2Kart!
             </p>
 
             <div class="space-y-6 text-sm md:text-base text-[#2B2B2B] leading-relaxed">
                 <p>
-                    At Fashion Store, we believe that fabric is more than just material—it's an expression of culture,
-                    elegance, and individuality.
-                    Rooted in tradition yet inspired by contemporary tastes, Fashion Store brings you a curated collection of
-                    exquisite sarees, suits, and dupattas that celebrate the art of Indian textiles.
+                    We at Switch2Kart are committed to delivering premium-quality clothing that meets the highest standards of comfort, durability, and style. Every product we create begins with a simple belief — when quality is uncompromised, customer satisfaction follows naturally.
                 </p>
 
                 <p>
-                    Each piece at Fashion Store is thoughtfully crafted, blending timeless craftsmanship with modern
-                    aesthetics. From handpicked weaves to delicate embellishments, our collections are designed to make
-                    every moment special—whether it's a festive gathering, a family occasion, or your everyday elegance.
+                    We work exclusively with carefully tested, premium-grade fabrics, ensuring that each garment feels superior and performs exceptionally. From stitching to finishing, every detail is thoughtfully crafted to reflect our dedication to excellence.
                 </p>
 
                 <p>
-                    Discover fabrics that tell stories. Wrap yourself in heritage. Create your own statement with
-                    Fashion Store.
+                    Specializing in men’s and kids’ wear, we focus on providing apparel that is not only stylish but also soft, safe, and long-lasting. Our fabrics are selected to suit all kinds of wear, offering comfort and confidence for everyday use as well as special occasions.
+                </p>
+
+                <p>
+                    To achieve this, we are launching a new brand for men’s wear under the name <strong>DUST</strong>.
+                </p>
+
+                <p>
+                    Beyond fashion, Switch2Kart.com is continuously evolving. In the near future, we will be launching a wide range of electronics and accessories, expanding our commitment to premium quality across multiple product categories.
+                </p>
+
+                <p>
+                    When you choose us, you choose premium fabric, trusted quality, and timeless comfort — because nothing matters more than wearing the best.
                 </p>
             </div>
 
