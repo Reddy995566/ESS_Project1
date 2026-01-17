@@ -27,7 +27,7 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     @if(!$order->shiprocket_order_id)
-                    @if(!$order->shiprocket_order_id)
+
                         <button onclick="shipOrder({{ $order->id }})" id="shipBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
