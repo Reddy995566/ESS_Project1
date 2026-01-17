@@ -108,7 +108,20 @@ class ShiprocketService
         $response = Http::withToken($this->token)->post("{$this->baseUrl}/orders/create/adhoc", $data);
 
         if ($response->successful()) {
-            return $response->json();
+            $data = $response->json();
+            
+            // Check for direct order_id
+            if (isset($data['order_id'])) {
+                return $data;
+            }
+            
+            // Check for order_id inside data key (common in v2)
+            if (isset($data['data']) && isset($data['data']['order_id'])) {
+                return $data['data'];
+            }
+
+            // If neither, throw exception with body for debugging
+            throw new \Exception('Unexpected Shiprocket Response (Missing order_id): ' . $response->body());
         }
 
         Log::error('Shiprocket Create Order Failed: ' . $response->body());
