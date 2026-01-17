@@ -186,7 +186,13 @@
             <!-- Section 20 - Contact Information -->
             <div>
                 <h2 class="text-xl md:text-2xl font-serif-elegant text-wine-dark mb-4">Section 20 - Contact Information</h2>
-                <p>Questions about the Terms of Service should be sent to us at @if(!empty($siteSettings['site_email']))<a href="mailto:{{ $siteSettings['site_email'] }}" class="text-wine hover:underline">{{ $siteSettings['site_email'] }}</a>@else our contact page@endif.</p>
+                <p>Questions about the Terms of Service should be sent to us at 
+                @if(!empty($siteSettings['site_email']))
+                    <a href="mailto:{{ $siteSettings['site_email'] }}" class="text-wine hover:underline">{{ $siteSettings['site_email'] }}</a>
+                @else
+                    our contact page
+                @endif
+                .</p>
                 <div class="mt-4 p-4 bg-cream rounded-lg space-y-2">
                     <p><strong>Trading Name:</strong> {{ $siteSettings['site_name'] ?? 'Fashion Store' }}</p>
                     @if(!empty($siteSettings['site_email']))
