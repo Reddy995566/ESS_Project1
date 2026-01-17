@@ -52,6 +52,13 @@
                             </svg>
                             Payment Gateways
                         </button>
+                        <button onclick="switchTab('shiprocket')" 
+                                class="tab-btn text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-1 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Shiprocket
+                        </button>
                         <button onclick="switchTab('social')" 
                                 class="tab-btn text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-1 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -617,6 +624,9 @@
                 </div>
             </div>
 
+            <!-- Shiprocket Settings Tab -->
+            @include('admin.settings.partials.shiprocket-tab')
+
             <!-- Social Media Links Tab -->
             @include('admin.settings.partials.social-media-tab')
 
@@ -674,8 +684,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function switchTab(tabName) {
-    // Hide all tabs
-    const tabs = ['general-tab', 'imagekit-tab', 'payment-tab', 'social-tab', 'maintenance-tab', 'seo-tab'];
+    const tabs = ['general-tab', 'imagekit-tab', 'payment-tab', 'shiprocket-tab', 'social-tab', 'maintenance-tab', 'seo-tab'];
     tabs.forEach(tabId => {
         const tab = document.getElementById(tabId);
         if (tab) tab.classList.add('hidden');

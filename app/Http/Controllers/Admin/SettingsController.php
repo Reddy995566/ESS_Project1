@@ -48,6 +48,10 @@ class SettingsController extends Controller
             'razorpay_key_id' => Setting::get('razorpay_key_id', ''),
             'razorpay_key_secret' => Setting::get('razorpay_key_secret', ''),
             'razorpay_enabled' => Setting::get('razorpay_enabled', false),
+            
+            // Shiprocket Settings
+            'shiprocket_email' => Setting::get('shiprocket_email', ''),
+            'shiprocket_password' => Setting::get('shiprocket_password', ''),
         ];
 
         return view('admin.settings.index', [
@@ -147,6 +151,37 @@ class SettingsController extends Controller
 
             return redirect()->route('admin.settings', ['tab' => 'payment'])
                 ->with('success', 'Payment gateway settings saved successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed: ' . implode(' ', $e->validator->errors()->all())
+                ], 422);
+            }
+            throw $e;
+        }
+    }
+
+    public function updateShiprocket(Request $request)
+    {
+        try {
+            $request->validate([
+                'shiprocket_email' => 'required|email',
+                'shiprocket_password' => 'required|string',
+            ]);
+            
+            Setting::set('shiprocket_email', $request->shiprocket_email);
+            Setting::set('shiprocket_password', $request->shiprocket_password);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Shiprocket settings saved successfully!'
+                ]);
+            }
+
+            return redirect()->route('admin.settings', ['tab' => 'shiprocket'])
+                ->with('success', 'Shiprocket settings saved successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->ajax()) {
                 return response()->json([

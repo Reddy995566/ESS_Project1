@@ -178,4 +178,27 @@ class OrderController extends Controller
         fclose($output);
         exit;
     }
+    public function shipToShiprocket($id, \App\Services\ShiprocketService $shiprocket)
+    {
+        try {
+            $order = Order::with(['items', 'items.variant', 'items.product'])->findOrFail($id);
+            
+            if ($order->shiprocket_order_id) {
+                return back()->with('error', 'Order is already pushed to Shiprocket');
+            }
+
+            $response = $shiprocket->createOrder($order);
+
+            // Update order with Shiprocket details
+            $order->shiprocket_order_id = $response['order_id'];
+            $order->shiprocket_shipment_id = $response['shipment_id'];
+            $order->awb_code = $response['awb_code'] ?? null;
+            $order->save();
+
+            return back()->with('success', 'Order successfully pushed to Shiprocket! Order ID: ' . $response['order_id']);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Shiprocket Error: ' . $e->getMessage());
+        }
+    }
 }
