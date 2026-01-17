@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\UserAddress;
 use App\Models\Setting;
+use App\Mail\OrderPlaced;
 use Illuminate\Support\Str;
 use Razorpay\Api\Api;
 
@@ -213,6 +215,14 @@ class CheckoutController extends Controller
             session()->forget('cart');
             DB::commit();
 
+            // Send order confirmation email
+            try {
+                Mail::to($user->email)->send(new OrderPlaced($order));
+            } catch (\Exception $e) {
+                // Log email error but don't fail the order
+                \Log::error('Order confirmation email failed: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
                 'redirect' => route('order.success', $order->id),
@@ -252,6 +262,14 @@ class CheckoutController extends Controller
             
             // Clear cart
             session()->forget('cart');
+
+            // Send order confirmation email
+            try {
+                Mail::to($order->email)->send(new OrderPlaced($order));
+            } catch (\Exception $e) {
+                // Log email error but don't fail the order
+                \Log::error('Order confirmation email failed: ' . $e->getMessage());
+            }
             
             return response()->json([
                 'success' => true,
