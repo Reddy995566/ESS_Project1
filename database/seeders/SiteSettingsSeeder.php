@@ -208,7 +208,7 @@ class SiteSettingsSeeder extends Seeder
             [
                 'key' => 'font_heading',
                 'value' => 'Playfair Display',
-                'type' => 'select',
+                'type' => 'a',
                 'group' => 'fonts',
                 'label' => 'Heading Font',
                 'description' => 'Font for headings and titles',
