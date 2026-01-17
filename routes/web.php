@@ -448,6 +448,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/settings/maintenance', [App\Http\Controllers\Admin\SettingsController::class, 'updateMaintenance'])->name('admin.settings.maintenance');
         Route::post('/settings/seo', [App\Http\Controllers\Admin\SettingsController::class, 'updateSEO'])->name('admin.settings.seo');
         Route::post('/settings/upload-og-image', [App\Http\Controllers\Admin\SettingsController::class, 'uploadOGImage'])->name('admin.settings.uploadOGImage');
+        Route::post('/settings/generate-sitemap', [App\Http\Controllers\Admin\SettingsController::class, 'generateSitemap'])->name('admin.settings.generateSitemap');
         Route::post('/settings/shiprocket', [App\Http\Controllers\Admin\SettingsController::class, 'updateShiprocket'])->name('admin.settings.shiprocket');
         Route::post('/orders/{id}/shiprocket', [App\Http\Controllers\Admin\OrderController::class, 'shipToShiprocket'])->name('admin.orders.shiprocket');
 
