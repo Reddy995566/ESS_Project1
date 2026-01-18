@@ -19,6 +19,11 @@ self.addEventListener('install', event => {
 
 // Fetch from cache
 self.addEventListener('fetch', event => {
+  // Skip caching for POST, PUT, DELETE requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -26,6 +31,7 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response;
         }
+        
         return fetch(event.request).then(
           function(response) {
             // Check if valid response
