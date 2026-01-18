@@ -64,6 +64,13 @@
 
                 <!-- ➡ RIGHT: Action Icons -->
                 <div class="flex items-center justify-end gap-4 md:gap-5 lg:w-1/4">
+                    <!-- Install App Button (Desktop) -->
+                    <button id="installAppBtn" class="hidden hover:opacity-80 transition-opacity duration-200" style="color: var(--color-header-text);">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                    </button>
+                    
                     @auth
                         <!-- Logged In - Go to Dashboard -->
                         <a href="{{ route('user.dashboard') }}"
@@ -192,6 +199,30 @@
 <!-- Mobile Menu -->
 <div id="mobile-menu" class="hidden lg:hidden fixed top-[104px] left-0 right-0 z-40 shadow-lg" style="background-color: var(--color-header-bg); border-top: 1px solid rgba(0,0,0,0.1);">
     <div class="px-4 py-4 space-y-1 max-h-[calc(100vh-104px)] overflow-y-auto">
+        <!-- Install App Button (Mobile) -->
+        <button id="installAppBtnMobile" class="hidden w-full text-left font-medium text-sm py-3 flex items-center gap-2" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Install App
+        </button>
+        
+        <!-- Store Buttons -->
+        <div id="storeButtons" class="hidden py-3 space-y-2" style="border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <a href="#" class="flex items-center gap-2 text-sm" style="color: var(--color-header-text);">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                </svg>
+                Google Play
+            </a>
+            <a href="#" class="flex items-center gap-2 text-sm" style="color: var(--color-header-text);">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z"/>
+                </svg>
+                App Store
+            </a>
+        </div>
+        
         <a href="{{ route('home') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Home</a>
         <a href="{{ route('shop') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Shop</a>
         <a href="{{ route('bulk-orders') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Bulk Orders</a>
@@ -306,4 +337,66 @@
         }
     });
 
+</script>
+
+<!-- PWA Install Script -->
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installAppBtn');
+    const installBtnMobile = document.getElementById('installAppBtnMobile');
+    const storeButtons = document.getElementById('storeButtons');
+
+    // Listen for beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later
+        deferredPrompt = e;
+        // Show install button
+        if (installBtn) installBtn.classList.remove('hidden');
+        if (installBtnMobile) installBtnMobile.classList.remove('hidden');
+    });
+
+    // Install button click handler
+    function installPWA() {
+        if (!deferredPrompt) {
+            // If PWA already installed or not available, show store buttons
+            if (storeButtons) storeButtons.classList.remove('hidden');
+            return;
+        }
+        
+        // Show the install prompt
+        deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            } else {
+                console.log('User dismissed the install prompt');
+            }
+            deferredPrompt = null;
+        });
+    }
+
+    // Add click listeners
+    if (installBtn) {
+        installBtn.addEventListener('click', installPWA);
+    }
+    if (installBtnMobile) {
+        installBtnMobile.addEventListener('click', installPWA);
+    }
+
+    // Hide install button if app is already installed
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        if (installBtn) installBtn.classList.add('hidden');
+        if (installBtnMobile) installBtnMobile.classList.add('hidden');
+    });
+
+    // For iOS - always show store buttons as PWA install is different
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS && storeButtons) {
+        storeButtons.classList.remove('hidden');
+    }
 </script>
