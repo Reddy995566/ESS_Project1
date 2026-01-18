@@ -215,12 +215,20 @@ class CheckoutController extends Controller
             session()->forget('cart');
             DB::commit();
 
-            // Send order confirmation email
+            // Send order confirmation email to customer
             try {
                 Mail::to($user->email)->send(new OrderPlaced($order));
             } catch (\Exception $e) {
                 // Log email error but don't fail the order
                 \Log::error('Order confirmation email failed: ' . $e->getMessage());
+            }
+
+            // Send order notification email to admin
+            try {
+                $adminEmail = config('mail.from.address');
+                Mail::to($adminEmail)->send(new \App\Mail\AdminOrderNotificationMail($order));
+            } catch (\Exception $e) {
+                \Log::error('Admin order notification email failed: ' . $e->getMessage());
             }
 
             return response()->json([
@@ -263,12 +271,20 @@ class CheckoutController extends Controller
             // Clear cart
             session()->forget('cart');
 
-            // Send order confirmation email
+            // Send order confirmation email to customer
             try {
                 Mail::to($order->email)->send(new OrderPlaced($order));
             } catch (\Exception $e) {
                 // Log email error but don't fail the order
                 \Log::error('Order confirmation email failed: ' . $e->getMessage());
+            }
+
+            // Send order notification email to admin
+            try {
+                $adminEmail = config('mail.from.address');
+                Mail::to($adminEmail)->send(new \App\Mail\AdminOrderNotificationMail($order));
+            } catch (\Exception $e) {
+                \Log::error('Admin order notification email failed: ' . $e->getMessage());
             }
             
             return response()->json([
