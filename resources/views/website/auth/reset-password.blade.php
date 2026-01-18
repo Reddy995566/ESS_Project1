@@ -1,32 +1,26 @@
 @extends('website.layouts.master')
 
-@section('title', 'Login')
+@section('title', 'Reset Password')
 
 @section('content')
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FAF5ED] to-[#E5E0D8] py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-2xl">
         <!-- Header -->
         <div class="text-center">
-            <h2 class="font-serif-elegant text-4xl font-bold text-[#3D0C1F] tracking-wide">Welcome Back</h2>
-            <p class="mt-2 text-sm text-gray-600">Sign in to your account</p>
+            <div class="mx-auto h-16 w-16 bg-[#3D0C1F] rounded-full flex items-center justify-center mb-4">
+                <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h2 class="font-serif-elegant text-3xl font-bold text-[#3D0C1F] tracking-wide">Reset Password</h2>
+            <p class="mt-2 text-sm text-gray-600">Enter your new password</p>
         </div>
 
-        <!-- Login Form -->
-        
-        <!-- Session Messages -->
-        @if(session('error'))
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {{ session('error') }}
-            </div>
-        @endif
-        @if(session('success'))
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <form id="loginForm" class="mt-8 space-y-6">
+        <!-- Reset Password Form -->
+        <form id="resetPasswordForm" class="mt-8 space-y-6">
             @csrf
+            <input type="hidden" name="token" value="{{ $token }}">
+            
             <div class="space-y-4">
                 <!-- Email -->
                 <div>
@@ -36,15 +30,16 @@
                         name="email" 
                         type="email" 
                         required 
+                        value="{{ request('email') }}"
                         class="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D0C1F] focus:border-transparent transition"
                         placeholder="Enter your email"
                     >
                     <span class="text-red-500 text-xs mt-1 hidden" id="email-error"></span>
                 </div>
 
-                <!-- Password -->
+                <!-- New Password -->
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                     <div class="relative">
                         <input 
                             id="password" 
@@ -52,14 +47,14 @@
                             type="password" 
                             required 
                             class="appearance-none relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D0C1F] focus:border-transparent transition"
-                            placeholder="Enter your password"
+                            placeholder="Enter new password (min 6 characters)"
                         >
                         <button 
                             type="button" 
-                            onclick="togglePasswordVisibility()"
+                            onclick="togglePasswordVisibility('password', 'eyeIcon1')"
                             class="absolute inset-y-0 right-0 pr-4 flex items-center"
                         >
-                            <svg id="eyeIcon" class="h-5 w-5 text-gray-400 hover:text-gray-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg id="eyeIcon1" class="h-5 w-5 text-gray-400 hover:text-gray-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
@@ -67,21 +62,31 @@
                     </div>
                     <span class="text-red-500 text-xs mt-1 hidden" id="password-error"></span>
                 </div>
-            </div>
 
-            <!-- Remember Me & Forgot Password -->
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <input 
-                        id="remember" 
-                        name="remember" 
-                        type="checkbox" 
-                        class="h-4 w-4 text-[#3D0C1F] focus:ring-[#3D0C1F] border-gray-300 rounded"
-                    >
-                    <label for="remember" class="ml-2 block text-sm text-gray-900">Remember me</label>
-                </div>
-                <div class="text-sm">
-                    <a href="{{ route('password.request') }}" class="font-medium text-[#3D0C1F] hover:text-[#2a0815]">Forgot password?</a>
+                <!-- Confirm Password -->
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <div class="relative">
+                        <input 
+                            id="password_confirmation" 
+                            name="password_confirmation" 
+                            type="password" 
+                            required 
+                            class="appearance-none relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D0C1F] focus:border-transparent transition"
+                            placeholder="Confirm your new password"
+                        >
+                        <button 
+                            type="button" 
+                            onclick="togglePasswordVisibility('password_confirmation', 'eyeIcon2')"
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center"
+                        >
+                            <svg id="eyeIcon2" class="h-5 w-5 text-gray-400 hover:text-gray-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <span class="text-red-500 text-xs mt-1 hidden" id="password_confirmation-error"></span>
                 </div>
             </div>
 
@@ -89,28 +94,24 @@
             <div>
                 <button 
                     type="submit" 
-                    id="loginBtn"
+                    id="submitBtn"
                     class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#3D0C1F] hover:bg-[#2a0815] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3D0C1F] transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                    Sign In
+                    <svg id="spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="btnText">Reset Password</span>
                 </button>
-            </div>
-
-            <!-- Register Link -->
-            <div class="text-center">
-                <p class="text-sm text-gray-600">
-                    Don't have an account? 
-                    <a href="{{ route('register') }}" class="font-medium text-[#3D0C1F] hover:text-[#2a0815]">Sign up</a>
-                </p>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-function togglePasswordVisibility() {
-    const passwordInput = document.getElementById('password');
-    const eyeIcon = document.getElementById('eyeIcon');
+function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const eyeIcon = document.getElementById(iconId);
     
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
@@ -126,13 +127,16 @@ function togglePasswordVisibility() {
     }
 }
 
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
+document.getElementById('resetPasswordForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const btn = document.getElementById('loginBtn');
-    const originalText = btn.innerText;
-    btn.innerText = 'Signing in...';
+    const btn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+    
     btn.disabled = true;
+    spinner.classList.remove('hidden');
+    btnText.innerText = 'Resetting...';
 
     // Clear previous errors
     document.querySelectorAll('[id$="-error"]').forEach(el => {
@@ -144,7 +148,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const data = Object.fromEntries(formData.entries());
 
     try {
-        const response = await fetch('{{ route("login.post") }}', {
+        const response = await fetch('{{ route("password.update") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -156,9 +160,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         const result = await response.json();
 
         if (result.success) {
-            window.location.href = result.redirect || '{{ route("home") }}';
+            // Show success message
+            alert(result.message);
+            // Redirect to login
+            window.location.href = result.redirect;
         } else {
-            // Show errors inline
             if (result.errors) {
                 Object.keys(result.errors).forEach(key => {
                     const errorEl = document.getElementById(key + '-error');
@@ -168,30 +174,16 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                     }
                 });
             } else {
-                // For general errors like "Invalid email or password", show it under password field if not specified
-                const passwordError = document.getElementById('password-error');
-                if (passwordError) {
-                    passwordError.innerText = result.message || 'Login failed';
-                    passwordError.classList.remove('hidden');
-                } else {
-                    alert(result.message || 'Login failed'); // Fallback
-                }
+                alert(result.message || 'Failed to reset password');
             }
-            btn.innerText = originalText;
-            btn.disabled = false;
         }
     } catch (error) {
-        console.error('Login error:', error);
-        // Show generic error under password field
-        const passwordError = document.getElementById('password-error');
-        if (passwordError) {
-            passwordError.innerText = 'Something went wrong. Please try again.';
-            passwordError.classList.remove('hidden');
-        } else {
-            alert('Something went wrong. Please try again.');
-        }
-        btn.innerText = originalText;
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again.');
+    } finally {
         btn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.innerText = 'Reset Password';
     }
 });
 </script>

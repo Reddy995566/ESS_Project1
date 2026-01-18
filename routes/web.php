@@ -17,6 +17,12 @@ Route::post('/register', [App\Http\Controllers\Website\AuthController::class, 'r
 Route::post('/logout', [App\Http\Controllers\Website\AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/check', [App\Http\Controllers\Website\AuthController::class, 'checkAuth'])->name('auth.check');
 
+// Password Reset Routes
+Route::get('/forgot-password', [App\Http\Controllers\Website\ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [App\Http\Controllers\Website\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [App\Http\Controllers\Website\ResetPasswordController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [App\Http\Controllers\Website\ResetPasswordController::class, 'resetPassword'])->name('password.update');
+
 // User Dashboard (Protected)
 Route::middleware('auth')->group(function () {
     Route::get('/my-account', function () {

@@ -91,7 +91,7 @@
             </label>
         </div>
         <div class="text-sm">
-            <a href="#" class="font-semibold text-purple-600 hover:text-purple-500 transition-colors">
+            <a href="{{ route('password.request') }}" class="font-semibold text-purple-600 hover:text-purple-500 transition-colors">
                 Forgot password?
             </a>
         </div>
