@@ -270,11 +270,11 @@
 
             <!-- Footer Links -->
             <div class="border-t border-gray-200 pt-4 flex flex-wrap gap-4 text-xs text-[#4b0f27] underline decoration-solid">
-                <a href="#">Refund policy</a>
-                <a href="#">Shipping</a>
-                <a href="#">Privacy policy</a>
-                <a href="#">Terms of service</a>
-                <a href="#">Contact</a>
+                <a href="{{ route('refund-policy') }}">Refund policy</a>
+                <a href="{{ route('shipping-policy') }}">Shipping</a>
+                <a href="{{ route('privacy-policy') }}">Privacy policy</a>
+                <a href="{{ route('terms-of-service') }}">Terms of service</a>
+                <a href="{{ route('contact') }}">Contact</a>
             </div>
 
         </div>
