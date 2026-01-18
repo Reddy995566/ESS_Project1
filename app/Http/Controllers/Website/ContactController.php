@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Website;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -22,7 +23,15 @@ class ContactController extends Controller
             'message' => 'required|string',
         ]);
 
-        Contact::create($validated);
+        $contact = Contact::create($validated);
+
+        // Send notification email to admin
+        try {
+            $adminEmail = config('mail.from.address');
+            Mail::to($adminEmail)->send(new \App\Mail\AdminContactNotificationMail($contact));
+        } catch (\Exception $e) {
+            \Log::error('Admin contact notification email failed: ' . $e->getMessage());
+        }
 
         if ($request->wantsJson()) {
             return response()->json([

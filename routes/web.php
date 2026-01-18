@@ -92,6 +92,9 @@ Route::get('/contact-information', function () {
 Route::get('/contact-us', [App\Http\Controllers\Website\ContactController::class, 'index'])->name('contact');
 Route::post('/contact-us', [App\Http\Controllers\Website\ContactController::class, 'store'])->name('contact.store');
 
+// Newsletter Route
+Route::post('/newsletter/subscribe', [App\Http\Controllers\Website\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+
 // Search Route
 Route::get('/search/ajax', [App\Http\Controllers\Website\SearchController::class, 'search'])->name('search.ajax');
 Route::get('/search/quick-view/{id}', [App\Http\Controllers\Website\SearchController::class, 'quickView'])->name('search.quickview');
@@ -490,6 +493,10 @@ Route::prefix('admin')->group(function () {
         ]);
         Route::post('/contacts/{contact}/toggle-status', [App\Http\Controllers\Admin\ContactController::class, 'toggleStatus'])->name('admin.contacts.toggle-status');
 
+        // Newsletter Subscribers
+        Route::resource('/newsletters', App\Http\Controllers\Admin\NewsletterController::class, [
+            'as' => 'admin'
+        ]);
         // Testimonials
         Route::resource('/testimonials', App\Http\Controllers\Admin\TestimonialsController::class, [
             'as' => 'admin'

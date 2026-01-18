@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Website;
 use App\Http\Controllers\Controller;
 use App\Models\BulkOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class BulkOrderController extends Controller
 {
@@ -25,7 +26,15 @@ class BulkOrderController extends Controller
             'quantity_required' => 'required|string|max:255',
         ]);
 
-        BulkOrder::create($validated);
+        $bulkOrder = BulkOrder::create($validated);
+
+        // Send notification email to admin
+        try {
+            $adminEmail = config('mail.from.address');
+            Mail::to($adminEmail)->send(new \App\Mail\AdminBulkOrderNotificationMail($bulkOrder));
+        } catch (\Exception $e) {
+            \Log::error('Admin bulk order notification email failed: ' . $e->getMessage());
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
