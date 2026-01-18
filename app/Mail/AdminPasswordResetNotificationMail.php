@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
+use App\Models\Setting;
 
 class AdminPasswordResetNotificationMail extends Mailable
 {
@@ -18,6 +19,8 @@ class AdminPasswordResetNotificationMail extends Mailable
     public $resetTime;
     public $ipAddress;
     public $userAgent;
+    public $siteName;
+    public $siteLogo;
 
     /**
      * Create a new message instance.
@@ -28,6 +31,8 @@ class AdminPasswordResetNotificationMail extends Mailable
         $this->resetTime = now()->format('d M, Y h:i A');
         $this->ipAddress = $ipAddress ?? request()->ip();
         $this->userAgent = request()->userAgent();
+        $this->siteName = Setting::get('site_name', config('app.name'));
+        $this->siteLogo = Setting::get('site_logo', '');
     }
 
     /**

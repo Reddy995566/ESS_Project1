@@ -37,6 +37,11 @@
             letter-spacing: 2px;
             margin-bottom: 10px;
         }
+        .logo {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 20px;
+        }
         .header-subtitle {
             color: #FAF5ED;
             font-size: 16px;
@@ -240,7 +245,11 @@
     <div class="email-container">
         <!-- Header -->
         <div class="header">
-            <div class="site-name">{{ strtoupper(config('app.name')) }}</div>
+            @if($siteLogo)
+                <img src="{{ $siteLogo }}" alt="{{ $siteName }}" class="logo">
+            @else
+                <div class="site-name">{{ strtoupper($siteName) }}</div>
+            @endif
             <div class="header-subtitle">Premium Fashion Store</div>
         </div>
 
@@ -314,14 +323,14 @@
 
             <p class="message" style="text-align: center; font-size: 14px; color: #6B6B6B;">
                 Best regards,<br>
-                <strong style="color: #5C1F33;">{{ config('app.name') }} Team</strong>
+                <strong style="color: #5C1F33;">{{ $siteName }} Team</strong>
             </p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <div class="footer-text">
-                Thank you for being a valued member of {{ config('app.name') }}!
+                Thank you for being a valued member of {{ $siteName }}!
             </div>
             
             <div class="contact-info">
@@ -336,7 +345,7 @@
             </div>
             
             <div class="footer-text" style="font-size: 12px; color: #6B6B6B; margin-top: 10px;">
-                © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                © {{ date('Y') }} {{ $siteName }}. All rights reserved.
             </div>
         </div>
     </div>

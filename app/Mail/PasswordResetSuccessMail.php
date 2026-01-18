@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
+use App\Models\Setting;
 
 class PasswordResetSuccessMail extends Mailable
 {
@@ -17,6 +18,8 @@ class PasswordResetSuccessMail extends Mailable
     public $user;
     public $resetTime;
     public $ipAddress;
+    public $siteName;
+    public $siteLogo;
 
     /**
      * Create a new message instance.
@@ -26,6 +29,8 @@ class PasswordResetSuccessMail extends Mailable
         $this->user = $user;
         $this->resetTime = now()->format('d M, Y h:i A');
         $this->ipAddress = $ipAddress ?? request()->ip();
+        $this->siteName = Setting::get('site_name', config('app.name'));
+        $this->siteLogo = Setting::get('site_logo', '');
     }
 
     /**
@@ -34,7 +39,7 @@ class PasswordResetSuccessMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Password Successfully Reset - ' . config('app.name'),
+            subject: 'Password Successfully Reset - ' . $this->siteName,
         );
     }
 

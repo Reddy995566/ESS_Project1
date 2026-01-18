@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
+use App\Models\Setting;
 
 class ResetPasswordMail extends Mailable
 {
@@ -17,6 +18,8 @@ class ResetPasswordMail extends Mailable
     public $user;
     public $token;
     public $resetUrl;
+    public $siteName;
+    public $siteLogo;
 
     /**
      * Create a new message instance.
@@ -26,6 +29,8 @@ class ResetPasswordMail extends Mailable
         $this->user = $user;
         $this->token = $token;
         $this->resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
+        $this->siteName = Setting::get('site_name', config('app.name'));
+        $this->siteLogo = Setting::get('site_logo', '');
     }
 
     /**
@@ -34,7 +39,7 @@ class ResetPasswordMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reset Your Password - ' . config('app.name'),
+            subject: 'Reset Your Password - ' . $this->siteName,
         );
     }
 

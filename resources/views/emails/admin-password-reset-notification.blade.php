@@ -37,6 +37,11 @@
             letter-spacing: 2px;
             margin-bottom: 10px;
         }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
         .header-subtitle {
             color: #FEE2E2;
             font-size: 16px;
@@ -217,6 +222,9 @@
     <div class="email-container">
         <!-- Header -->
         <div class="header">
+            @if($siteLogo)
+                <img src="{{ $siteLogo }}" alt="{{ $siteName }}" class="logo" style="max-width: 150px; margin-bottom: 15px;">
+            @endif
             <div class="site-name">🔐 ADMIN ALERT</div>
             <div class="header-subtitle">Password Reset Notification</div>
         </div>
@@ -233,7 +241,7 @@
             <div class="greeting">Password Reset Alert</div>
             
             <p class="message">
-                A user has successfully reset their password on {{ config('app.name') }}.
+                A user has successfully reset their password on {{ $siteName }}.
             </p>
 
             <!-- Alert Box -->
@@ -302,14 +310,14 @@
             </p>
 
             <p class="message" style="text-align: center; font-size: 14px; color: #6B6B6B;">
-                <strong style="color: #5C1F33;">{{ config('app.name') }} Security Team</strong>
+                <strong style="color: #5C1F33;">{{ $siteName }} Security Team</strong>
             </p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <div class="footer-text">
-                <strong>{{ config('app.name') }} - Admin Notification System</strong>
+                <strong>{{ $siteName }} - Admin Notification System</strong>
             </div>
             
             <div class="contact-info">
@@ -324,7 +332,7 @@
             </div>
             
             <div class="footer-text" style="font-size: 12px; color: #6B6B6B; margin-top: 10px;">
-                © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                © {{ date('Y') }} {{ $siteName }}. All rights reserved.
             </div>
         </div>
     </div>
