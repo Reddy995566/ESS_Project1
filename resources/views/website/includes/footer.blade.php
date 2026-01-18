@@ -9,7 +9,18 @@
                 <p class="text-center text-sm mb-8 md:mb-10 max-w-2xl mx-auto" style="color: var(--color-footer-text); opacity: 0.8;">Be the first to know about
                     our latest offers and get exclusive discounts.</p>
 
-                <div class="w-full relative rounded-md px-4 py-3 bg-transparent" style="border: 1px solid rgba(68, 18, 39, 0.3);">
+                <!-- Success Message -->
+                <div id="newsletter-success" class="hidden mb-4 p-4 rounded-md text-center" style="background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+                    <p class="text-sm font-medium" style="color: #22c55e;">Thank you for subscribing to our newsletter!</p>
+                </div>
+
+                <!-- Error Message -->
+                <div id="newsletter-error" class="hidden mb-4 p-4 rounded-md text-center" style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+                    <p class="text-sm font-medium" style="color: #ef4444;" id="newsletter-error-text"></p>
+                </div>
+
+                <form id="newsletter-form" class="w-full relative rounded-md px-4 py-3 bg-transparent" style="border: 1px solid rgba(68, 18, 39, 0.3);">
+                    @csrf
                     <div class="flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3 flex-1">
                             <svg class="w-5 h-5" style="color: var(--color-footer-text); opacity: 0.7;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,10 +28,10 @@
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                 </path>
                             </svg>
-                            <input type="email" placeholder="Enter your email address..."
+                            <input type="email" name="email" id="newsletter-email" placeholder="Enter your email address..." required
                                 class="w-full bg-transparent border-none outline-none text-base" style="color: var(--color-footer-text);">
                         </div>
-                        <button class="hover:opacity-80 transition-colors" style="color: var(--color-footer-text);">
+                        <button type="submit" id="newsletter-btn" class="hover:opacity-80 transition-colors" style="color: var(--color-footer-text);">
                             <svg class="w-5 h-5 transform -rotate-45" fill="currentColor" viewBox="0 0 20 20">
                                 <path
                                     d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
@@ -28,8 +39,62 @@
                             </svg>
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
+
+            <script>
+            document.getElementById('newsletter-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const form = this;
+                const btn = document.getElementById('newsletter-btn');
+                const emailInput = document.getElementById('newsletter-email');
+                const successMsg = document.getElementById('newsletter-success');
+                const errorMsg = document.getElementById('newsletter-error');
+                const errorText = document.getElementById('newsletter-error-text');
+                
+                // Hide messages
+                successMsg.classList.add('hidden');
+                errorMsg.classList.add('hidden');
+                
+                // Disable button
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                
+                const formData = new FormData(form);
+                
+                try {
+                    const response = await fetch('{{ route("newsletter.subscribe") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        successMsg.classList.remove('hidden');
+                        emailInput.value = '';
+                        setTimeout(() => {
+                            successMsg.classList.add('hidden');
+                        }, 5000);
+                    } else {
+                        errorText.textContent = result.message || 'Something went wrong. Please try again.';
+                        errorMsg.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Newsletter error:', error);
+                    errorText.textContent = 'Something went wrong. Please try again.';
+                    errorMsg.classList.remove('hidden');
+                } finally {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            });
+            </script>
 
             <!-- Footer Links Grid -->
             <div class="hidden md:grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-16 lg:gap-20 mb-12">
