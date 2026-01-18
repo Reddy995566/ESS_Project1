@@ -117,15 +117,18 @@
                     <div class="flex gap-3">
                         <div class="w-1/2">
                             <input type="text" name="first_name" placeholder="First name" value="{{ old('first_name', Auth::user()->name) }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="first_name"></span>
                         </div>
                         <div class="w-1/2">
                             <input type="text" name="last_name" placeholder="Last name" value="{{ old('last_name') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="last_name"></span>
                         </div>
                     </div>
 
                     <!-- Address -->
                     <div class="relative">
                         <input type="text" name="address" placeholder="Address" value="{{ old('address') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="address"></span>
                     </div>
 
                     <!-- Apartment -->
@@ -135,6 +138,7 @@
                     <div class="flex gap-3">
                         <div class="w-1/3">
                             <input type="text" name="city" placeholder="City" value="{{ old('city') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="city"></span>
                         </div>
                         <div class="w-1/3 relative">
                             <select name="state" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none text-gray-800 text-sm bg-white shadow-sm appearance-none form-select">
@@ -145,15 +149,18 @@
                                 <option value="Karnataka" {{ old('state') == 'Karnataka' ? 'selected' : '' }}>Karnataka</option>
                                 <!-- Add more states as needed -->
                             </select>
+                            <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="state"></span>
                         </div>
                         <div class="w-1/3">
                             <input type="text" name="zipcode" placeholder="PIN code" value="{{ old('zipcode') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="zipcode"></span>
                         </div>
                     </div>
 
                     <!-- Phone -->
                     <div class="relative">
                         <input type="text" name="phone" placeholder="Phone" value="{{ old('phone', Auth::user()->mobile) }}" class="w-full h-12 pl-3 pr-10 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="phone"></span>
                     </div>
                 </div>
             </div>
@@ -358,9 +365,43 @@
             }
         }
 
+        // Clear all validation errors
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.add('hidden');
+                el.textContent = '';
+            });
+            document.querySelectorAll('input, select').forEach(el => {
+                el.classList.remove('border-red-500');
+            });
+        }
+
+        // Display validation errors
+        function showErrors(errors) {
+            clearErrors();
+            
+            for (const [field, messages] of Object.entries(errors)) {
+                const errorSpan = document.querySelector(`.error-message[data-field="${field}"]`);
+                const inputField = document.querySelector(`[name="${field}"]`);
+                
+                if (errorSpan && inputField) {
+                    errorSpan.textContent = messages[0];
+                    errorSpan.classList.remove('hidden');
+                    inputField.classList.add('border-red-500');
+                    
+                    // Scroll to first error
+                    if (Object.keys(errors)[0] === field) {
+                        inputField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }
+        }
+
         // Razorpay Integration
         document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            clearErrors();
             
             const formData = new FormData(this);
             const paymentMethod = formData.get('payment_method');
@@ -381,6 +422,23 @@
                 });
                 
                 const data = await response.json();
+                
+                if(!response.ok) {
+                    // Handle validation errors
+                    if (data.errors) {
+                        showErrors(data.errors);
+                    } else if (data.message) {
+                        // Show general error at top
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4';
+                        errorDiv.textContent = data.message;
+                        document.getElementById('checkoutForm').insertBefore(errorDiv, document.getElementById('checkoutForm').firstChild);
+                        setTimeout(() => errorDiv.remove(), 5000);
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    return;
+                }
                 
                 if(data.success && paymentMethod === 'online') {
                     // Open Razorpay modal
@@ -420,13 +478,19 @@
                                 if(verifyData.success) {
                                     window.location.href = '{{ url("/order/success") }}/' + verifyData.order_id;
                                 } else {
-                                    alert('Payment verification failed. Please contact support.');
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4';
+                                    errorDiv.textContent = 'Payment verification failed. Please contact support.';
+                                    document.getElementById('checkoutForm').insertBefore(errorDiv, document.getElementById('checkoutForm').firstChild);
                                     submitBtn.disabled = false;
                                     submitBtn.innerHTML = originalBtnText;
                                 }
                             } catch(error) {
                                 console.error('Verification error:', error);
-                                alert('Payment verification failed. Please contact support.');
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4';
+                                errorDiv.textContent = 'Payment verification failed. Please contact support.';
+                                document.getElementById('checkoutForm').insertBefore(errorDiv, document.getElementById('checkoutForm').firstChild);
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = originalBtnText;
                             }
@@ -446,14 +510,20 @@
                     // For COD, redirect directly
                     window.location.href = data.redirect || '{{ route("order.success", ":id") }}'.replace(':id', data.order_id);
                 } else {
-                    alert(data.message || 'Order placement failed');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4';
+                    errorDiv.textContent = data.message || 'Order placement failed';
+                    document.getElementById('checkoutForm').insertBefore(errorDiv, document.getElementById('checkoutForm').firstChild);
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnText;
                 }
                 
             } catch(error) {
                 console.error('Checkout error:', error);
-                alert('Something went wrong. Please try again.');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4';
+                errorDiv.textContent = 'Something went wrong. Please try again.';
+                document.getElementById('checkoutForm').insertBefore(errorDiv, document.getElementById('checkoutForm').firstChild);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;
             }
