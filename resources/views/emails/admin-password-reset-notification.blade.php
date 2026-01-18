@@ -25,7 +25,7 @@
             box-shadow: 0 4px 20px rgba(92, 31, 51, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+            background: #DC2626;
             padding: 40px 30px;
             text-align: center;
         }
@@ -85,7 +85,7 @@
             text-align: center;
         }
         .alert-box {
-            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+            background: #FEE2E2;
             border: 2px solid #DC2626;
             border-radius: 10px;
             padding: 25px;
@@ -100,7 +100,7 @@
             text-align: center;
         }
         .user-info-box {
-            background: linear-gradient(135deg, #FAF5ED 0%, #EDE5DA 100%);
+            background: #FAF5ED;
             border: 2px solid #E6B873;
             border-radius: 10px;
             padding: 25px;
@@ -137,7 +137,7 @@
             word-break: break-all;
         }
         .action-box {
-            background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+            background: #E0F2FE;
             border-left: 4px solid #0284C7;
             padding: 20px;
             margin: 25px 0;
@@ -162,7 +162,7 @@
         }
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+            background: #DC2626;
             color: #ffffff;
             text-decoration: none;
             padding: 15px 40px;
@@ -176,7 +176,7 @@
         }
         .divider {
             height: 2px;
-            background: linear-gradient(90deg, transparent, #E6B873, transparent);
+            background: #E6B873;
             margin: 30px 0;
         }
         .footer {

@@ -25,7 +25,7 @@
             box-shadow: 0 4px 20px rgba(92, 31, 51, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #5C1F33 0%, #4B0F27 100%);
+            background: #5C1F33;
             padding: 40px 30px;
             text-align: center;
         }
@@ -80,7 +80,7 @@
             line-height: 1.8;
         }
         .info-box {
-            background: linear-gradient(135deg, #FAF5ED 0%, #EDE5DA 100%);
+            background: #FAF5ED;
             border: 2px solid #E6B873;
             border-radius: 10px;
             padding: 25px;
@@ -105,7 +105,7 @@
         }
         .reset-button {
             display: inline-block;
-            background: linear-gradient(135deg, #495530 0%, #384225 100%);
+            background: #495530;
             color: #ffffff !important;
             text-decoration: none;
             padding: 16px 45px;
@@ -157,7 +157,7 @@
             font-size: 18px;
         }
         .security-tips {
-            background: linear-gradient(135deg, #E7F3FF 0%, #D4E9FF 100%);
+            background: #E7F3FF;
             border-left: 4px solid #495530;
             padding: 20px;
             margin: 25px 0;
@@ -182,7 +182,7 @@
         }
         .divider {
             height: 2px;
-            background: linear-gradient(90deg, transparent, #E6B873, transparent);
+            background: #E6B873;
             margin: 30px 0;
         }
         .footer {

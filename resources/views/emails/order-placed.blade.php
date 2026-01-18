@@ -25,7 +25,7 @@
             box-shadow: 0 4px 20px rgba(92, 31, 51, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #5C1F33 0%, #4B0F27 100%);
+            background: #5C1F33;
             padding: 40px 30px;
             text-align: center;
         }
@@ -93,7 +93,7 @@
             line-height: 1.8;
         }
         .order-box {
-            background: linear-gradient(135deg, #FAF5ED 0%, #EDE5DA 100%);
+            background: #FAF5ED;
             border: 2px solid #E6B873;
             border-radius: 10px;
             padding: 25px;
@@ -195,7 +195,7 @@
             line-height: 1.8;
         }
         .total-box {
-            background: linear-gradient(135deg, #5C1F33 0%, #4B0F27 100%);
+            background: #5C1F33;
             border-radius: 10px;
             padding: 25px;
             margin: 30px 0;
@@ -217,7 +217,7 @@
         }
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #495530 0%, #384225 100%);
+            background: #495530;
             color: #ffffff;
             text-decoration: none;
             padding: 15px 40px;
@@ -264,7 +264,7 @@
         }
         .divider {
             height: 2px;
-            background: linear-gradient(90deg, transparent, #E6B873, transparent);
+            background: #E6B873;
             margin: 30px 0;
         }
         @media only screen and (max-width: 600px) {

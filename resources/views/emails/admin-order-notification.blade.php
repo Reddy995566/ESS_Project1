@@ -25,7 +25,7 @@
             box-shadow: 0 4px 20px rgba(92, 31, 51, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: #059669;
             padding: 40px 30px;
             text-align: center;
         }
@@ -49,25 +49,8 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .alert-icon {
-            width: 80px;
-            height: 80px;
-            background-color: #059669;
-            border-radius: 50%;
-            margin: -40px auto 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
-            border: 4px solid #ffffff;
-        }
-        .alert-icon svg {
-            width: 40px;
-            height: 40px;
-            fill: #ffffff;
-        }
         .content {
-            padding: 50px 30px 30px;
+            padding: 30px 30px 30px;
         }
         .greeting {
             font-size: 24px;
@@ -85,7 +68,7 @@
             text-align: center;
         }
         .order-box {
-            background: linear-gradient(135deg, #FAF5ED 0%, #EDE5DA 100%);
+            background: #FAF5ED;
             border: 2px solid #E6B873;
             border-radius: 10px;
             padding: 25px;
@@ -187,7 +170,7 @@
             color: #5C1F33;
         }
         .total-box {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: #059669;
             border-radius: 10px;
             padding: 25px;
             margin: 30px 0;
@@ -209,7 +192,7 @@
         }
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: #059669;
             color: #ffffff;
             text-decoration: none;
             padding: 15px 40px;
@@ -223,7 +206,7 @@
         }
         .divider {
             height: 2px;
-            background: linear-gradient(90deg, transparent, #E6B873, transparent);
+            background: #E6B873;
             margin: 30px 0;
         }
         .footer {
@@ -245,7 +228,7 @@
                 padding: 30px 20px;
             }
             .content {
-                padding: 40px 20px 20px;
+                padding: 30px 20px 20px;
             }
             .product-item {
                 flex-direction: column;
@@ -265,13 +248,6 @@
             @endif
             <div class="site-name">🛍️ NEW ORDER</div>
             <div class="header-subtitle">Admin Notification</div>
-        </div>
-
-        <!-- Alert Icon -->
-        <div class="alert-icon">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-            </svg>
         </div>
 
         <!-- Content -->
