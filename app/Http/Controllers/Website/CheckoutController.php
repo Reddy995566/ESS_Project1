@@ -64,6 +64,18 @@ class CheckoutController extends Controller
             'billing_city' => 'required_if:billing_selection,different',
             'billing_state' => 'required_if:billing_selection,different',
             'billing_zipcode' => 'required_if:billing_selection,different',
+        ], [
+            'first_name.required_without' => 'First name is required',
+            'address.required_without' => 'Address is required',
+            'city.required_without' => 'City is required',
+            'state.required_without' => 'State is required',
+            'zipcode.required_without' => 'PIN code is required',
+            'phone.required_without' => 'Phone number is required',
+            'billing_first_name.required_if' => 'Billing first name is required',
+            'billing_address.required_if' => 'Billing address is required',
+            'billing_city.required_if' => 'Billing city is required',
+            'billing_state.required_if' => 'Billing state is required',
+            'billing_zipcode.required_if' => 'Billing PIN code is required',
         ]);
 
         $cart = session()->get('cart', []);
