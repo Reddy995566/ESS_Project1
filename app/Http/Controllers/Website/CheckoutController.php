@@ -44,6 +44,14 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {
+        // Check if cart is empty
+        $cart = session()->get('cart', []);
+        if(count($cart) == 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your cart is empty. Please add items before checkout.'
+            ], 400);
+        }
 
         // Validation
         $request->validate([

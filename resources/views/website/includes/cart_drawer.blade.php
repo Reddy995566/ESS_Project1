@@ -86,8 +86,8 @@
                 <span id="cartSubtotalSkeleton" class="h-6 w-24 bg-gray-200 rounded animate-pulse hidden"></span>
             </span>
         </div>
-        <a href="{{ route('checkout') }}"
-            class="w-full py-3.5 text-white font-medium text-lg rounded-[4px] transition-all shadow-md flex items-center justify-center gap-2" style="background-color: var(--color-btn-primary);">
+        <a href="{{ route('checkout') }}" id="checkoutBtn"
+            class="w-full py-3.5 text-white font-medium text-lg rounded-[4px] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" style="background-color: var(--color-btn-primary);">
             <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -167,11 +167,25 @@
         document.getElementById('cartSubtotal').innerText = data.totals.subtotal_formatted;
 
         const container = document.getElementById('cartItemsContainer');
+        const checkoutBtn = document.getElementById('checkoutBtn');
         container.innerHTML = '';
 
         if (!data.cart_items || data.cart_items.length === 0) {
             container.innerHTML = '<div class="text-center py-10 text-gray-500">Your cart is empty</div>';
+            // Disable checkout button
+            if (checkoutBtn) {
+                checkoutBtn.style.opacity = '0.5';
+                checkoutBtn.style.cursor = 'not-allowed';
+                checkoutBtn.style.pointerEvents = 'none';
+            }
             return;
+        }
+
+        // Enable checkout button
+        if (checkoutBtn) {
+            checkoutBtn.style.opacity = '1';
+            checkoutBtn.style.cursor = 'pointer';
+            checkoutBtn.style.pointerEvents = 'auto';
         }
 
         // Generate HTML using cart_items which now includes 'key'
