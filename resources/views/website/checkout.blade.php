@@ -1,37 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Fashion Store</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        /* Fix z-index for checkout page */
-        header {
-            position: sticky !important;
-            top: 0 !important;
-            z-index: 9999 !important;
-        }
-    </style>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</head>
-<body class="bg-[#fff7ec]">
+@extends('website.layouts.master')
 
-    <!-- Global Header -->
-    <div style="position: relative; z-index: 100;">
-        @include('website.includes.header')
-    </div>
+@section('title', 'Checkout - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
+
+@section('content')
+<style>
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+</style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <!-- Flash Messages -->
     @if(session('error'))
@@ -537,5 +520,4 @@
             }
         });
     </script>
-</body>
-</html>
+@endsection
