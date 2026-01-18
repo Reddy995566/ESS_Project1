@@ -1,7 +1,8 @@
 const CACHE_NAME = 'fashion-store-v1';
 const urlsToCache = [
   '/',
-  '/offline.html'
+  '/offline.html',
+  '/website/1768647579_696b6b9b91f3a.png'
 ];
 
 // Install Service Worker
@@ -13,6 +14,7 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
   );
+  self.skipWaiting();
 });
 
 // Fetch from cache
@@ -24,9 +26,27 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response;
         }
-        return fetch(event.request);
-      }
-    )
+        return fetch(event.request).then(
+          function(response) {
+            // Check if valid response
+            if(!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Clone the response
+            var responseToCache = response.clone();
+            
+            caches.open(CACHE_NAME)
+              .then(function(cache) {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return response;
+          }
+        );
+      }).catch(() => {
+        return caches.match('/offline.html');
+      })
   );
 });
 
@@ -44,4 +64,5 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  return self.clients.claim();
 });
