@@ -17,13 +17,21 @@
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
+        /* Fix z-index for checkout page */
+        header {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 9999 !important;
+        }
     </style>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body class="bg-[#fff7ec]">
 
     <!-- Global Header -->
-    @include('website.includes.header')
+    <div style="position: relative; z-index: 100;">
+        @include('website.includes.header')
+    </div>
 
     <!-- Flash Messages -->
     @if(session('error'))
@@ -120,7 +128,7 @@
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="first_name"></span>
                         </div>
                         <div class="w-1/2">
-                            <input type="text" name="last_name" placeholder="Last name" value="{{ old('last_name') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="last_name" placeholder="Last name (optional)" value="{{ old('last_name') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="last_name"></span>
                         </div>
                     </div>

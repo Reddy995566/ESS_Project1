@@ -27,7 +27,7 @@
                     <div>
                         <h3 class="font-medium text-gray-900 mb-2">Shipping To:</h3>
                         <p class="text-gray-600 text-sm leading-relaxed">
-                            {{ $order->first_name }} {{ $order->last_name }}<br>
+                            {{ $order->first_name }}{{ $order->last_name ? ' ' . $order->last_name : '' }}<br>
                             {{ $order->address }}<br>
                             @if($order->address_line_2) {{ $order->address_line_2 }}<br> @endif
                             {{ $order->city }}, {{ $order->state }} - {{ $order->zipcode }}<br>

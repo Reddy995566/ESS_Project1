@@ -288,7 +288,7 @@
             <div class="customer-box">
                 <div class="customer-title">Customer Details:</div>
                 <div class="customer-text">
-                    <strong>{{ $order->first_name }} {{ $order->last_name }}</strong><br>
+                    <strong>{{ $order->first_name }}{{ $order->last_name ? ' ' . $order->last_name : '' }}</strong><br>
                     Email: {{ $order->email }}<br>
                     Phone: {{ $order->phone }}
                 </div>

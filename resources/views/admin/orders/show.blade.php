@@ -173,7 +173,7 @@
                     </div>
                     <div class="p-6">
                         <div class="space-y-2">
-                            <p class="text-sm font-bold text-gray-900">{{ $order->first_name }} {{ $order->last_name }}</p>
+                            <p class="text-sm font-bold text-gray-900">{{ $order->first_name }}{{ $order->last_name ? ' ' . $order->last_name : '' }}</p>
                             <p class="text-sm text-gray-600">{{ $order->address }}</p>
                             @if($order->address_line_2)
                                 <p class="text-sm text-gray-600">{{ $order->address_line_2 }}</p>
@@ -200,7 +200,7 @@
                     </div>
                     <div class="p-6">
                         <div class="space-y-2">
-                            <p class="text-sm font-bold text-gray-900">{{ $order->billing_first_name ?? $order->first_name }} {{ $order->billing_last_name ?? $order->last_name }}</p>
+                            <p class="text-sm font-bold text-gray-900">{{ ($order->billing_first_name ?? $order->first_name) }}{{ ($order->billing_last_name ?? $order->last_name) ? ' ' . ($order->billing_last_name ?? $order->last_name) : '' }}</p>
                             <p class="text-sm text-gray-600">{{ $order->billing_address ?? $order->address }}</p>
                             @if($order->billing_address_line_2 || $order->address_line_2)
                                 <p class="text-sm text-gray-600">{{ $order->billing_address_line_2 ?? $order->address_line_2 }}</p>

@@ -75,7 +75,7 @@
                         <div class="bg-gray-50 rounded-xl p-6">
                             <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Shipping Address</h3>
                             <div class="text-sm text-gray-900 leading-relaxed">
-                                <p class="font-semibold text-base mb-1">{{ $order->first_name }} {{ $order->last_name }}</p>
+                                <p class="font-semibold text-base mb-1">{{ $order->first_name }}{{ $order->last_name ? ' ' . $order->last_name : '' }}</p>
                                 <p>{{ $order->address }}</p>
                                 @if($order->address_line_2) <p>{{ $order->address_line_2 }}</p> @endif
                                 <p>{{ $order->city }}, {{ $order->state }} - {{ $order->zipcode }}</p>

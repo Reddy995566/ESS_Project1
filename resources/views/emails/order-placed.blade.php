@@ -393,7 +393,7 @@
             <div class="address-box">
                 <div class="address-title">Deliver To:</div>
                 <div class="address-text">
-                    <strong>{{ $order->first_name }} {{ $order->last_name }}</strong><br>
+                    <strong>{{ $order->first_name }}{{ $order->last_name ? ' ' . $order->last_name : '' }}</strong><br>
                     {{ $order->address }}<br>
                     @if($order->address_line_2)
                         {{ $order->address_line_2 }}<br>

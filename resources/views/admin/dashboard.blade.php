@@ -117,7 +117,7 @@
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $order->order_number }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $order->user ? $order->user->name : $order->first_name . ' ' . $order->last_name }}
+                            {{ $order->user ? $order->user->name : ($order->first_name . ($order->last_name ? ' ' . $order->last_name : '')) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">₹{{ number_format($order->total, 2) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">

@@ -277,7 +277,7 @@
                             <!-- Customer -->
                             <td class="px-4 py-4">
                                 <div>
-                                    <p class="text-sm font-bold text-gray-900">{{ $order->user->name ?? ($order->first_name . ' ' . $order->last_name) }}</p>
+                                    <p class="text-sm font-bold text-gray-900">{{ $order->user->name ?? ($order->first_name . ($order->last_name ? ' ' . $order->last_name : '')) }}</p>
                                     <p class="text-xs text-gray-500">{{ $order->user->email ?? $order->email }}</p>
                                 </div>
                             </td>
