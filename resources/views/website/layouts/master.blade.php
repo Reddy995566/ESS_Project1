@@ -14,6 +14,16 @@
     <meta name="theme-color" content="{{ $themeColors['color_primary'] ?? '#5C1F33' }}">
     <title>@yield('title', ($siteSettings['site_name'] ?? 'Fashion Store') . ' - Premium Fashion Store')</title>
 
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="{{ route('manifest') }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="{{ $siteSettings['site_name'] ?? 'Fashion Store' }}">
+    @if(!empty($siteSettings['site_logo']))
+    <link rel="apple-touch-icon" href="{{ $siteSettings['site_logo'] }}">
+    @endif
+
     <!-- Favicon -->
     @if(!empty($siteSettings['site_favicon']))
     <link rel="icon" type="image/png" href="{{ $siteSettings['site_favicon'] }}">
@@ -271,6 +281,21 @@
     </script>
 
     @stack('scripts')
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>
