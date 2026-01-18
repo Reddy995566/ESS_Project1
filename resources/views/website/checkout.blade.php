@@ -269,12 +269,12 @@
             </form>
 
             <!-- Footer Links -->
-            <div class="border-t border-gray-200 pt-4 flex flex-wrap gap-4 text-xs text-[#4b0f27] underline decoration-solid">
-                <a href="{{ route('refund-policy') }}">Refund policy</a>
-                <a href="{{ route('shipping-policy') }}">Shipping</a>
-                <a href="{{ route('privacy-policy') }}">Privacy policy</a>
-                <a href="{{ route('terms-of-service') }}">Terms of service</a>
-                <a href="{{ route('contact') }}">Contact</a>
+            <div class="pt-4 flex flex-wrap gap-4 text-xs text-[#4b0f27]">
+                <a href="{{ route('refund-policy') }}" class="hover:opacity-70 transition-opacity">Refund policy</a>
+                <a href="{{ route('shipping-policy') }}" class="hover:opacity-70 transition-opacity">Shipping</a>
+                <a href="{{ route('privacy-policy') }}" class="hover:opacity-70 transition-opacity">Privacy policy</a>
+                <a href="{{ route('terms-of-service') }}" class="hover:opacity-70 transition-opacity">Terms of service</a>
+                <a href="{{ route('contact') }}" class="hover:opacity-70 transition-opacity">Contact</a>
             </div>
 
         </div>
