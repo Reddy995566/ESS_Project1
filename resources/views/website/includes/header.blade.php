@@ -64,13 +64,13 @@
 
                 <!-- ➡ RIGHT: Action Icons -->
                 <div class="flex items-center justify-end gap-4 md:gap-5 lg:w-1/4">
-                    <!-- Play Store Badge (Desktop) -->
-                    <a href="#" id="playStoreBadge" class="hidden hover:opacity-80 transition-opacity duration-200">
+                    <!-- Play Store Badge (Desktop only) -->
+                    <a href="#" id="playStoreBadge" class="hidden lg:block hover:opacity-80 transition-opacity duration-200">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="h-10">
                     </a>
                     
-                    <!-- App Store Badge (Desktop) -->
-                    <a href="#" id="appStoreBadge" class="hidden hover:opacity-80 transition-opacity duration-200">
+                    <!-- App Store Badge (Desktop only) -->
+                    <a href="#" id="appStoreBadge" class="hidden lg:block hover:opacity-80 transition-opacity duration-200">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store" class="h-10">
                     </a>
                     
@@ -202,16 +202,6 @@
 <!-- Mobile Menu -->
 <div id="mobile-menu" class="hidden lg:hidden fixed top-[104px] left-0 right-0 z-40 shadow-lg" style="background-color: var(--color-header-bg); border-top: 1px solid rgba(0,0,0,0.1);">
     <div class="px-4 py-4 space-y-1 max-h-[calc(100vh-104px)] overflow-y-auto">
-        <!-- Store Badges (Mobile) -->
-        <div class="py-3 space-y-3" style="border-bottom: 1px solid rgba(0,0,0,0.1);">
-            <a href="#" id="playStoreBadgeMobile" class="block">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="h-12">
-            </a>
-            <a href="#" id="appStoreBadgeMobile" class="block">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store" class="h-12">
-            </a>
-        </div>
-        
         <a href="{{ route('home') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Home</a>
         <a href="{{ route('shop') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Shop</a>
         <a href="{{ route('bulk-orders') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Bulk Orders</a>
@@ -222,6 +212,16 @@
         @else
         <a href="{{ route('login') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Login / Register</a>
         @endauth
+        
+        <!-- Store Badges (Mobile Sidebar) -->
+        <div class="py-3 space-y-3" style="border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <a href="#" id="playStoreBadgeMobile" class="hidden block">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="h-12">
+            </a>
+            <a href="#" id="appStoreBadgeMobile" class="hidden block">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store" class="h-12">
+            </a>
+        </div>
     </div>
 </div>
 
@@ -400,8 +400,8 @@
     window.addEventListener('appinstalled', () => {
         console.log('PWA was installed');
         if (playStoreBadge) playStoreBadge.classList.add('hidden');
-        if (playStoreBadgeMobile) playStoreBadgeMobile.classList.add('hidden');
         if (appStoreBadge) appStoreBadge.classList.add('hidden');
+        if (playStoreBadgeMobile) playStoreBadgeMobile.classList.add('hidden');
         if (appStoreBadgeMobile) appStoreBadgeMobile.classList.add('hidden');
     });
 </script>
