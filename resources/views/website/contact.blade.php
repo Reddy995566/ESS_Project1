@@ -208,7 +208,7 @@
                 View answers to some of the most common questions.
             </p>
 
-            <a href="#"
+            <a href="{{ route('faqs') }}"
                 class="inline-block px-10 py-2 border border-[#441227] text-[#441227] text-sm font-medium hover:bg-[#441227] hover:text-white transition-all duration-300 rounded-sm">
                 Read FAQs
             </a>
