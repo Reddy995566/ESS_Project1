@@ -6,7 +6,7 @@
     <!-- 1️⃣ TOP ANNOUNCEMENT BAR - FIXED -->
     <div class="w-full flex items-center justify-center" style="height: 40px; background-color: var(--color-bg-primary);">
         <p class="font-medium" style="font-size: 13px; font-weight: 500; color: var(--color-text-primary);">
-            Free Shipping Across India
+            Welcome! Log in now—grab 10% off + free shipping across India!
         </p>
     </div>
 
