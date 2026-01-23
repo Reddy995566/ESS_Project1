@@ -12,7 +12,7 @@
         $fontBody = $themeFonts['font_body'] ?? 'Inter';
     @endphp
     <meta name="theme-color" content="{{ $themeColors['color_primary'] ?? '#5C1F33' }}">
-    <title>@yield('title', ($siteSettings['site_name'] ?? 'Fashion Store') . ' - Premium Fashion Store')</title>
+    <title>@yield('title', ($siteSettings['site_name'] ?? 'The Trusted Store') . ' - The Trusted Store')</title>
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="{{ route('manifest') }}">

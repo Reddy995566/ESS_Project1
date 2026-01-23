@@ -141,7 +141,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                         </svg>
                     </div>
-                    <span class="text-xl font-bold text-gray-800">{{ config('app.name', 'Fashion Store') }} Admin</span>
+                    <span class="text-xl font-bold text-gray-800">{{ config('app.name', 'Switch2Kart') }} Admin</span>
                 </div>
 
                 <div class="mb-10">
