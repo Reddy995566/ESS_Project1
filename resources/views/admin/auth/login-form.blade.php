@@ -32,7 +32,7 @@
                 name="email"
                 value="{{ old('email') }}"
                 class="input-focus block w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none transition-all @error('email') border-red-500 @enderror"
-                placeholder="super@gmail.com"
+                placeholder="Enter your Email"
                 required
             >
         </div>
