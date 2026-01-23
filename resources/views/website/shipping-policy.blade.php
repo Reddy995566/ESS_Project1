@@ -1,6 +1,6 @@
 @extends('website.layouts.master')
 
-@section('title', 'Shipping Policy - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
+@section('title', 'Shipping Policy - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
 
 @section('content')
 <!-- Shipping Policy Header -->
@@ -67,7 +67,7 @@
 
             <!-- Thank You Note -->
             <div class="text-center pt-4 border-t border-wine/10">
-                <p class="text-wine-dark font-medium">Thank you for shopping with {{ $siteSettings['site_name'] ?? 'Fashion Store' }}.</p>
+                <p class="text-wine-dark font-medium">Thank you for shopping with {{ $siteSettings['site_name'] ?? 'The Trusted Store' }}.</p>
                 <p class="text-wine-dark/70 mt-1">We appreciate your trust and support!</p>
             </div>
 

@@ -19,10 +19,10 @@
                 <div class="flex-shrink-0 lg:w-1/4">
                     <a href="{{ route('home') }}">
                         @if(!empty($siteSettings['site_logo']))
-                            <img src="{{ $siteSettings['site_logo'] }}" alt="{{ $siteSettings['site_name'] ?? 'Fashion Store' }}" class="h-8 sm:h-10 md:h-12 lg:h-14 w-auto object-contain">
+                            <img src="{{ $siteSettings['site_logo'] }}" alt="{{ $siteSettings['site_name'] ?? 'The Trusted Store' }}" class="h-8 sm:h-10 md:h-12 lg:h-14 w-auto object-contain">
                         @else
                             <h1 class="font-serif-elegant font-semibold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-[0.08em] md:tracking-[0.12em]" style="color: var(--color-header-text);">
-                                {{ strtoupper($siteSettings['site_name'] ?? 'FASHION STORE') }}
+                                {{ strtoupper($siteSettings['site_name'] ?? 'The Trusted Store') }}
                             </h1>
                         @endif
                     </a>

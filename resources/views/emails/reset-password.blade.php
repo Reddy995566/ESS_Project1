@@ -240,7 +240,7 @@
             @else
                 <div class="site-name">{{ strtoupper($siteName) }}</div>
             @endif
-            <div class="header-subtitle">Premium Fashion Store</div>
+            <div class="header-subtitle">Premium The Trusted Store</div>
         </div>
 
         <!-- Lock Icon -->

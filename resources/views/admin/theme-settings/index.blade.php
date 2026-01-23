@@ -239,7 +239,7 @@
                             <p class="text-xs text-gray-500 mt-2">Used for titles, headings, and brand name</p>
                             <div class="mt-3 p-3 bg-gray-50 rounded-lg">
                                 <p id="heading-preview" class="text-2xl" style="font-family: '{{ $fontSettings->where('key', 'font_heading')->first()->value ?? 'Playfair Display' }}', serif;">
-                                    Fashion Store
+                                    The Trusted Store
                                 </p>
                             </div>
                         </div>
@@ -320,7 +320,7 @@
                         <div id="preview-container" class="rounded-xl overflow-hidden border border-gray-200">
                             <!-- Header Preview -->
                             <div class="preview-header p-4 flex items-center justify-between">
-                                <span class="preview-header-text font-bold text-lg">Fashion Store</span>
+                                <span class="preview-header-text font-bold text-lg">The Trusted Store</span>
                                 <div class="flex gap-2">
                                     <span class="preview-header-text">🔍</span>
                                     <span class="preview-header-text">❤️</span>
@@ -357,7 +357,7 @@
                             
                             <!-- Footer Preview -->
                             <div class="preview-footer p-4">
-                                <p class="preview-footer-text text-xs text-center">© 2024 Fashion Store</p>
+                                <p class="preview-footer-text text-xs text-center">© 2024 The Trusted Store</p>
                             </div>
                         </div>
                         

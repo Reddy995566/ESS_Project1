@@ -17,7 +17,7 @@ class SettingsController extends Controller
             'imagekit_public_key' => Setting::get('imagekit_public_key', ''),
             'imagekit_private_key' => Setting::get('imagekit_private_key', ''),
             'imagekit_url_endpoint' => Setting::get('imagekit_url_endpoint', ''),
-            'site_name' => Setting::get('site_name', config('app.name', 'Fashion Store')),
+            'site_name' => Setting::get('site_name', config('app.name', 'The Trusted Store')),
             'site_email' => Setting::get('site_email', ''),
             'site_phone' => Setting::get('site_phone', ''),
             'site_address' => Setting::get('site_address', ''),

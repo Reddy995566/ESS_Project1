@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#441227">
-    <title>Signup - Fashion Store</title>
+    <title>Signup - The Trusted Store</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('website/assets/images/favicon.png') }}">
@@ -74,7 +74,7 @@
             
             <!-- Decorative Element -->
             <div class="absolute bottom-10 left-1/2 -translate-x-1/2">
-                <h1 class="font-serif-elegant text-[#D6B27A] font-bold text-4xl tracking-widest opacity-30">FASHION STORE</h1>
+                <h1 class="font-serif-elegant text-[#D6B27A] font-bold text-4xl tracking-widest opacity-30">The Trusted Store</h1>
             </div>
         </div>
 
@@ -95,7 +95,7 @@
                     </div>
 
                     <p class="text-[10px] text-gray-500">
-                        By continuing, you agree to Fashion Store's <a href="#" class="text-[#5C1F33] font-medium">Terms of Use</a> and <a href="#" class="text-[#5C1F33] font-medium">Privacy Policy</a>.
+                        By continuing, you agree to The Trusted Store's <a href="#" class="text-[#5C1F33] font-medium">Terms of Use</a> and <a href="#" class="text-[#5C1F33] font-medium">Privacy Policy</a>.
                     </p>
 
                     <!-- Submit Button -->

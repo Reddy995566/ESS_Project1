@@ -1,7 +1,7 @@
 {
-  "name": "Fashion Store",
-  "short_name": "Fashion",
-  "description": "Premium Fashion Store - Shop Latest Trends",
+  "name": "The Trusted Store",
+  "short_name": "Trusted Store",
+  "description": "Premium Trusted Store - Shop Latest Trends",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

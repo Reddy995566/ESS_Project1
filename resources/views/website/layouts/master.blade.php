@@ -19,7 +19,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="{{ $siteSettings['site_name'] ?? 'Fashion Store' }}">
+    <meta name="apple-mobile-web-app-title" content="{{ $siteSettings['site_name'] ?? 'The Trusted Store' }}">
     @if(!empty($siteSettings['site_logo']))
     <link rel="apple-touch-icon" href="{{ $siteSettings['site_logo'] }}">
     @endif

@@ -20,7 +20,7 @@ class ViewComposerServiceProvider extends ServiceProvider
     {
 
         View::composer(['admin.components.sidebar', 'components.admin-layout'], function ($view) {
-            $view->with('siteName', Setting::get('site_name', config('app.name', 'Fashion Store')));
+            $view->with('siteName', Setting::get('site_name', config('app.name', 'The Trusted Store')));
         });
 
         // Share categories with header for mega menu

@@ -77,7 +77,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold text-gray-900">
-                    {{ $settings['business_name'] ?? config('app.name', 'Fashion Store') }}
+                    {{ $settings['business_name'] ?? config('app.name', 'The Trusted Store') }}
                 </h1>
                 <p class="text-xs text-gray-500">Admin Portal</p>
             </div>

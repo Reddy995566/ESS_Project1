@@ -1,12 +1,12 @@
 @extends('website.layouts.master')
 
-@section('title', 'Contact Information - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
+@section('title', 'Contact Information - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
 
 @section('content')
 <!-- Contact Information Header -->
 <div class="bg-wine py-12 md:py-16">
     <div class="container mx-auto px-4 text-center">
-        <h1 class="text-3xl md:text-4xl font-serif-elegant text-white mb-3">Get in Touch with {{ $siteSettings['site_name'] ?? 'Fashion Store' }}</h1>
+        <h1 class="text-3xl md:text-4xl font-serif-elegant text-white mb-3">Get in Touch with {{ $siteSettings['site_name'] ?? 'The Trusted Store' }}</h1>
         <p class="text-white/80 text-sm md:text-base">We'd love to hear from you!</p>
     </div>
 </div>
@@ -35,7 +35,7 @@
                     </div>
                     <div>
                         <h3 class="font-medium text-wine-dark mb-1">Trade Name</h3>
-                        <p class="text-wine-dark/70">{{ $siteSettings['site_name'] ?? 'Fashion Store' }}</p>
+                        <p class="text-wine-dark/70">{{ $siteSettings['site_name'] ?? 'The Trusted Store' }}</p>
                     </div>
                 </div>
 

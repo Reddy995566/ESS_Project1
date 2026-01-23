@@ -15,7 +15,7 @@
    MAIL_PASSWORD=your_password_here
    MAIL_ENCRYPTION=ssl
    MAIL_FROM_ADDRESS=orders@yourdomain.com
-   MAIL_FROM_NAME="Fashion Store"
+   MAIL_FROM_NAME="The Trusted Store"
 
 2. CLEAR CACHE
    ────────────────────────────────────

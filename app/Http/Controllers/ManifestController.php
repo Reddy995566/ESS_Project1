@@ -9,8 +9,8 @@ class ManifestController extends Controller
 {
     public function manifest()
     {
-        $siteName = Setting::get('site_name', 'Fashion Store');
-        $siteDescription = Setting::get('site_description', 'Premium Fashion Store - Shop Latest Trends');
+        $siteName = Setting::get('site_name', 'The Trusted Store');
+        $siteDescription = Setting::get('site_description', 'Premium The Trusted Store - Shop Latest Trends');
         $siteLogo = Setting::get('site_logo', '');
         
         // Use database logo if available, otherwise fallback to uploaded icon
