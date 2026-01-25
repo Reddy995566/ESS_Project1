@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSetting extends Model
 {
+    const CACHE_KEY = 'site_settings';
+
     protected $fillable = [
         'key',
         'value',
@@ -22,7 +24,7 @@ class SiteSetting extends Model
      */
     public static function get($key, $default = null)
     {
-        $settings = Cache::remember('site_settings', 3600, function () {
+        $settings = Cache::remember(self::CACHE_KEY, 300, function () {
             return self::pluck('value', 'key')->toArray();
         });
 
@@ -39,7 +41,8 @@ class SiteSetting extends Model
             ['value' => $value]
         );
 
-        Cache::forget('site_settings');
+        Cache::forget(self::CACHE_KEY);
+        Cache::forget('site_color_css');
 
         return $setting;
     }
@@ -59,7 +62,8 @@ class SiteSetting extends Model
      */
     public static function clearCache()
     {
-        Cache::forget('site_settings');
+        Cache::forget(self::CACHE_KEY);
+        Cache::forget('site_color_css');
     }
 
     /**
@@ -67,15 +71,16 @@ class SiteSetting extends Model
      */
     public static function getColorCss()
     {
-        $colors = self::where('group', 'colors')->get();
-        $css = ':root {' . PHP_EOL;
-        
-        foreach ($colors as $color) {
-            $varName = '--' . str_replace('_', '-', $color->key);
-            $css .= "    {$varName}: {$color->value};" . PHP_EOL;
-        }
-        
-        $css .= '}';
-        return $css;
+        return Cache::remember('site_color_css', 300, function () {
+            $colors = self::where('group', 'colors')->get();
+            $css = ':root {' . PHP_EOL;
+
+            foreach ($colors as $color) {
+                $varName = '--' . str_replace('_', '-', $color->key);
+                $css .= "    {$varName}: {$color->value};" . PHP_EOL;
+            }
+
+            return $css . '}';
+        });
     }
 }
