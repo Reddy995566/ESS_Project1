@@ -32,8 +32,27 @@ class CollectionController extends Controller
         $query = Product::where('status', 'active')
             ->with(['category', 'reviews']);
 
-        // 1. Filter by Category
-        if ($request->has('category')) {
+        // 1. Filter by Category (Multiple categories support)
+        if ($request->has('categories')) {
+            $categorySlugs = explode(',', $request->input('categories'));
+            $categoryIds = [];
+            
+            foreach ($categorySlugs as $slug) {
+                $category = Category::where('slug', trim($slug))->first();
+                if ($category) {
+                    // Get all category IDs (parent + all descendants)
+                    $categoryIds[] = $category->id;
+                    $childIds = $this->getAllChildCategoryIds($category->id);
+                    $categoryIds = array_merge($categoryIds, $childIds);
+                }
+            }
+            
+            if (!empty($categoryIds)) {
+                $query->whereIn('category_id', array_unique($categoryIds));
+            }
+        }
+        // Fallback to single category for backward compatibility
+        elseif ($request->has('category')) {
             $slug = $request->input('category');
             $category = Category::where('slug', $slug)->first();
             if ($category) {
@@ -145,8 +164,27 @@ class CollectionController extends Controller
         $query = Product::where('status', 'active')
             ->with(['category', 'reviews']);
 
-        // 1. Filter by Category
-        if ($request->has('category')) {
+        // 1. Filter by Category (Multiple categories support)
+        if ($request->has('categories')) {
+            $categorySlugs = explode(',', $request->input('categories'));
+            $categoryIds = [];
+            
+            foreach ($categorySlugs as $slug) {
+                $category = Category::where('slug', trim($slug))->first();
+                if ($category) {
+                    // Get all category IDs (parent + all descendants)
+                    $categoryIds[] = $category->id;
+                    $childIds = $this->getAllChildCategoryIds($category->id);
+                    $categoryIds = array_merge($categoryIds, $childIds);
+                }
+            }
+            
+            if (!empty($categoryIds)) {
+                $query->whereIn('category_id', array_unique($categoryIds));
+            }
+        }
+        // Fallback to single category for backward compatibility
+        elseif ($request->has('category')) {
             $slug = $request->input('category');
             $category = Category::where('slug', $slug)->first();
             if ($category) {

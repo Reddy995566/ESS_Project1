@@ -437,7 +437,7 @@
                         key: '{{ $razorpayKey }}',
                         amount: data.amount * 100,
                         currency: 'INR',
-                        name: 'Fashion Store',
+                        name: '{{ $siteSettings["site_name"] ?? config("app.name") }}',
                         description: 'Order Payment',
                         order_id: data.razorpay_order_id,
                         prefill: {
