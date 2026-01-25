@@ -5,10 +5,6 @@ use App\Services\ImageKitService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Website\CollectionController;
 
-// PWA Routes
-Route::get('/manifest.json', [App\Http\Controllers\ManifestController::class, 'manifest'])->name('manifest');
-
-// Website Routes
 // Website Routes
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 

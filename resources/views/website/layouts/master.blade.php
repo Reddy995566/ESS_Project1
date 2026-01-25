@@ -11,18 +11,7 @@
         $fontHeading = $themeFonts['font_heading'] ?? 'Playfair Display';
         $fontBody = $themeFonts['font_body'] ?? 'Inter';
     @endphp
-    <meta name="theme-color" content="{{ $themeColors['color_primary'] ?? '#5C1F33' }}">
-    <title>@yield('title', ($siteSettings['site_name'] ?? 'The Trusted Store') . ' - The Trusted Store')</title>
-
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="{{ route('manifest') }}">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="{{ $siteSettings['site_name'] ?? 'The Trusted Store' }}">
-    @if(!empty($siteSettings['site_logo']))
-    <link rel="apple-touch-icon" href="{{ $siteSettings['site_logo'] }}">
-    @endif
+    <title>@yield('title', ($siteSettings['site_name'] ?? 'Fashion Store') . ' - Premium Fashion Store')</title>
 
     <!-- Favicon -->
     @if(!empty($siteSettings['site_favicon']))
@@ -92,7 +81,8 @@
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-    <!-- Alpine.js -->
+    <!-- Alpine.js with Collapse Plugin -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 
@@ -282,20 +272,6 @@
 
     @stack('scripts')
 
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered successfully:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            });
-        }
-    </script>
 </body>
 
 </html>

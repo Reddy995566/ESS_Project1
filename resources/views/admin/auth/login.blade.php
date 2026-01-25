@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin Login - The Trusted Store</title>
+    <title>Admin Login - Clothing E-commerce</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -87,7 +87,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
                         </div>
-                        <span class="text-2xl font-bold">{{ config('app.name', 'Switch2Kart') }} Admin</span>
+                        <span class="text-2xl font-bold">{{ config('app.name') }} Admin</span>
                     </div>
                     
                     <!-- Welcome Text -->
@@ -141,7 +141,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                         </svg>
                     </div>
-                    <span class="text-xl font-bold text-gray-800">{{ config('app.name', 'Switch2Kart') }} Admin</span>
+                    <span class="text-xl font-bold text-gray-800">{{ config('app.name') }} Admin</span>
                 </div>
 
                 <div class="mb-10">

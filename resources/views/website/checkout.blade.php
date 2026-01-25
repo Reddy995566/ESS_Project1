@@ -1,6 +1,6 @@
 @extends('website.layouts.master')
 
-@section('title', 'Checkout - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
+@section('title', 'Checkout - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
 
 @section('content')
 <style>
@@ -437,7 +437,7 @@
                         key: '{{ $razorpayKey }}',
                         amount: data.amount * 100,
                         currency: 'INR',
-                        name: 'The Trusted Store',
+                        name: '{{ $siteSettings["site_name"] ?? config("app.name") }}',
                         description: 'Order Payment',
                         order_id: data.razorpay_order_id,
                         prefill: {
