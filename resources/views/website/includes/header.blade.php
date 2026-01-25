@@ -64,16 +64,6 @@
 
                 <!-- ➡ RIGHT: Action Icons -->
                 <div class="flex items-center justify-end gap-4 md:gap-5 lg:w-1/4">
-                    <!-- Play Store Badge (Desktop only) -->
-                    <a href="#" id="playStoreBadge" class="hidden lg:block hover:opacity-80 transition-opacity duration-200">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="h-10">
-                    </a>
-                    
-                    <!-- App Store Badge (Desktop only) -->
-                    <a href="#" id="appStoreBadge" class="hidden lg:block hover:opacity-80 transition-opacity duration-200">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store" class="h-10">
-                    </a>
-                    
                     @auth
                         <!-- Logged In - Go to Dashboard -->
                         <a href="{{ route('user.dashboard') }}"
@@ -212,16 +202,6 @@
         @else
         <a href="{{ route('login') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Login / Register</a>
         @endauth
-        
-        <!-- Store Badges (Mobile Sidebar) -->
-        <div class="py-3 space-y-3" style="border-bottom: 1px solid rgba(0,0,0,0.1);">
-            <a href="#" id="playStoreBadgeMobile" class="hidden block">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="h-12">
-            </a>
-            <a href="#" id="appStoreBadgeMobile" class="hidden block">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store" class="h-12">
-            </a>
-        </div>
     </div>
 </div>
 
@@ -326,82 +306,4 @@
         }
     });
 
-</script>
-
-<!-- PWA Install Script -->
-<script>
-    let deferredPrompt;
-    const playStoreBadge = document.getElementById('playStoreBadge');
-    const appStoreBadge = document.getElementById('appStoreBadge');
-    const playStoreBadgeMobile = document.getElementById('playStoreBadgeMobile');
-    const appStoreBadgeMobile = document.getElementById('appStoreBadgeMobile');
-
-    // Detect device type
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-    // Listen for beforeinstallprompt event (Android/Chrome)
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        
-        // Show Play Store badge for Android
-        if (playStoreBadge) playStoreBadge.classList.remove('hidden');
-        if (playStoreBadgeMobile) playStoreBadgeMobile.classList.remove('hidden');
-    });
-
-    // Show App Store badge for iOS
-    if (isIOS) {
-        if (appStoreBadge) appStoreBadge.classList.remove('hidden');
-        if (appStoreBadgeMobile) appStoreBadgeMobile.classList.remove('hidden');
-    }
-
-    // Play Store badge click handler
-    function installPWA(e) {
-        e.preventDefault();
-        
-        if (!deferredPrompt) {
-            alert('App installation is not available on this device. Please use Chrome or Edge browser.');
-            return;
-        }
-        
-        deferredPrompt.prompt();
-        
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            }
-            deferredPrompt = null;
-        });
-    }
-
-    // Add click listeners for Play Store badges
-    if (playStoreBadge) {
-        playStoreBadge.addEventListener('click', installPWA);
-    }
-    if (playStoreBadgeMobile) {
-        playStoreBadgeMobile.addEventListener('click', installPWA);
-    }
-
-    // App Store badge click handler (iOS instructions)
-    function showIOSInstructions(e) {
-        e.preventDefault();
-        alert('To install this app on iOS:\n\n1. Tap the Share button (square with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" in the top right corner');
-    }
-
-    if (appStoreBadge) {
-        appStoreBadge.addEventListener('click', showIOSInstructions);
-    }
-    if (appStoreBadgeMobile) {
-        appStoreBadgeMobile.addEventListener('click', showIOSInstructions);
-    }
-
-    // Hide badges if app is already installed
-    window.addEventListener('appinstalled', () => {
-        console.log('PWA was installed');
-        if (playStoreBadge) playStoreBadge.classList.add('hidden');
-        if (appStoreBadge) appStoreBadge.classList.add('hidden');
-        if (playStoreBadgeMobile) playStoreBadgeMobile.classList.add('hidden');
-        if (appStoreBadgeMobile) appStoreBadgeMobile.classList.add('hidden');
-    });
 </script>
