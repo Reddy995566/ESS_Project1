@@ -47,12 +47,7 @@ class ProductController extends Controller
         // You can implement this based on your orders/sales tracking
         $recentPurchases = 0; // TODO: Implement based on your orders table
         
-      //  return view('website.product-details', compact('product', 'similarProducts', 'recentlyViewed', 'recentPurchases', 'selectedColorId'));
-      return response()
-        ->view('website.product-details', compact('product', 'similarProducts', 'recentlyViewed', 'recentPurchases', 'selectedColorId'))
-        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        ->header('Pragma', 'no-cache')
-        ->header('Expires', '0');
+        return view('website.product-details', compact('product', 'similarProducts', 'recentlyViewed', 'recentPurchases', 'selectedColorId'));
 
     }
 
