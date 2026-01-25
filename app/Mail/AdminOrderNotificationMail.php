@@ -24,7 +24,7 @@ class AdminOrderNotificationMail extends Mailable
     public function __construct(Order $order)
     {
         $this->order = $order;
-        $this->siteName = Setting::get('site_name', 'Fashion Store');
+        $this->siteName = Setting::get('site_name', 'The Trusted Store');
         $this->siteLogo = Setting::get('site_logo', '');
     }
 

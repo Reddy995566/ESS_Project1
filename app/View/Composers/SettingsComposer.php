@@ -10,7 +10,7 @@ class SettingsComposer
     public function compose(View $view)
     {
         $settings = [
-            'business_name' => Setting::get('site_name', config('app.name', 'Fashion Store')),
+            'business_name' => Setting::get('site_name', config('app.name', 'The Trusted Store')),
             'site_logo' => Setting::get('site_logo', null),
             'address' => Setting::get('site_address', '184 Main Rd E, St Albans VIC 3021, Australia'),
             'email' => Setting::get('site_email', 'info@example.com'),

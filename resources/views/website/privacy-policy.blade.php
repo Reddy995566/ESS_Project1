@@ -1,6 +1,6 @@
 @extends('website.layouts.master')
 
-@section('title', 'Privacy Policy - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
+@section('title', 'Privacy Policy - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
 
 @section('content')
 <!-- Privacy Policy Header -->
@@ -18,7 +18,7 @@
             
             <!-- Introduction -->
             <div>
-                <p>This Privacy Policy describes how {{ $siteSettings['site_name'] ?? 'Fashion Store' }} (the "Site", "we", "us", or "our") collects, uses, and discloses your personal information when you visit, use our services, or make a purchase from our website (the "Site") or otherwise communicate with us regarding the Site (collectively, the "Services"). For purposes of this Privacy Policy, "you" and "your" means you as the user of the Services, whether you are a customer, website visitor, or another individual whose information we have collected pursuant to this Privacy Policy.</p>
+                <p>This Privacy Policy describes how {{ $siteSettings['site_name'] ?? 'The Trusted Store' }} (the "Site", "we", "us", or "our") collects, uses, and discloses your personal information when you visit, use our services, or make a purchase from our website (the "Site") or otherwise communicate with us regarding the Site (collectively, the "Services"). For purposes of this Privacy Policy, "you" and "your" means you as the user of the Services, whether you are a customer, website visitor, or another individual whose information we have collected pursuant to this Privacy Policy.</p>
                 <p class="mt-4">Please read this Privacy Policy carefully. By using and accessing any of the Services, you agree to the collection, use, and disclosure of your information as described in this Privacy Policy. If you do not agree to this Privacy Policy, please do not use or access any of the Services.</p>
             </div>
 

@@ -28,7 +28,7 @@ class SettingsServiceProvider extends ServiceProvider
             
             if ($siteSettings === null) {
                 $siteSettings = [
-                    'site_name' => Setting::get('site_name', 'Fashion Store'),
+                    'site_name' => Setting::get('site_name', 'The Trusted Store'),
                     'site_email' => Setting::get('site_email', ''),
                     'site_phone' => Setting::get('site_phone', ''),
                     'site_address' => Setting::get('site_address', ''),

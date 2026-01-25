@@ -1,13 +1,13 @@
 @extends('website.layouts.master')
 
-@section('title', 'Return & Refund Policy - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
+@section('title', 'Return & Refund Policy - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
 
 @section('content')
 <!-- Refund Policy Header -->
 <div class="bg-wine py-12 md:py-16">
     <div class="container mx-auto px-4 text-center">
         <h1 class="text-3xl md:text-4xl font-serif-elegant text-white mb-3">Return & Refund Policy</h1>
-        <p class="text-white/80 text-sm md:text-base">At {{ $siteSettings['site_name'] ?? 'Fashion Store' }}, we value your trust and strive to ensure you are happy with every purchase.</p>
+        <p class="text-white/80 text-sm md:text-base">At {{ $siteSettings['site_name'] ?? 'The Trusted Store' }}, we value your trust and strive to ensure you are happy with every purchase.</p>
     </div>
 </div>
 

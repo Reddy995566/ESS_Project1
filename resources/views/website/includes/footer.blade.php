@@ -103,9 +103,9 @@
                 <div class="flex flex-col items-start px-4 md:px-0">
                     <div class="mb-6">
                         @if(!empty($siteSettings['site_logo']))
-                            <img src="{{ $siteSettings['site_logo'] }}" alt="{{ $siteSettings['site_name'] ?? 'Fashion Store' }}" class="h-12 w-auto object-contain mb-4" style="filter: brightness(0) invert(0.2);">
+                            <img src="{{ $siteSettings['site_logo'] }}" alt="{{ $siteSettings['site_name'] ?? 'The Trusted Store' }}" class="h-12 w-auto object-contain mb-4" style="filter: brightness(0) invert(0.2);">
                         @else
-                            <h3 class="text-xl font-bold tracking-wider uppercase" style="color: var(--color-footer-text);">{{ $siteSettings['site_name'] ?? 'Fashion Store' }}</h3>
+                            <h3 class="text-xl font-bold tracking-wider uppercase" style="color: var(--color-footer-text);">{{ $siteSettings['site_name'] ?? 'The Trusted Store' }}</h3>
                         @endif
                     </div>
                     <ul class="space-y-3">
@@ -303,7 +303,7 @@
             <!-- Copyright & Back to Top -->
             <div class="flex flex-row items-end justify-between pb-8 md:pb-12 relative z-20 px-4 pt-4">
                 <div class="text-left">
-                    <p class="text-xs" style="color: var(--color-footer-text); opacity: 0.9;">© {{ date('Y') }} {{ $siteSettings['site_name'] ?? 'Fashion Store' }}.</p>
+                    <p class="text-xs" style="color: var(--color-footer-text); opacity: 0.9;">© {{ date('Y') }} {{ $siteSettings['site_name'] ?? 'The Trusted Store' }}.</p>
                     <p class="text-xs" style="color: var(--color-footer-text); opacity: 0.9;">All rights reserved.</p>
                 </div>
 
