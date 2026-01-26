@@ -13,6 +13,9 @@
     ?>
     <title><?php echo $__env->yieldContent('title', ($siteSettings['site_name'] ?? 'Fashion Store') . ' - Premium Fashion Store'); ?></title>
 
+    <!-- SEO Meta Tags -->
+    <?php echo $__env->yieldContent('meta'); ?>
+
     <!-- Favicon -->
     <?php if(!empty($siteSettings['site_favicon'])): ?>
     <link rel="icon" type="image/png" href="<?php echo e($siteSettings['site_favicon']); ?>">

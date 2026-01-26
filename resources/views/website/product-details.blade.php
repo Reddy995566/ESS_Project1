@@ -1788,24 +1788,71 @@
                     break;
                     
                 case 'copy':
-                    navigator.clipboard.writeText(productUrl).then(() => {
-                        // Show success message
-                        const btn = event.target.closest('button');
-                        const originalText = btn.querySelector('span').textContent;
-                        btn.querySelector('span').textContent = 'Copied!';
-                        btn.querySelector('div').classList.add('bg-green-500');
-                        btn.querySelector('div').classList.remove('bg-gray-600');
-                        
-                        setTimeout(() => {
-                            btn.querySelector('span').textContent = originalText;
-                            btn.querySelector('div').classList.remove('bg-green-500');
-                            btn.querySelector('div').classList.add('bg-gray-600');
-                        }, 2000);
-                    }).catch(err => {
-                        alert('Failed to copy link');
-                    });
+                    // Fallback for older browsers
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(productUrl).then(() => {
+                            showCopySuccess();
+                        }).catch(err => {
+                            fallbackCopyTextToClipboard(productUrl);
+                        });
+                    } else {
+                        fallbackCopyTextToClipboard(productUrl);
+                    }
                     break;
             }
+        }
+
+        // Show copy success feedback
+        function showCopySuccess() {
+            const copyBtn = document.querySelector('button[onclick*="copy"]');
+            if (copyBtn) {
+                const span = copyBtn.querySelector('span');
+                const icon = copyBtn.querySelector('div');
+                const originalText = span.textContent;
+                
+                span.textContent = 'Copied!';
+                icon.classList.remove('bg-gray-600');
+                icon.classList.add('bg-green-500');
+                
+                setTimeout(() => {
+                    span.textContent = originalText;
+                    icon.classList.remove('bg-green-500');
+                    icon.classList.add('bg-gray-600');
+                }, 2000);
+            }
+        }
+
+        // Fallback copy method for older browsers
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                } else {
+                    alert('Failed to copy link. Please copy manually: ' + text);
+                }
+            } catch (err) {
+                alert('Failed to copy link. Please copy manually: ' + text);
+            }
+            
+            document.body.removeChild(textArea);
         }
 
         // Close share menu when clicking outside
