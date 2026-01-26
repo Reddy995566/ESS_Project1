@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Load site settings from database on every request
         $middleware->append(\App\Http\Middleware\LoadSiteSettings::class);
+        
+        // Add no-cache headers for HTML responses (prevents browser caching)
+        $middleware->append(\App\Http\Middleware\NoCacheHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

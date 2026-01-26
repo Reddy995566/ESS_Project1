@@ -94,7 +94,8 @@ Route::post('/contact-us', [App\Http\Controllers\Website\ContactController::clas
 // Newsletter Route
 Route::post('/newsletter/subscribe', [App\Http\Controllers\Website\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
-// Search Route
+// Search Routes
+Route::get('/search', [App\Http\Controllers\Website\SearchController::class, 'search'])->name('search');
 Route::get('/search/ajax', [App\Http\Controllers\Website\SearchController::class, 'search'])->name('search.ajax');
 Route::get('/search/quick-view/{id}', [App\Http\Controllers\Website\SearchController::class, 'quickView'])->name('search.quickview');
 

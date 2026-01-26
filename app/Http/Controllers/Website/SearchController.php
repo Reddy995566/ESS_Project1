@@ -13,52 +13,139 @@ class SearchController extends Controller
         $query = $request->input('q');
 
         if (!$query) {
+            // If AJAX request, return JSON
+            if ($request->ajax() || $request->input('ajax')) {
+                return response()->json([
+                    'products' => [],
+                    'total' => 0,
+                    'html' => view('website.partials.no-products')->render()
+                ]);
+            }
+            // Otherwise redirect to shop
+            return redirect()->route('shop');
+        }
+
+        // Start query
+        $productsQuery = Product::where('status', 'active')
+            ->where(function($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%")
+                  ->orWhere('sku', 'like', "%{$query}%");
+            });
+
+        // Debug: Log the base query count
+        $baseCount = $productsQuery->count();
+        \Log::info('Search base count for "' . $query . '": ' . $baseCount);
+
+        // Apply category filter
+        if ($request->has('categories') && $request->categories) {
+            $categories = explode(',', $request->categories);
+            $productsQuery->whereIn('category_id', $categories);
+            \Log::info('After category filter: ' . $productsQuery->count() . ' (categories: ' . implode(',', $categories) . ')');
+        }
+
+        // Apply price range filter
+        if ($request->has('min_price') && $request->min_price) {
+            $productsQuery->whereRaw('COALESCE(sale_price, price) >= ?', [$request->min_price]);
+            \Log::info('After min_price filter: ' . $productsQuery->count() . ' (min: ' . $request->min_price . ')');
+        }
+
+        if ($request->has('max_price') && $request->max_price) {
+            $productsQuery->whereRaw('COALESCE(sale_price, price) <= ?', [$request->max_price]);
+            \Log::info('After max_price filter: ' . $productsQuery->count() . ' (max: ' . $request->max_price . ')');
+        }
+
+        // Apply availability filter
+        if ($request->has('availability') && $request->availability !== 'all') {
+            $productsQuery->where('stock_status', $request->availability);
+        }
+
+        // Apply sorting
+        if ($request->has('sort') && $request->sort) {
+            switch ($request->sort) {
+                case 'price_low':
+                    $productsQuery->orderByRaw('COALESCE(sale_price, price) ASC');
+                    break;
+                case 'price_high':
+                    $productsQuery->orderByRaw('COALESCE(sale_price, price) DESC');
+                    break;
+                case 'title-ascending':
+                    $productsQuery->orderBy('name', 'ASC');
+                    break;
+                case 'title-descending':
+                    $productsQuery->orderBy('name', 'DESC');
+                    break;
+                case 'created-descending':
+                    $productsQuery->orderBy('created_at', 'DESC');
+                    break;
+            }
+        }
+
+        $products = $productsQuery->with(['category', 'brand'])->get();
+        $total = $products->count();
+
+        // If AJAX request (for filters)
+        if ($request->ajax() || $request->input('ajax')) {
+            // For live search suggestions (no filters) - only when it's truly autocomplete
+            $hasFilters = $request->has('categories') || 
+                         $request->has('min_price') || 
+                         $request->has('max_price') || 
+                         $request->has('availability') || 
+                         $request->has('sort');
+            
+            if (!$hasFilters) {
+                // Autocomplete suggestions
+                $productsData = $products->take(50)->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                        'url' => route('product.show', $product->slug),
+                        'price' => number_format($product->sale_price > 0 ? $product->sale_price : $product->price, 0),
+                        'original_price' => $product->sale_price > 0 ? number_format($product->price, 0) : null,
+                        'image' => $product->image_url ?? null,
+                    ];
+                });
+
+                return response()->json([
+                    'products' => $productsData,
+                    'total' => $total
+                ]);
+            }
+
+            // For filtered results, return HTML
+            if ($products->count() > 0) {
+                $html = '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">';
+                foreach ($products as $product) {
+                    $html .= view('website.partials.product-card', ['product' => $product])->render();
+                }
+                $html .= '</div>';
+            } else {
+                $html = view('website.partials.no-products')->render();
+            }
+
             return response()->json([
-                'suggestions' => [],
-                'products' => [],
-                'total_products' => 0
+                'html' => $html,
+                'total' => $total
             ]);
         }
 
-        // 1. Get Suggestions (Keywords)
-        // We can search distinct product names that start with or contain the query
-        // Or specific tags/categories if available. For now, let's use product names.
-        $suggestions = Product::where('status', 'active')
-            ->where('name', 'like', "%{$query}%")
-            ->limit(5)
-            ->pluck('name')
-            ->map(function ($name) use ($query) {
-                // Highlight the query part in the name for frontend logic if needed, 
-                // but usually frontend handles highlighting. 
-                // Let's just return the full name.
-                // To make it look like "patola linen saree" we might want to verify if variations exist.
-                return $name;
-            });
+        // Get all categories for filter
+        $categories = \App\Models\Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->orderBy('name', 'ASC')
+            ->get();
 
-        // 2. Get Products
-        $products = Product::where('status', 'active')
-            ->where('name', 'like', "%{$query}%")
-            ->orWhere('description', 'like', "%{$query}%")
-            ->with(['category']) // Eager load necessary relationships
-            ->limit(5)
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'slug' => $product->slug,
-                    'price' => $product->sale_price > 0 ? $product->sale_price : $product->price,
-                    'original_price' => $product->sale_price > 0 ? $product->price : null,
-                    'image' => $product->image_url ?? asset('website/assets/images/placeholder.jpg'),
-                    'reviews_count' => $product->reviews_count ?? 0, // Assuming relation exists or handle later
-                    'rating' => 4.5, // Placeholder or actual rating
-                ];
-            });
+        // Calculate max price for filter
+        $maxPrice = Product::where('status', 'active')->max('price') ?? 10000;
 
-        return response()->json([
-            'suggestions' => $suggestions,
+        // Regular search page view
+        return view('website.search', [
             'products' => $products,
-            'total_products' => Product::where('status', 'active')->where('name', 'like', "%{$query}%")->count()
+            'query' => $query,
+            'total' => $total,
+            'categories' => $categories,
+            'maxPrice' => $maxPrice
         ]);
     }
 

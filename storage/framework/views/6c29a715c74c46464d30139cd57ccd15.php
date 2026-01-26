@@ -17,14 +17,15 @@
 
                 <!-- ⬅ LEFT: Brand Logo -->
                 <div class="flex-shrink-0">
-                    <a href="{{ route('home') }}">
-                        @if(!empty($siteSettings['site_logo']))
-                            <img src="{{ $siteSettings['site_logo'] }}" alt="{{ $siteSettings['site_name'] ?? 'The Trusted Store' }}" class="h-8 sm:h-10 md:h-12 w-auto object-contain">
-                        @else
+                    <a href="<?php echo e(route('home')); ?>">
+                        <?php if(!empty($siteSettings['site_logo'])): ?>
+                            <img src="<?php echo e($siteSettings['site_logo']); ?>" alt="<?php echo e($siteSettings['site_name'] ?? 'The Trusted Store'); ?>" class="h-8 sm:h-10 md:h-12 w-auto object-contain">
+                        <?php else: ?>
                             <h1 class="font-serif-elegant font-semibold text-lg sm:text-xl md:text-2xl tracking-[0.08em] md:tracking-[0.12em]" style="color: var(--color-header-text);">
-                                {{ strtoupper($siteSettings['site_name'] ?? 'The Trusted Store') }}
+                                <?php echo e(strtoupper($siteSettings['site_name'] ?? 'The Trusted Store')); ?>
+
                             </h1>
-                        @endif
+                        <?php endif; ?>
                     </a>
                 </div>
 
@@ -65,7 +66,7 @@
 
                 <!-- ⬆ CENTER-RIGHT: Navigation Links - DESKTOP ONLY -->
                 <div class="hidden lg:flex items-center gap-5">
-                    <a href="{{ route('home') }}"
+                    <a href="<?php echo e(route('home')); ?>"
                         class="font-medium hover:opacity-80 transition-opacity duration-200 text-sm whitespace-nowrap" style="color: var(--color-header-text);">
                         Home
                     </a>
@@ -83,15 +84,15 @@
                         </button>
                     </div>
 
-                    <a href="{{ route('bulk-orders') }}"
+                    <a href="<?php echo e(route('bulk-orders')); ?>"
                         class="font-medium hover:opacity-80 transition-opacity duration-200 text-sm whitespace-nowrap" style="color: var(--color-header-text);">
                         Bulk Orders
                     </a>
-                    <a href="{{ route('about') }}"
+                    <a href="<?php echo e(route('about')); ?>"
                         class="font-medium hover:opacity-80 transition-opacity duration-200 text-sm whitespace-nowrap" style="color: var(--color-header-text);">
                         About
                     </a>
-                    <a href="{{ route('contact') }}"
+                    <a href="<?php echo e(route('contact')); ?>"
                         class="font-medium hover:opacity-80 transition-opacity duration-200 text-sm whitespace-nowrap" style="color: var(--color-header-text);">
                         Contact
                     </a>
@@ -99,18 +100,18 @@
 
                 <!-- ➡ RIGHT: Action Icons -->
                 <div class="flex items-center justify-end gap-3 md:gap-4 flex-shrink-0">
-                    @auth
+                    <?php if(auth()->guard()->check()): ?>
                         <!-- Logged In - Go to Dashboard -->
-                        <a href="{{ route('user.dashboard') }}"
+                        <a href="<?php echo e(route('user.dashboard')); ?>"
                             class="hover:opacity-80 transition-opacity duration-200 hidden md:block" style="color: var(--color-header-text);">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                         </a>
-                    @else
+                    <?php else: ?>
                         <!-- Not Logged In -->
-                        <a href="{{ route('login') }}"
+                        <a href="<?php echo e(route('login')); ?>"
                             class="hover:opacity-80 transition-opacity duration-200 hidden md:block" style="color: var(--color-header-text);">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -118,7 +119,7 @@
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                         </a>
-                    @endauth
+                    <?php endif; ?>
                     <a href="#" id="search-btn" class="hover:opacity-80 transition-opacity duration-200 lg:hidden" style="color: var(--color-header-text);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -162,62 +163,65 @@
             <div class="shadow-2xl mt-0 overflow-hidden" style="background-color: var(--color-header-bg); border-top: 2px solid var(--color-accent-gold);">
                 <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
                     <div class="grid gap-8 py-8"
-                        style="grid-template-columns: repeat({{ $megaMenuCategories->count() + ($megaMenuFabrics->isNotEmpty() ? 1 : 0) }}, minmax(0, 1fr));">
-                        @forelse($megaMenuCategories as $category)
-                            <!-- {{ $category->name }} -->
+                        style="grid-template-columns: repeat(<?php echo e($megaMenuCategories->count() + ($megaMenuFabrics->isNotEmpty() ? 1 : 0)); ?>, minmax(0, 1fr));">
+                        <?php $__empty_1 = true; $__currentLoopData = $megaMenuCategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <!-- <?php echo e($category->name); ?> -->
                             <div>
                                 <h3 class="font-semibold text-sm mb-4 tracking-wider uppercase" style="color: var(--color-accent-gold);">
-                                    {{ $category->name }}
+                                    <?php echo e($category->name); ?>
+
                                 </h3>
                                 <ul class="space-y-2.5">
-                                    @foreach($category->children->take(6) as $subcategory)
+                                    <?php $__currentLoopData = $category->children->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subcategory): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <li>
-                                            <a href="{{ route('shop', ['category' => $subcategory->slug]) }}"
+                                            <a href="<?php echo e(route('shop', ['category' => $subcategory->slug])); ?>"
                                                 class="text-sm hover:opacity-80 transition-colors duration-200" style="color: var(--color-header-text);">
-                                                {{ $subcategory->name }}
+                                                <?php echo e($subcategory->name); ?>
+
                                             </a>
                                         </li>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     <li>
-                                        <a href="{{ route('shop', ['category' => $category->slug]) }}"
+                                        <a href="<?php echo e(route('shop', ['category' => $category->slug])); ?>"
                                             class="text-sm hover:opacity-80 transition-colors duration-200 font-medium" style="color: var(--color-header-text);">
                                             View All
                                         </a>
                                     </li>
                                 </ul>
                             </div>
-                        @empty
-                            @if($megaMenuFabrics->isEmpty())
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <?php if($megaMenuFabrics->isEmpty()): ?>
                                 <!-- Fallback if no categories and no fabrics -->
                                 <div class="col-span-3 text-center py-4">
                                     <p class="text-sm" style="color: var(--color-header-text);">No categories available</p>
                                 </div>
-                            @endif
-                        @endforelse
+                            <?php endif; ?>
+                        <?php endif; ?>
 
                         <!-- SHOP BY FABRIC -->
-                        @if($megaMenuFabrics->isNotEmpty())
+                        <?php if($megaMenuFabrics->isNotEmpty()): ?>
                             <div>
                                 <h3 class="font-semibold text-sm mb-4 tracking-wider uppercase" style="color: var(--color-accent-gold);">SHOP BY
                                     FABRIC</h3>
                                 <ul class="space-y-2.5">
-                                    @foreach($megaMenuFabrics->take(6) as $fabric)
+                                    <?php $__currentLoopData = $megaMenuFabrics->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fabric): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <li>
-                                            <a href="{{ route('shop', ['fabric' => $fabric->slug]) }}"
+                                            <a href="<?php echo e(route('shop', ['fabric' => $fabric->slug])); ?>"
                                                 class="text-sm hover:opacity-80 transition-colors duration-200" style="color: var(--color-header-text);">
-                                                {{ $fabric->name }}
+                                                <?php echo e($fabric->name); ?>
+
                                             </a>
                                         </li>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     <li>
-                                        <a href="{{ route('shop') }}"
+                                        <a href="<?php echo e(route('shop')); ?>"
                                             class="text-sm hover:opacity-80 transition-colors duration-200 font-medium" style="color: var(--color-header-text);">
                                             View All
                                         </a>
                                     </li>
                                 </ul>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -228,16 +232,16 @@
 <!-- Mobile Menu -->
 <div id="mobile-menu" class="hidden lg:hidden fixed top-[110px] left-0 right-0 z-40 shadow-lg" style="background-color: var(--color-header-bg); border-top: 1px solid rgba(0,0,0,0.1);">
     <div class="px-4 py-4 space-y-1 max-h-[calc(100vh-110px)] overflow-y-auto">
-        <a href="{{ route('home') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Home</a>
-        <a href="{{ route('shop') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Shop</a>
-        <a href="{{ route('bulk-orders') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Bulk Orders</a>
-        <a href="{{ route('about') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">About Us</a>
-        <a href="{{ route('contact') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Contact Us</a>
-        @auth
-        <a href="{{ route('user.dashboard') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">My Account</a>
-        @else
-        <a href="{{ route('login') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Login / Register</a>
-        @endauth
+        <a href="<?php echo e(route('home')); ?>" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Home</a>
+        <a href="<?php echo e(route('shop')); ?>" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Shop</a>
+        <a href="<?php echo e(route('bulk-orders')); ?>" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Bulk Orders</a>
+        <a href="<?php echo e(route('about')); ?>" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">About Us</a>
+        <a href="<?php echo e(route('contact')); ?>" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Contact Us</a>
+        <?php if(auth()->guard()->check()): ?>
+        <a href="<?php echo e(route('user.dashboard')); ?>" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">My Account</a>
+        <?php else: ?>
+        <a href="<?php echo e(route('login')); ?>" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Login / Register</a>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -391,12 +395,12 @@
         function performSearch() {
             const query = searchInput.value.trim();
             if (query.length > 0) {
-                window.location.href = '{{ route("search") }}?q=' + encodeURIComponent(query);
+                window.location.href = '<?php echo e(route("search")); ?>?q=' + encodeURIComponent(query);
             }
         }
 
         function fetchSuggestions(query) {
-            fetch('{{ route("search") }}?q=' + encodeURIComponent(query) + '&ajax=1', {
+            fetch('<?php echo e(route("search")); ?>?q=' + encodeURIComponent(query) + '&ajax=1', {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -438,7 +442,7 @@
             if (products.length > 8) {
                 html += `
                     <div class="px-4 py-2 text-center border-t">
-                        <a href="{{ route('search') }}?q=${encodeURIComponent(query)}" class="text-sm font-medium hover:underline" style="color: var(--color-accent-gold);">
+                        <a href="<?php echo e(route('search')); ?>?q=${encodeURIComponent(query)}" class="text-sm font-medium hover:underline" style="color: var(--color-accent-gold);">
                             View all ${products.length} results
                         </a>
                     </div>
@@ -477,3 +481,4 @@
         }
     });
 </script>
+<?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/website/includes/header.blade.php ENDPATH**/ ?>
