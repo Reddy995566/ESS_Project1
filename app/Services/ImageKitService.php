@@ -130,6 +130,15 @@ class ImageKitService
         }
     }
 
+    /**
+     * Alias for deleteImage() method
+     * Deletes a file from ImageKit by file ID
+     */
+    public function deleteFile(string $fileId): bool
+    {
+        return $this->deleteImage($fileId);
+    }
+
     public function getOptimizedUrl(string $filePath, int $width = 540, int $height = 689, int $quality = 80): string
     {
         try {

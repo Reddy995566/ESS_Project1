@@ -1,7 +1,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     // Banners data from server
-    let bannersData = @json($banners->keyBy('id'));
+    let bannersData = <?php echo json_encode($banners->keyBy('id'), 15, 512) ?>;
 
     // Initialize Sortable for drag-and-drop
     const el = document.getElementById('banners-list');
@@ -18,11 +18,11 @@
                     });
                 });
                 
-                fetch('{{ route("admin.banners.updateOrder") }}', {
+                fetch('<?php echo e(route("admin.banners.updateOrder")); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                     },
                     body: JSON.stringify({ items })
                 })
@@ -114,11 +114,11 @@
         deleteBtn.innerHTML = '<svg class="animate-spin h-5 w-5 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Deleting...';
         deleteBtn.disabled = true;
         
-        fetch("{{ url('admin/banners') }}/" + id, {
+        fetch("<?php echo e(url('admin/banners')); ?>/" + id, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Accept': 'application/json'
             }
         })
@@ -152,11 +152,11 @@
     // Toggle Status
     function toggleStatus(id) {
         const checkbox = event.target;
-        fetch("{{ url('admin/banners') }}/" + id + "/toggle", {
+        fetch("<?php echo e(url('admin/banners')); ?>/" + id + "/toggle", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
             },
             body: JSON.stringify({ field: 'is_active', value: checkbox.checked })
         })
@@ -213,9 +213,9 @@
         const bannerId = document.getElementById('bannerId').value;
         const isEdit = bannerId && bannerId !== '';
         
-        let url = "{{ route('admin.banners.store') }}";
+        let url = "<?php echo e(route('admin.banners.store')); ?>";
         if (isEdit) {
-            url = "{{ url('admin/banners') }}/" + bannerId;
+            url = "<?php echo e(url('admin/banners')); ?>/" + bannerId;
             formData.append('_method', 'PUT');
         }
         
@@ -229,7 +229,7 @@
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Accept': 'application/json'
             }
         })
@@ -369,3 +369,4 @@
         }
     });
 </script>
+<?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/admin/banners/scripts.blade.php ENDPATH**/ ?>

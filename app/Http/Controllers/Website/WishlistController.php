@@ -27,7 +27,8 @@ class WishlistController extends Controller
                     'id' => $item->id,
                     'product_id' => $item->product_id,
                     'name' => $item->product->name,
-                    'price' => $item->product->price,
+                    'price' => $item->product->sale_price > 0 ? $item->product->sale_price : $item->product->price,
+                    'original_price' => $item->product->sale_price > 0 ? $item->product->price : null,
                     'image' => $item->product->image_url,
                     'slug' => $item->product->slug,
                     'color_id' => $item->color_id,
@@ -46,7 +47,8 @@ class WishlistController extends Controller
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
-                    'price' => $product->price,
+                    'price' => $product->sale_price > 0 ? $product->sale_price : $product->price,
+                    'original_price' => $product->sale_price > 0 ? $product->price : null,
                     'image' => $product->image_url,
                     'slug' => $product->slug,
                 ];

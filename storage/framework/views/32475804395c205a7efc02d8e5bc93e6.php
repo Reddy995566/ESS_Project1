@@ -1,15 +1,13 @@
-@extends('website.layouts.master')
+<?php $__env->startSection('title', 'Collection - ' . ($siteSettings['site_name'] ?? 'The Trusted Store')); ?>
 
-@section('title', 'Collection - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <main class="w-full pt-8 pb-16 min-h-screen bg-white">
     <div class="max-w-[1800px] mx-auto px-4 md:px-8 lg:px-12">
 
         <!-- Mobile Filter Button -->
         <div class="md:hidden mb-4 flex items-center justify-between">
-            <p class="text-[#441227] text-sm font-normal">{{ $products->total() }} products</p>
+            <p class="text-[#441227] text-sm font-normal"><?php echo e($products->total()); ?> products</p>
             <button onclick="toggleMobileFilters()" 
                 class="flex items-center gap-2 px-4 py-2 bg-[#441227] text-white rounded text-sm font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,36 +29,36 @@
                     <!-- Filter Header -->
                     <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#441227]/10">
                         <h2 class="text-lg font-semibold text-[#441227]">Filters</h2>
-                        <a href="{{ route('shop') }}" class="text-xs text-[#441227]/60 hover:text-[#441227] underline">Clear All</a>
+                        <a href="<?php echo e(route('shop')); ?>" class="text-xs text-[#441227]/60 hover:text-[#441227] underline">Clear All</a>
                     </div>
 
                     <!-- Categories Filter -->
-                    @if($categories->count() > 0)
+                    <?php if($categories->count() > 0): ?>
                     <div class="mb-6 pb-6 border-b border-[#441227]/10">
                         <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Categories</h3>
                         <div class="space-y-2">
-                            @foreach($categories as $category)
+                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" name="category[]" value="{{ $category->slug }}" 
+                                <input type="checkbox" name="category[]" value="<?php echo e($category->slug); ?>" 
                                        class="category-checkbox form-checkbox w-4 h-4 text-[#441227] rounded border-gray-300 focus:ring-[#441227]"
-                                       onchange="toggleCategory('{{ $category->slug }}', this.checked)">
-                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">{{ $category->name }}</span>
+                                       onchange="toggleCategory('<?php echo e($category->slug); ?>', this.checked)">
+                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]"><?php echo e($category->name); ?></span>
                             </label>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
                     <!-- Price Range Filter -->
                     <div class="mb-6 pb-6 border-b border-[#441227]/10">
                         <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Price</h3>
-                        <p class="text-xs text-[#441227]/60 mb-3">Max: Rs. {{ number_format($maxPrice) }}</p>
+                        <p class="text-xs text-[#441227]/60 mb-3">Max: Rs. <?php echo e(number_format($maxPrice)); ?></p>
                         <div class="flex items-center gap-2 mb-4">
-                            <input type="number" id="min_price_desktop" value="{{ request('min_price', $minPrice) }}" 
+                            <input type="number" id="min_price_desktop" value="<?php echo e(request('min_price', $minPrice)); ?>" 
                                    placeholder="Min"
                                    class="w-full text-sm border border-[#441227]/20 rounded px-3 py-2 focus:border-[#441227] focus:ring-1 focus:ring-[#441227]">
                             <span class="text-[#441227]/40">-</span>
-                            <input type="number" id="max_price_desktop" value="{{ request('max_price', $maxPrice) }}"
+                            <input type="number" id="max_price_desktop" value="<?php echo e(request('max_price', $maxPrice)); ?>"
                                    placeholder="Max"
                                    class="w-full text-sm border border-[#441227]/20 rounded px-3 py-2 focus:border-[#441227] focus:ring-1 focus:ring-[#441227]">
                         </div>
@@ -77,17 +75,19 @@
                         <div class="space-y-2">
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" name="availability" value="in_stock" 
-                                       {{ request('availability') == 'in_stock' ? 'checked' : '' }}
+                                       <?php echo e(request('availability') == 'in_stock' ? 'checked' : ''); ?>
+
                                        onchange="updateFilter('availability', this.checked ? 'in_stock' : '')"
                                        class="form-checkbox w-4 h-4 text-[#441227] rounded border-gray-300 focus:ring-[#441227]">
-                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">In Stock ({{ $inStockCount }})</span>
+                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">In Stock (<?php echo e($inStockCount); ?>)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" name="availability" value="out_of_stock"
-                                       {{ request('availability') == 'out_of_stock' ? 'checked' : '' }}
+                                       <?php echo e(request('availability') == 'out_of_stock' ? 'checked' : ''); ?>
+
                                        onchange="updateFilter('availability', this.checked ? 'out_of_stock' : '')"
                                        class="form-checkbox w-4 h-4 text-[#441227] rounded border-gray-300 focus:ring-[#441227]">
-                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">Out of Stock ({{ $outStockCount }})</span>
+                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">Out of Stock (<?php echo e($outStockCount); ?>)</span>
                             </label>
                         </div>
                     </div>
@@ -100,7 +100,7 @@
                 
                 <!-- Top Bar -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#441227]/10">
-                    <p id="product-count" class="text-[#441227] text-sm md:text-base font-normal">{{ $products->total() }} products</p>
+                    <p id="product-count" class="text-[#441227] text-sm md:text-base font-normal"><?php echo e($products->total()); ?> products</p>
                     
                     <!-- Sort Dropdown -->
                     <div class="relative" x-data="{ open: false }" @click.away="open = false">
@@ -114,60 +114,62 @@
                         
                         <div x-show="open" style="display: none;"
                              class="absolute top-full right-0 mt-2 w-56 bg-white border border-[#441227]/10 rounded shadow-lg z-30 py-1">
-                             @foreach([
+                             <?php $__currentLoopData = [
                                  'title-ascending' => 'Alphabetically, A-Z',
                                  'title-descending' => 'Alphabetically, Z-A',
                                  'price_low' => 'Price, low to high',
                                  'price_high' => 'Price, high to low',
                                  'oldest' => 'Date, old to new',
                                  'newest' => 'Date, new to old',
-                             ] as $key => $label)
-                             <a href="javascript:void(0)" onclick="updateFilter('sort', '{{ $key }}')" 
-                                class="block px-4 py-2 text-sm text-[#441227] hover:bg-[#FAF5ED] {{ $sort == $key ? 'font-bold bg-[#FAF5ED]' : '' }}">
-                                {{ $label }}
+                             ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                             <a href="javascript:void(0)" onclick="updateFilter('sort', '<?php echo e($key); ?>')" 
+                                class="block px-4 py-2 text-sm text-[#441227] hover:bg-[#FAF5ED] <?php echo e($sort == $key ? 'font-bold bg-[#FAF5ED]' : ''); ?>">
+                                <?php echo e($label); ?>
+
                              </a>
-                             @endforeach
+                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Products Grid -->
                 <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    @forelse($products as $product)
+                    <?php $__empty_1 = true; $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="flex flex-col group items-center">
                         <div class="relative w-full h-auto rounded-lg overflow-hidden bg-gray-100 group">
                             
                             <div class="swiper product-swiper w-full h-auto">
                                 <div class="swiper-wrapper">
-                                    @php $displayImages = $product->display_images; @endphp
-                                    @if(count($displayImages) > 0)
-                                        @foreach($displayImages as $img)
+                                    <?php $displayImages = $product->display_images; ?>
+                                    <?php if(count($displayImages) > 0): ?>
+                                        <?php $__currentLoopData = $displayImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="swiper-slide">
-                                            <a href="{{ route('product.show', $product->slug) }}" class="block w-full h-auto">
-                                                <img src="{{ $img }}" alt="{{ $product->name }}" class="w-full h-auto object-cover aspect-[3/4]" loading="lazy" />
+                                            <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                                <img src="<?php echo e($img); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto object-cover aspect-[3/4]" loading="lazy" />
                                             </a>
                                         </div>
-                                        @endforeach
-                                    @else
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php else: ?>
                                         <div class="swiper-slide">
-                                            <a href="{{ route('product.show', $product->slug) }}" class="block w-full h-auto">
-                                                <img src="{{ $product->image_url ?? asset('website/assets/images/placeholder.jpg') }}" alt="{{ $product->name }}" class="w-full h-auto object-cover aspect-[3/4]" />
+                                            <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                                <img src="<?php echo e($product->image_url ?? asset('website/assets/images/placeholder.jpg')); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto object-cover aspect-[3/4]" />
                                             </a>
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <div class="swiper-button-next !w-6 !h-6 !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md" style="--swiper-navigation-size: 20px;"></div>
                                 <div class="swiper-button-prev !w-6 !h-6 !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md" style="--swiper-navigation-size: 20px;"></div>
                             </div>
 
-                            @if($product->sale_price > 0)
+                            <?php if($product->sale_price > 0): ?>
                             <div class="absolute top-2 right-2 md:top-3 md:right-3 z-10 bg-[#441227] text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
-                                SAVE RS. {{ number_format($product->price - $product->sale_price) }}
-                            </div>
-                            @endif
+                                SAVE RS. <?php echo e(number_format($product->price - $product->sale_price)); ?>
 
-                            <button onclick="addToWishlist({{ $product->id }})" data-product-id="{{ $product->id }}" class="absolute bottom-2 right-2 md:bottom-3 md:right-3 z-10 text-white text-lg md:text-xl p-2 rounded-full hover:bg-white/20 transition-colors">
+                            </div>
+                            <?php endif; ?>
+
+                            <button onclick="addToWishlist(<?php echo e($product->id); ?>)" data-product-id="<?php echo e($product->id); ?>" class="absolute bottom-2 right-2 md:bottom-3 md:right-3 z-10 text-white text-lg md:text-xl p-2 rounded-full hover:bg-white/20 transition-colors">
                                 <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                 </svg>
@@ -175,29 +177,30 @@
                         </div>
 
                         <div class="text-center mt-2 md:mt-3 pb-2">
-                            <a href="{{ route('product.show', $product->slug) }}">
-                                <h3 class="text-[#441227] font-medium text-sm md:text-lg hover:text-[#5C1F33] transition-colors truncate px-1 md:px-2">{{ $product->name }}</h3>
+                            <a href="<?php echo e(route('product.show', $product->slug)); ?>">
+                                <h3 class="text-[#441227] font-medium text-sm md:text-lg hover:text-[#5C1F33] transition-colors truncate px-1 md:px-2"><?php echo e($product->name); ?></h3>
                             </a>
                             <div class="flex items-center justify-center gap-1 md:gap-2 mt-1">
-                                @if($product->sale_price > 0)
-                                    <p class="text-[#441227]/80 text-xs md:text-sm font-bold">Rs. {{ number_format($product->sale_price) }}</p>
-                                    <p class="text-gray-400 text-[10px] md:text-xs line-through">Rs. {{ number_format($product->price) }}</p>
-                                @else
-                                    <p class="text-[#441227]/80 text-xs md:text-sm font-medium">Rs. {{ number_format($product->price) }}</p>
-                                @endif
+                                <?php if($product->sale_price > 0): ?>
+                                    <p class="text-[#441227]/80 text-xs md:text-sm font-bold">Rs. <?php echo e(number_format($product->sale_price)); ?></p>
+                                    <p class="text-gray-400 text-[10px] md:text-xs line-through">Rs. <?php echo e(number_format($product->price)); ?></p>
+                                <?php else: ?>
+                                    <p class="text-[#441227]/80 text-xs md:text-sm font-medium">Rs. <?php echo e(number_format($product->price)); ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-full text-center py-20 text-gray-500">
                         <p class="text-xl">No products found.</p>
                     </div>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
 
                 <!-- Pagination -->
                 <div class="mt-12 flex justify-center">
-                    {{ $products->appends(request()->query())->links() }}
+                    <?php echo e($products->appends(request()->query())->links()); ?>
+
                 </div>
             </div>
 
@@ -219,31 +222,31 @@
                 </button>
             </div>
             
-            @if($categories->count() > 0)
+            <?php if($categories->count() > 0): ?>
             <div class="mb-6 pb-6 border-b border-[#441227]/10">
                 <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Categories</h3>
                 <div class="space-y-3">
-                    @foreach($categories as $category)
+                    <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <label class="flex items-center gap-3 cursor-pointer group">
-                        <input type="checkbox" name="category_mobile[]" value="{{ $category->slug }}" 
+                        <input type="checkbox" name="category_mobile[]" value="<?php echo e($category->slug); ?>" 
                                class="category-checkbox form-checkbox w-5 h-5 text-[#441227] rounded border-gray-300 focus:ring-[#441227]"
-                               onchange="toggleCategory('{{ $category->slug }}', this.checked)">
-                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">{{ $category->name }}</span>
+                               onchange="toggleCategory('<?php echo e($category->slug); ?>', this.checked)">
+                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]"><?php echo e($category->name); ?></span>
                     </label>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
             <div class="mb-6 pb-6 border-b border-[#441227]/10">
                 <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Price</h3>
-                <p class="text-xs text-[#441227]/60 mb-3">Max: Rs. {{ number_format($maxPrice) }}</p>
+                <p class="text-xs text-[#441227]/60 mb-3">Max: Rs. <?php echo e(number_format($maxPrice)); ?></p>
                 <div class="flex items-center gap-2 mb-4">
-                    <input type="number" id="min_price_mobile" value="{{ request('min_price', $minPrice) }}" 
+                    <input type="number" id="min_price_mobile" value="<?php echo e(request('min_price', $minPrice)); ?>" 
                            placeholder="Min"
                            class="w-full text-sm border border-[#441227]/20 rounded px-3 py-2 focus:border-[#441227] focus:ring-1 focus:ring-[#441227]">
                     <span class="text-[#441227]/40">-</span>
-                    <input type="number" id="max_price_mobile" value="{{ request('max_price', $maxPrice) }}"
+                    <input type="number" id="max_price_mobile" value="<?php echo e(request('max_price', $maxPrice)); ?>"
                            placeholder="Max"
                            class="w-full text-sm border border-[#441227]/20 rounded px-3 py-2 focus:border-[#441227] focus:ring-1 focus:ring-[#441227]">
                 </div>
@@ -259,23 +262,25 @@
                 <div class="space-y-3">
                     <label class="flex items-center gap-3 cursor-pointer group">
                         <input type="checkbox" name="availability_mobile" value="in_stock" 
-                               {{ request('availability') == 'in_stock' ? 'checked' : '' }}
+                               <?php echo e(request('availability') == 'in_stock' ? 'checked' : ''); ?>
+
                                onchange="updateFilter('availability', this.checked ? 'in_stock' : '')"
                                class="form-checkbox w-5 h-5 text-[#441227] rounded border-gray-300 focus:ring-[#441227]">
-                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">In Stock ({{ $inStockCount }})</span>
+                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">In Stock (<?php echo e($inStockCount); ?>)</span>
                     </label>
                     <label class="flex items-center gap-3 cursor-pointer group">
                         <input type="checkbox" name="availability_mobile" value="out_of_stock"
-                               {{ request('availability') == 'out_of_stock' ? 'checked' : '' }}
+                               <?php echo e(request('availability') == 'out_of_stock' ? 'checked' : ''); ?>
+
                                onchange="updateFilter('availability', this.checked ? 'out_of_stock' : '')"
                                class="form-checkbox w-5 h-5 text-[#441227] rounded border-gray-300 focus:ring-[#441227]">
-                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">Out of Stock ({{ $outStockCount }})</span>
+                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">Out of Stock (<?php echo e($outStockCount); ?>)</span>
                     </label>
                 </div>
             </div>
 
             <div class="mt-8 pt-4 border-t border-[#441227]/10 space-y-3">
-                <a href="{{ route('shop') }}" class="block w-full text-center bg-white border border-[#441227] text-[#441227] py-2.5 rounded font-medium hover:bg-[#FAF5ED] transition-colors">
+                <a href="<?php echo e(route('shop')); ?>" class="block w-full text-center bg-white border border-[#441227] text-[#441227] py-2.5 rounded font-medium hover:bg-[#FAF5ED] transition-colors">
                     Clear all filters
                 </a>
                 <button onclick="toggleMobileFilters()" class="block w-full text-center bg-[#441227] text-white py-2.5 rounded font-medium hover:bg-[#5C1F33] transition-colors">
@@ -286,9 +291,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 // Multi-filter state management
 let activeFilters = {
@@ -296,8 +301,8 @@ let activeFilters = {
     availability: null,
     min_price: null,
     max_price: null,
-    sort: '{{ $sort ?? "newest" }}',
-    collection: '{{ request("collection") }}'
+    sort: '<?php echo e($sort ?? "newest"); ?>',
+    collection: '<?php echo e(request("collection")); ?>'
 };
 
 // Initialize filters from URL on page load
@@ -498,4 +503,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initProductSwipers();
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('website.layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/website/collection.blade.php ENDPATH**/ ?>

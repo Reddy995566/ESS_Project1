@@ -115,6 +115,35 @@ class BannerController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id)
+    {
+        $banner = Banner::find($id);
+        
+        if (!$banner) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Banner not found'
+                ], 404);
+            }
+            
+            return redirect()->route('admin.banners.index')
+                ->with('error', 'Banner not found');
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'banner' => $banner
+            ]);
+        }
+        
+        return view('admin.banners.edit', compact('banner'));
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Banner $banner)

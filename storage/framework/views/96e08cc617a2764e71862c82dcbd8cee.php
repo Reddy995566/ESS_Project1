@@ -199,10 +199,23 @@
 
                                 </p>
                             </a>
-                            <p class="text-xs md:text-sm font-medium mt-1" style="color: var(--color-text-primary);">
-                                Rs. <?php echo e(number_format($product->price)); ?>
+                            <div class="flex items-center justify-center gap-2 mt-1">
+                                <?php if($product->sale_price > 0): ?>
+                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->sale_price)); ?>
 
-                            </p>
+                                    </p>
+                                    <p class="text-[10px] md:text-xs text-gray-400 line-through">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                <?php else: ?>
+                                    <p class="text-xs md:text-sm font-medium" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -401,10 +414,23 @@
 
                                 </p>
                             </a>
-                            <p class="text-xs md:text-sm font-medium mt-1" style="color: var(--color-text-primary);">
-                                Rs. <?php echo e(number_format($product->price)); ?>
+                            <div class="flex items-center justify-center gap-2 mt-1">
+                                <?php if($product->sale_price > 0): ?>
+                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->sale_price)); ?>
 
-                            </p>
+                                    </p>
+                                    <p class="text-[10px] md:text-xs text-gray-400 line-through">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                <?php else: ?>
+                                    <p class="text-xs md:text-sm font-medium" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -505,8 +531,17 @@
                                     <div class="flex-1 min-w-0">
                                         <p class="font-medium truncate text-[11px]" style="color: var(--color-text-primary);">
                                             <?php echo e($reel->product->name ?? 'Product Name'); ?></p>
-                                        <p class="font-semibold text-xs" style="color: var(--color-text-primary);">
-                                            Rs. <?php echo e(number_format($reel->product->price ?? 0)); ?></p>
+                                        <div class="flex items-center gap-1">
+                                            <?php if($reel->product && $reel->product->sale_price > 0): ?>
+                                                <p class="font-bold text-xs" style="color: var(--color-text-primary);">
+                                                    Rs. <?php echo e(number_format($reel->product->sale_price)); ?></p>
+                                                <p class="text-[9px] text-gray-400 line-through">
+                                                    Rs. <?php echo e(number_format($reel->product->price)); ?></p>
+                                            <?php else: ?>
+                                                <p class="font-semibold text-xs" style="color: var(--color-text-primary);">
+                                                    Rs. <?php echo e(number_format($reel->product->price ?? 0)); ?></p>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                     <button onclick="window.openQuickView(event, <?php echo e($reel->product->id ?? 0); ?>)" class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 hover:bg-gray-200 transition-colors">
                                         <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

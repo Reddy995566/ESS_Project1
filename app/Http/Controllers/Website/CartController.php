@@ -63,7 +63,8 @@ class CartController extends Controller
             $itemData = [
                 'product_id' => $product->id,
                 'name' => $product->name,
-                'price' => $product->price,
+                'price' => $product->sale_price > 0 ? $product->sale_price : $product->price,
+                'original_price' => $product->sale_price > 0 ? $product->price : null,
                 'image' => $image,
                 'quantity' => $quantity,
                 'color_id' => $colorId,

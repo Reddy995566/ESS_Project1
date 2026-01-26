@@ -22,5 +22,23 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\NoCacheHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Handle ModelNotFoundException gracefully
+        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Resource not found'
+                ], 404);
+            }
+
+            // For admin routes, redirect to index with error message
+            if ($request->is('admin/*')) {
+                $modelName = class_basename($e->getModel());
+                return redirect()->back()
+                    ->with('error', $modelName . ' not found. It may have been deleted.');
+            }
+
+            // For website routes, show 404 page
+            abort(404);
+        });
     })->create();

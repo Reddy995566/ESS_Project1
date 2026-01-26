@@ -13,6 +13,9 @@
     @endphp
     <title>@yield('title', ($siteSettings['site_name'] ?? 'Fashion Store') . ' - Premium Fashion Store')</title>
 
+    <!-- SEO Meta Tags -->
+    @yield('meta')
+
     <!-- Favicon -->
     @if(!empty($siteSettings['site_favicon']))
     <link rel="icon" type="image/png" href="{{ $siteSettings['site_favicon'] }}">

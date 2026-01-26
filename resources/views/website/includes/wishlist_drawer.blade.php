@@ -268,8 +268,11 @@
                                 </button>
                             </div>
                             ${colorBadge}
-                            <div class="text-[15px] font-medium mt-1" style="color: var(--color-text-primary);">
-                                Rs. ${Number(item.price).toLocaleString()}
+                            <div class="mt-1">
+                                <span class="text-[15px] font-bold" style="color: var(--color-text-primary);">
+                                    Rs. ${Number(item.price).toLocaleString()}
+                                </span>
+                                ${item.original_price ? `<span class="text-xs text-gray-400 line-through ml-2">Rs. ${Number(item.original_price).toLocaleString()}</span>` : ''}
                             </div>
                         </div>
                         <button onclick="openQuickViewFromWishlist(event, ${item.product_id})" 
@@ -315,8 +318,11 @@
                         <h4 class="text-[15px] font-normal leading-tight truncate" style="color: var(--color-text-primary);">
                             <a href="/product/${product.slug}">${product.name}</a>
                         </h4>
-                        <div class="text-[15px] font-medium mt-1" style="color: var(--color-text-primary);">
-                            Rs. ${Number(product.price).toLocaleString()}
+                        <div class="mt-1">
+                            <span class="text-[15px] font-bold" style="color: var(--color-text-primary);">
+                                Rs. ${Number(product.price).toLocaleString()}
+                            </span>
+                            ${product.original_price ? `<span class="text-xs text-gray-400 line-through ml-2">Rs. ${Number(product.original_price).toLocaleString()}</span>` : ''}
                         </div>
                     </div>
                     <button onclick="openQuickViewFromWishlist(event, ${product.id})" 

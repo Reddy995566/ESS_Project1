@@ -1,38 +1,4 @@
-@extends('website.layouts.master')
-
-@section('title', $product->meta_title ?? $product->name . ' - Buy Online')
-
-@section('meta')
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="{{ $product->meta_description ?? Str::limit(strip_tags($product->description), 160) }}">
-    <meta name="keywords" content="{{ $product->meta_keywords ?? $product->name . ', ' . ($product->category->name ?? 'fashion') }}">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="product">
-    <meta property="og:url" content="{{ route('product.show', $product->slug) }}">
-    <meta property="og:title" content="{{ $product->meta_title ?? $product->name }}">
-    <meta property="og:description" content="{{ $product->meta_description ?? Str::limit(strip_tags($product->description), 160) }}">
-    <meta property="og:image" content="{{ $product->image_url }}">
-    <meta property="og:site_name" content="{{ config('app.name') }}">
-    <meta property="product:price:amount" content="{{ $product->sale_price > 0 ? $product->sale_price : $product->price }}">
-    <meta property="product:price:currency" content="INR">
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ route('product.show', $product->slug) }}">
-    <meta name="twitter:title" content="{{ $product->meta_title ?? $product->name }}">
-    <meta name="twitter:description" content="{{ $product->meta_description ?? Str::limit(strip_tags($product->description), 160) }}">
-    <meta name="twitter:image" content="{{ $product->image_url }}">
-    
-    <!-- WhatsApp -->
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="{{ route('product.show', $product->slug) }}">
-@endsection
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="bg-[#faf5ed] min-h-screen p-6 font-sans text-gray-700">
         <div class="mx-auto w-full max-w-[1600px]"> <!-- Full width but capped for sanity on huge screens -->
 
@@ -45,7 +11,7 @@
                         <div class="mb-4 overflow-hidden rounded-md bg-[#f0ece4] relative group">
                             <div class="swiper main-swiper w-full max-w-[635px] h-auto mx-auto" id="mainSwiperContainer">
                                 <div class="swiper-wrapper">
-                                    @php
+                                    <?php
                                         $groupedVariantImages = $product->grouped_variant_images;
                                         $productColorsForGallery = $product->colors()->get();
                                         
@@ -77,11 +43,11 @@
                                         if (empty($initialImages)) {
                                             $initialImages = [$product->image_url ?? asset('images/placeholder.png')];
                                         }
-                                    @endphp
-                                    @foreach($initialImages as $index => $img)
+                                    ?>
+                                    <?php $__currentLoopData = $initialImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="swiper-slide w-full h-auto relative group">
-                                            <img src="{{ $img }}" alt="{{ $product->name }}" class="w-full h-auto">
-                                            <button onclick="openLightbox({{ $index }})"
+                                            <img src="<?php echo e($img); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto">
+                                            <button onclick="openLightbox(<?php echo e($index); ?>)"
                                                 class="absolute top-4 right-4 z-20 p-2 bg-white/50 hover:bg-white rounded-lg text-[#4b0f27] backdrop-blur-sm transition shadow-sm">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -89,7 +55,7 @@
                                                 </svg>
                                             </button>
                                         </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                                 <!-- Pagination -->
                                 <div class="swiper-pagination !bottom-4"></div>
@@ -116,14 +82,14 @@
 
                         <!-- Thumbnails -->
                         <div id="thumbnailGrid" class="grid grid-cols-5 gap-4 mt-4">
-                            @foreach(array_slice($initialImages, 0, 5) as $index => $img)
-                                <div onclick="goToSlide({{ $index }})"
-                                    class="gallery-thumb cursor-pointer rounded-lg border-2 {{ $index === 0 ? 'border-[#4b0f27]' : 'border-gray-200' }} p-1 bg-white hover:border-[#4b0f27] transition-colors duration-200">
+                            <?php $__currentLoopData = array_slice($initialImages, 0, 5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div onclick="goToSlide(<?php echo e($index); ?>)"
+                                    class="gallery-thumb cursor-pointer rounded-lg border-2 <?php echo e($index === 0 ? 'border-[#4b0f27]' : 'border-gray-200'); ?> p-1 bg-white hover:border-[#4b0f27] transition-colors duration-200">
                                     <div class="aspect-square w-full overflow-hidden rounded-md">
-                                        <img src="{{ $img }}" class="h-full w-full object-cover">
+                                        <img src="<?php echo e($img); ?>" class="h-full w-full object-cover">
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
                 </div>
@@ -152,48 +118,54 @@
                         <div>
                             <h1
                                 class="font-serif-elegant text-[26px] font-semibold leading-tight text-[#4b0f27] tracking-wide">
-                                {{ $product->name }}
+                                <?php echo e($product->name); ?>
+
                             </h1>
                             <!-- Rating -->
                             <div class="mt-1 flex items-center gap-1">
                                 <div class="flex text-[#fbbf24]">
-                                    @for($i = 0; $i < 5; $i++)
+                                    <?php for($i = 0; $i < 5; $i++): ?>
                                         <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
                                             <path
                                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
-                                    @endfor
+                                    <?php endfor; ?>
                                 </div>
                                 <span class="text-xs text-gray-500">
-                                    {{ $product->approved_reviews_count ?? 0 }} {{ ($product->approved_reviews_count ?? 0) == 1 ? 'review' : 'reviews' }}
+                                    <?php echo e($product->approved_reviews_count ?? 0); ?> <?php echo e(($product->approved_reviews_count ?? 0) == 1 ? 'review' : 'reviews'); ?>
+
                                 </span>
                             </div>
                         </div>
 
                         <!-- Layout: Bought count badge -->
-                        @if($recentPurchases > 0)
+                        <?php if($recentPurchases > 0): ?>
                         <div class="w-fit rounded-full bg-[#fae8e8] px-3 py-1 text-xs font-medium text-[#4b0f27]">
-                            ⚡ {{ $recentPurchases }} Bought this in 24 hours
+                            ⚡ <?php echo e($recentPurchases); ?> Bought this in 24 hours
                         </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Price -->
                         <div class="flex items-center gap-3">
-                            @if($product->sale_price > 0)
+                            <?php if($product->sale_price > 0): ?>
                                 <div class="font-serif-elegant text-[24px] font-bold text-[#4b0f27] tracking-wide">
-                                    Rs. {{ number_format($product->sale_price) }}
+                                    Rs. <?php echo e(number_format($product->sale_price)); ?>
+
                                 </div>
                                 <div class="font-serif-elegant text-[18px] text-gray-400 line-through">
-                                    Rs. {{ number_format($product->price) }}
+                                    Rs. <?php echo e(number_format($product->price)); ?>
+
                                 </div>
                                 <div class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                                    SAVE Rs. {{ number_format($product->price - $product->sale_price) }}
+                                    SAVE Rs. <?php echo e(number_format($product->price - $product->sale_price)); ?>
+
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <div class="font-serif-elegant text-[24px] font-bold text-[#4b0f27] tracking-wide">
-                                    Rs. {{ number_format($product->price) }}
+                                    Rs. <?php echo e(number_format($product->price)); ?>
+
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
 
                         <!-- Offer Box -->
@@ -254,94 +226,39 @@
                                 class="h-11 w-full rounded bg-[#495530] text-sm font-semibold text-white transition hover:bg-[#384225] uppercase tracking-wider shadow-sm">
                                 Buy it now
                             </button>
-
-                            <!-- Row 3: Share Button -->
-                            <button onclick="toggleShareMenu()" id="shareButton"
-                                class="h-11 w-full rounded border-2 border-[#3D0C1F] text-sm font-semibold text-[#3D0C1F] transition hover:bg-[#3D0C1F] hover:text-white uppercase tracking-wider flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                                </svg>
-                                Share Product
-                            </button>
-
-                            <!-- Share Menu (Hidden by default) -->
-                            <div id="shareMenu" class="hidden mt-2 p-4 bg-white rounded-lg border-2 border-[#3D0C1F]/20 shadow-lg">
-                                <p class="text-sm font-semibold text-gray-700 mb-3">Share this product:</p>
-                                <div class="grid grid-cols-4 gap-3">
-                                    <!-- WhatsApp -->
-                                    <button onclick="shareOn('whatsapp')" class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-green-50 transition group">
-                                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center group-hover:scale-110 transition">
-                                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-xs text-gray-600">WhatsApp</span>
-                                    </button>
-
-                                    <!-- Facebook -->
-                                    <button onclick="shareOn('facebook')" class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-blue-50 transition group">
-                                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center group-hover:scale-110 transition">
-                                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-xs text-gray-600">Facebook</span>
-                                    </button>
-
-                                    <!-- Twitter -->
-                                    <button onclick="shareOn('twitter')" class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-sky-50 transition group">
-                                        <div class="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center group-hover:scale-110 transition">
-                                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-xs text-gray-600">Twitter</span>
-                                    </button>
-
-                                    <!-- Copy Link -->
-                                    <button onclick="shareOn('copy')" class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition group">
-                                        <div class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center group-hover:scale-110 transition">
-                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-xs text-gray-600">Copy Link</span>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
-                        @php
+                        <?php
                             $productColors = $product->colors()->get();
-                        @endphp
-                        @if($productColors->count() > 1)
+                        ?>
+                        <?php if($productColors->count() > 1): ?>
                             <div class="mt-4" id="moreColorsSection">
                                 <h3 class="mb-3 text-sm font-semibold text-gray-800">More Colors</h3>
                                 <div class="grid grid-cols-4 gap-2" id="moreColorsGrid">
-                                    @foreach($productColors as $color)
-                                        @php
+                                    <?php $__currentLoopData = $productColors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $color): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
                                             $cImages = $groupedVariantImages[$color->id] ?? [];
                                             $cImage = $cImages[0] ?? null;
                                             // Use the same $galleryInitialColorId that was set in the gallery section
                                             $isSelected = ($color->id == $galleryInitialColorId);
-                                        @endphp
-                                        <div onclick="switchColor({{ $color->id }}, '{{ addslashes($color->name) }}', this)" data-color-id="{{ $color->id }}"
+                                        ?>
+                                        <div onclick="switchColor(<?php echo e($color->id); ?>, '<?php echo e(addslashes($color->name)); ?>', this)" data-color-id="<?php echo e($color->id); ?>"
                                             class="cursor-pointer group flex flex-col items-center color-swatch more-color-item"
-                                            style="{{ $isSelected ? 'display: none;' : 'display: flex;' }}">
+                                            style="<?php echo e($isSelected ? 'display: none;' : 'display: flex;'); ?>">
                                             <div
                                                 class="aspect-[3/4] w-full overflow-hidden rounded border border-transparent transition group-hover:border-gray-400">
-                                                @if($cImage)
-                                                    <img src="{{ $cImage }}" class="h-full w-full object-cover">
-                                                @else
+                                                <?php if($cImage): ?>
+                                                    <img src="<?php echo e($cImage); ?>" class="h-full w-full object-cover">
+                                                <?php else: ?>
                                                     <div class="h-full w-full"
-                                                        style="background-color: {{ $color->hex_code ?? '#ccc' }}"></div>
-                                                @endif
+                                                        style="background-color: <?php echo e($color->hex_code ?? '#ccc'); ?>"></div>
+                                                <?php endif; ?>
                                             </div>
-                                            <span class="mt-1 text-[10px] text-gray-600">{{ $color->name }}</span>
+                                            <span class="mt-1 text-[10px] text-gray-600"><?php echo e($color->name); ?></span>
                                         </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Accordions (No JS, using details/summary) -->
                         <!-- Accordion Sections (Animated) -->
@@ -361,7 +278,8 @@
                                 <div
                                     class="overflow-hidden transition-all duration-300 max-h-0 opacity-0 accordion-content">
                                     <div class="pb-4 text-sm text-[#4b0f27]/80 leading-relaxed font-sans-premium">
-                                        <p>{!! $product->description ?? 'Premium quality fabric tailored for comfort and elegance. Perfect for any occasion.' !!}
+                                        <p><?php echo $product->description ?? 'Premium quality fabric tailored for comfort and elegance. Perfect for any occasion.'; ?>
+
                                         </p>
                                     </div>
                                 </div>
@@ -455,23 +373,25 @@
                         <!-- List -->
                         <div class="no-scrollbar h-[calc(100vh-180px)] overflow-y-auto p-3">
                             <div class="space-y-4">
-                                @if(isset($recentlyViewed))
-                                    @foreach($recentlyViewed as $recent)
+                                <?php if(isset($recentlyViewed)): ?>
+                                    <?php $__currentLoopData = $recentlyViewed; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="flex gap-3">
                                             <div class="h-16 w-12 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-                                                <img src="{{ $recent->image }}" class="h-full w-full object-cover">
+                                                <img src="<?php echo e($recent->image); ?>" class="h-full w-full object-cover">
                                             </div>
                                             <div class="flex flex-col justify-center">
-                                                <p class="line-clamp-1 text-[11px] font-medium text-gray-900">{{ $recent->name }}
+                                                <p class="line-clamp-1 text-[11px] font-medium text-gray-900"><?php echo e($recent->name); ?>
+
                                                 </p>
                                                 <p class="text-[11px] font-bold text-[#4b0f27]">Rs.
-                                                    {{ number_format($recent->price) }}
+                                                    <?php echo e(number_format($recent->price)); ?>
+
                                                 </p>
-                                                <p class="text-[10px] text-gray-400">{{ rand(1, 59) }} minutes ago</p>
+                                                <p class="text-[10px] text-gray-400"><?php echo e(rand(1, 59)); ?> minutes ago</p>
                                             </div>
                                         </div>
-                                    @endforeach
-                                @endif
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php endif; ?>
                                 <!-- Static fillers to ensure look match if empty -->
                                 <div class="flex gap-3">
                                     <div class="h-16 w-12 bg-gray-200"></div>
@@ -595,17 +515,17 @@
 
                     <!-- Rating Breakdown -->
                     <div class="lg:col-span-2 space-y-2">
-                        @for($i = 5; $i >= 1; $i--)
+                        <?php for($i = 5; $i >= 1; $i--): ?>
                             <div class="flex items-center gap-2 md:gap-3">
-                                <span class="text-xs md:text-sm font-medium text-gray-700 w-10 md:w-12">{{ $i }} star</span>
+                                <span class="text-xs md:text-sm font-medium text-gray-700 w-10 md:w-12"><?php echo e($i); ?> star</span>
                                 <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-[#fbbf24] transition-all duration-300" data-rating="{{ $i }}"
+                                    <div class="h-full bg-[#fbbf24] transition-all duration-300" data-rating="<?php echo e($i); ?>"
                                         style="width: 0%"></div>
                                 </div>
                                 <span class="text-xs md:text-sm text-gray-600 w-8 md:w-12 text-right"
-                                    data-count="{{ $i }}">0</span>
+                                    data-count="<?php echo e($i); ?>">0</span>
                             </div>
-                        @endfor
+                        <?php endfor; ?>
                     </div>
                 </div>
             </div>
@@ -624,21 +544,21 @@
                     </div>
 
                     <form id="reviewForm" class="space-y-4 md:space-y-6">
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="product_id" value="<?php echo e($product->id); ?>">
 
                         <!-- Rating Stars -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating *</label>
                             <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <div class="flex gap-1" id="ratingStars">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <svg onclick="setRating({{ $i }})"
+                                    <?php for($i = 1; $i <= 5; $i++): ?>
+                                        <svg onclick="setRating(<?php echo e($i); ?>)"
                                             class="w-8 h-8 md:w-10 md:h-10 cursor-pointer text-gray-300 hover:text-[#fbbf24] transition-colors rating-star"
-                                            data-rating="{{ $i }}" fill="currentColor" viewBox="0 0 20 20">
+                                            data-rating="<?php echo e($i); ?>" fill="currentColor" viewBox="0 0 20 20">
                                             <path
                                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
-                                    @endfor
+                                    <?php endfor; ?>
                                 </div>
                                 <span id="ratingText" class="text-sm text-gray-600"></span>
                             </div>
@@ -741,7 +661,7 @@
     </div>
 
 <!-- RECOMMENDED PRODUCTS SECTION -->
-@if($similarProducts && $similarProducts->count() > 0)
+<?php if($similarProducts && $similarProducts->count() > 0): ?>
     <div class="w-full bg-[#FAF5ED] pt-8 md:pt-12 pb-12 md:pb-16">
         <div class="max-w-[1800px] mx-auto px-4 sm:px-6 md:px-8">
             <!-- Section Header -->
@@ -753,29 +673,29 @@
 
             <!-- Products Grid -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-                @foreach($similarProducts as $product)
+                <?php $__currentLoopData = $similarProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="flex flex-col group items-center">
                     <div class="relative w-full h-auto rounded-lg overflow-hidden bg-gray-100 group">
                         
                         <!-- Product Image Slider -->
                         <div class="swiper product-swiper w-full h-auto">
                             <div class="swiper-wrapper">
-                                @php $displayImages = $product->display_images; @endphp
-                                @if(count($displayImages) > 0)
-                                    @foreach($displayImages as $img)
+                                <?php $displayImages = $product->display_images; ?>
+                                <?php if(count($displayImages) > 0): ?>
+                                    <?php $__currentLoopData = $displayImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="swiper-slide">
-                                        <a href="{{ route('product.show', $product->slug) }}" class="block w-full h-auto">
-                                            <img src="{{ $img }}" alt="{{ $product->name }}" class="w-full h-auto" loading="lazy" />
+                                        <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                            <img src="<?php echo e($img); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto" loading="lazy" />
                                         </a>
                                     </div>
-                                    @endforeach
-                                @else
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php else: ?>
                                     <div class="swiper-slide">
-                                        <a href="{{ route('product.show', $product->slug) }}" class="block w-full h-auto">
-                                            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-auto" />
+                                        <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                            <img src="<?php echo e($product->image_url); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto" />
                                         </a>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             
                             <!-- Slider Navigation Buttons (Visible on Hover) -->
@@ -784,7 +704,7 @@
                         </div>
 
                         <!-- Wishlist Button -->
-                        <button onclick="addToWishlist({{ $product->id }})" data-product-id="{{ $product->id }}" class="absolute bottom-2 right-2 md:bottom-3 md:right-3 z-10 text-white text-lg md:text-xl p-2 rounded-full hover:bg-white/20 transition-colors">
+                        <button onclick="addToWishlist(<?php echo e($product->id); ?>)" data-product-id="<?php echo e($product->id); ?>" class="absolute bottom-2 right-2 md:bottom-3 md:right-3 z-10 text-white text-lg md:text-xl p-2 rounded-full hover:bg-white/20 transition-colors">
                             <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                             </svg>
@@ -792,43 +712,47 @@
                     </div>
 
                     <div class="text-center mt-2 md:mt-3 pb-2">
-                        <a href="{{ route('product.show', $product->slug) }}">
+                        <a href="<?php echo e(route('product.show', $product->slug)); ?>">
                             <p class="text-[#2B2B2B] text-xs md:text-sm font-normal truncate px-2 hover:text-[#5C1F33] transition-colors">
-                                {{ $product->name }}
+                                <?php echo e($product->name); ?>
+
                             </p>
                         </a>
                         <div class="flex items-center justify-center gap-2 mt-1">
-                            @if($product->sale_price > 0)
+                            <?php if($product->sale_price > 0): ?>
                                 <p class="text-[#2B2B2B] text-xs md:text-sm font-bold">
-                                    Rs. {{ number_format($product->sale_price) }}
+                                    Rs. <?php echo e(number_format($product->sale_price)); ?>
+
                                 </p>
                                 <p class="text-gray-400 text-[10px] md:text-xs line-through">
-                                    Rs. {{ number_format($product->price) }}
+                                    Rs. <?php echo e(number_format($product->price)); ?>
+
                                 </p>
-                            @else
+                            <?php else: ?>
                                 <p class="text-[#2B2B2B] text-xs md:text-sm font-medium">
-                                    Rs. {{ number_format($product->price) }}
+                                    Rs. <?php echo e(number_format($product->price)); ?>
+
                                 </p>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
 
             <!-- View All Button -->
             <div class="text-center mt-10">
-                <a href="{{ route('shop') }}" class="inline-block px-8 py-3 bg-white text-[#4b0f27] text-sm font-bold uppercase tracking-wider border-2 border-[#4b0f27] rounded-md hover:bg-[#4b0f27] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg">
+                <a href="<?php echo e(route('shop')); ?>" class="inline-block px-8 py-3 bg-white text-[#4b0f27] text-sm font-bold uppercase tracking-wider border-2 border-[#4b0f27] rounded-md hover:bg-[#4b0f27] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg">
                     View All Products
                 </a>
             </div>
         </div>
     </div>
-@endif
+<?php endif; ?>
 
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
 <style>
     /* Custom Styling for Swiper Pagination Dots to match reference */
@@ -939,13 +863,13 @@
         <!-- Sidebar Thumbnails (Left Side) -->
         <div class="w-32 lg:w-40 border-r border-white/10 bg-black/20 p-4 pt-16 overflow-y-auto hidden md:block">
             <div class="space-y-3">
-                @foreach($initialImages as $index => $img)
-                    <div onclick="setLightboxImage('{{ $img }}', {{ $index }})"
+                <?php $__currentLoopData = $initialImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div onclick="setLightboxImage('<?php echo e($img); ?>', <?php echo e($index); ?>)"
                         class="cursor-pointer rounded-md overflow-hidden border-2 border-transparent hover:border-white/50 transition opacity-60 hover:opacity-100 lightbox-thumb"
-                        data-index="{{ $index }}">
-                        <img src="{{ $img }}" class="w-full h-auto object-cover">
+                        data-index="<?php echo e($index); ?>">
+                        <img src="<?php echo e($img); ?>" class="w-full h-auto object-cover">
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
 
@@ -978,12 +902,12 @@
     let swiper;
     let currentLightboxIndex = 0;
     // Make these global
-    window.allGalleryImages = @json($initialImages);
-    window.variantImages = @json($groupedVariantImages);
+    window.allGalleryImages = <?php echo json_encode($initialImages, 15, 512) ?>;
+    window.variantImages = <?php echo json_encode($groupedVariantImages, 15, 512) ?>;
 
     // Auto-select first color if available (or from URL param)
     // Use the same $galleryInitialColorId that was set in the gallery section
-    @php
+    <?php
         $firstColorId = $galleryInitialColorId ?? 'null';
         $firstColorName = 'null';
         if ($galleryInitialColorId && $product->colors()->count() > 0) {
@@ -992,9 +916,9 @@
                 $firstColorName = "'" . addslashes($selectedColorObj->name) . "'";
             }
         }
-    @endphp
-    window.selectedColorId = {{ $firstColorId }};
-    window.selectedColorName = {!! $firstColorName !!};
+    ?>
+    window.selectedColorId = <?php echo e($firstColorId); ?>;
+    window.selectedColorName = <?php echo $firstColorName; ?>;
 
     function updateQty(change) {
         const input = document.getElementById('qtyInput');
@@ -1005,7 +929,7 @@
     }
 
     async function addToCart() {
-        const productId = {{ $product->id }};
+        const productId = <?php echo e($product->id); ?>;
         const qty = parseInt(document.getElementById('qtyInput').value) || 1;
 
         // Basic Validation: If product has colors, maybe force selection?
@@ -1019,11 +943,11 @@
         btn.disabled = true;
 
         try {
-            const response = await fetch('{{ route("cart.add") }}', {
+            const response = await fetch('<?php echo e(route("cart.add")); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 },
                 body: JSON.stringify({
                     product_id: productId,
@@ -1250,7 +1174,7 @@
     }
 </script>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         // Make globally accessible with a unique name
         window.processBuyNow = async function () {
@@ -1262,14 +1186,14 @@
             }
 
             const qty = parseInt(document.getElementById('qtyInput').value);
-            const productId = {{ $product->id }};
+            const productId = <?php echo e($product->id); ?>;
 
             try {
-                const response = await fetch('{{ route("cart.add") }}', {
+                const response = await fetch('<?php echo e(route("cart.add")); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                     },
                     body: JSON.stringify({
                         product_id: productId,
@@ -1282,7 +1206,7 @@
 
                 if (data.success) {
                     // Redirect directly to checkout
-                    window.location.href = '{{ route("checkout") }}';
+                    window.location.href = '<?php echo e(route("checkout")); ?>';
                 } else {
                     showToast(data.message, 'error');
                     if (btn) {
@@ -1393,7 +1317,7 @@
         // Load reviews via AJAX
         async function loadReviews(page = 1) {
             try {
-                const productId = {{ $product->id }};
+                const productId = <?php echo e($product->id); ?>;
                 const response = await fetch(`/reviews/product/${productId}?page=${page}&per_page=10`);
                 const data = await response.json();
 
@@ -1592,10 +1516,10 @@
                     const formData = new FormData();
                     formData.append('image', file);
 
-                    const response = await fetch('{{ route("reviews.upload-image") }}', {
+                    const response = await fetch('<?php echo e(route("reviews.upload-image")); ?>', {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                         },
                         body: formData
                     });
@@ -1637,10 +1561,10 @@
             submitBtn.disabled = true;
 
             try {
-                const response = await fetch('{{ route("reviews.store") }}', {
+                const response = await fetch('<?php echo e(route("reviews.store")); ?>', {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                     },
                     body: formData
                 });
@@ -1682,11 +1606,11 @@
         // Quick Add to Cart for Recommended Products
         async function quickAddToCart(productId) {
             try {
-                const response = await fetch('{{ route("cart.add") }}', {
+                const response = await fetch('<?php echo e(route("cart.add")); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                     },
                     body: JSON.stringify({
                         product_id: productId,
@@ -1756,66 +1680,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             initProductSwipers();
         });
-
-        // Share Functions
-        function toggleShareMenu() {
-            const shareMenu = document.getElementById('shareMenu');
-            shareMenu.classList.toggle('hidden');
-        }
-
-        function shareOn(platform) {
-            const productUrl = '{{ route("product.show", $product->slug) }}';
-            const productTitle = '{{ addslashes($product->name) }}';
-            const productDescription = '{{ addslashes(Str::limit(strip_tags($product->description), 100)) }}';
-            const productImage = '{{ $product->image_url }}';
-            
-            let shareUrl = '';
-            
-            switch(platform) {
-                case 'whatsapp':
-                    shareUrl = `https://wa.me/?text=${encodeURIComponent(productTitle + ' - ' + productUrl)}`;
-                    window.open(shareUrl, '_blank');
-                    break;
-                    
-                case 'facebook':
-                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
-                    window.open(shareUrl, '_blank', 'width=600,height=400');
-                    break;
-                    
-                case 'twitter':
-                    shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(productTitle)}`;
-                    window.open(shareUrl, '_blank', 'width=600,height=400');
-                    break;
-                    
-                case 'copy':
-                    navigator.clipboard.writeText(productUrl).then(() => {
-                        // Show success message
-                        const btn = event.target.closest('button');
-                        const originalText = btn.querySelector('span').textContent;
-                        btn.querySelector('span').textContent = 'Copied!';
-                        btn.querySelector('div').classList.add('bg-green-500');
-                        btn.querySelector('div').classList.remove('bg-gray-600');
-                        
-                        setTimeout(() => {
-                            btn.querySelector('span').textContent = originalText;
-                            btn.querySelector('div').classList.remove('bg-green-500');
-                            btn.querySelector('div').classList.add('bg-gray-600');
-                        }, 2000);
-                    }).catch(err => {
-                        alert('Failed to copy link');
-                    });
-                    break;
-            }
-        }
-
-        // Close share menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const shareButton = document.getElementById('shareButton');
-            const shareMenu = document.getElementById('shareMenu');
-            
-            if (shareButton && shareMenu && !shareButton.contains(event.target) && !shareMenu.contains(event.target)) {
-                shareMenu.classList.add('hidden');
-            }
-        });
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('website.layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/website/product-details.blade.php ENDPATH**/ ?>

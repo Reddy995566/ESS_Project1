@@ -45,10 +45,10 @@ class LoginController extends Controller
                 'login_at' => now(),
             ]);
 
-            // Login using Laravel Auth guard
-            Auth::guard('admin')->login($admin);
+            // Login using Laravel Auth guard with remember me (stays logged in for 5 years)
+            Auth::guard('admin')->login($admin, true);
 
-            // Set session
+            // Set session with long lifetime
             session([
                 'admin_authenticated' => true,
                 'admin_id' => $admin->id,
@@ -56,6 +56,9 @@ class LoginController extends Controller
                 'admin_name' => $admin->name,
                 'admin_role' => $admin->role ? $admin->role->name : 'Admin',
             ]);
+
+            // Regenerate session to prevent fixation attacks
+            $request->session()->regenerate();
 
             return redirect()->route('admin.dashboard');
         }
