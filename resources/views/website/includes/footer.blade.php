@@ -19,7 +19,7 @@
                     <p class="text-xs font-medium" style="color: #ef4444;" id="newsletter-error-text"></p>
                 </div>
 
-                <form id="newsletter-form" class="w-full relative rounded-md px-3 py-2 bg-transparent" style="border: 1px solid rgba(68, 18, 39, 0.3);">
+                <form id="newsletter-form" class="w-full relative rounded-md px-3 py-2 bg-transparent" style="border: 1px solid rgba(255, 255, 255, 0.5);">
                     @csrf
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 flex-1">
