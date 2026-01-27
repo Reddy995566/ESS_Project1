@@ -125,8 +125,12 @@
                     <!-- Apartment -->
                     <input type="text" name="apartment" placeholder="Apartment, suite, etc. (optional)" value="{{ old('apartment') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow">
 
-                    <!-- City State Zip -->
+                    <!-- Pincode, City, State -->
                     <div class="flex gap-3">
+                        <div class="w-1/3">
+                            <input type="text" name="pincode" placeholder="PIN Code" value="{{ old('pincode') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="pincode"></span>
+                        </div>
                         <div class="w-1/3">
                             <input type="text" name="city" placeholder="City" value="{{ old('city') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="city"></span>
@@ -142,7 +146,7 @@
                             </select>
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="state"></span>
                         </div>
-                        <div class="w-1/3">
+                    </div>
                             <input type="text" name="zipcode" placeholder="PIN code" value="{{ old('zipcode') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="zipcode"></span>
                         </div>
@@ -205,8 +209,11 @@
                     <!-- Apartment -->
                     <input type="text" name="billing_address_line_2" placeholder="Apartment, suite, etc. (optional)" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow">
 
-                    <!-- City State Zip -->
+                    <!-- Pincode, City, State -->
                     <div class="flex gap-3">
+                        <div class="w-1/3">
+                            <input type="text" name="billing_pincode" placeholder="PIN Code" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        </div>
                         <div class="w-1/3">
                             <input type="text" name="billing_city" placeholder="City" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
@@ -220,7 +227,7 @@
                                 <!-- Add more states as needed -->
                             </select>
                         </div>
-                        <div class="w-1/3">
+                    </div>
                             <input type="text" name="billing_zipcode" placeholder="PIN code" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
                     </div>
