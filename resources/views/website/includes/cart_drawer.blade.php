@@ -218,8 +218,8 @@
                         </div>
                         <!-- Price -->
                         <div class="text-right">
-                            <span class="text-sm font-medium" style="color: var(--color-text-primary);">Rs. ${new Intl.NumberFormat().format(item.price * item.quantity)}</span>
                             ${item.original_price ? `<div class="text-[10px] text-gray-400 line-through">Rs. ${new Intl.NumberFormat().format(item.original_price * item.quantity)}</div>` : ''}
+                            <span class="text-sm font-medium" style="color: var(--color-text-primary);">Rs. ${new Intl.NumberFormat().format(item.price * item.quantity)}</span>
                             ${item.quantity > 1 ? `<div class="text-[10px]" style="color: var(--color-text-muted);">Rs. ${new Intl.NumberFormat().format(item.price)} each</div>` : ''}
                         </div>
                     </div>

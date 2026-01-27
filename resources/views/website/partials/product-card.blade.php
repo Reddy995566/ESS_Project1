@@ -27,11 +27,11 @@
             
             <div class="flex items-center gap-2">
                 @if($product->sale_price > 0)
-                    <span class="text-base md:text-lg font-bold" style="color: var(--color-accent-gold);">
-                        ₹{{ number_format($product->sale_price, 0) }}
-                    </span>
                     <span class="text-xs md:text-sm text-gray-500 line-through">
                         ₹{{ number_format($product->price, 0) }}
+                    </span>
+                    <span class="text-base md:text-lg font-bold" style="color: var(--color-accent-gold);">
+                        ₹{{ number_format($product->sale_price, 0) }}
                     </span>
                 @else
                     <span class="text-base md:text-lg font-bold" style="color: var(--color-accent-gold);">

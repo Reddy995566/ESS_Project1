@@ -180,11 +180,11 @@
                         <!-- Price -->
                         <div class="flex items-center gap-3">
                             @if($product->sale_price > 0)
-                                <div class="font-serif-elegant text-[24px] font-bold text-[#4b0f27] tracking-wide">
-                                    Rs. {{ number_format($product->sale_price) }}
-                                </div>
                                 <div class="font-serif-elegant text-[18px] text-gray-400 line-through">
                                     Rs. {{ number_format($product->price) }}
+                                </div>
+                                <div class="font-serif-elegant text-[24px] font-bold text-[#4b0f27] tracking-wide">
+                                    Rs. {{ number_format($product->sale_price) }}
                                 </div>
                                 <div class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                                     SAVE Rs. {{ number_format($product->price - $product->sale_price) }}

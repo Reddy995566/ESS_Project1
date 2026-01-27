@@ -201,11 +201,11 @@
                             </a>
                             <div class="flex items-center justify-center gap-2 mt-1">
                                 @if($product->sale_price > 0)
-                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
-                                        Rs. {{ number_format($product->sale_price) }}
-                                    </p>
                                     <p class="text-[10px] md:text-xs text-gray-400 line-through">
                                         Rs. {{ number_format($product->price) }}
+                                    </p>
+                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
+                                        Rs. {{ number_format($product->sale_price) }}
                                     </p>
                                 @else
                                     <p class="text-xs md:text-sm font-medium" style="color: var(--color-text-primary);">
@@ -411,11 +411,11 @@
                             </a>
                             <div class="flex items-center justify-center gap-2 mt-1">
                                 @if($product->sale_price > 0)
-                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
-                                        Rs. {{ number_format($product->sale_price) }}
-                                    </p>
                                     <p class="text-[10px] md:text-xs text-gray-400 line-through">
                                         Rs. {{ number_format($product->price) }}
+                                    </p>
+                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
+                                        Rs. {{ number_format($product->sale_price) }}
                                     </p>
                                 @else
                                     <p class="text-xs md:text-sm font-medium" style="color: var(--color-text-primary);">
@@ -524,10 +524,10 @@
                                             {{ $reel->product->name ?? 'Product Name' }}</p>
                                         <div class="flex items-center gap-1">
                                             @if($reel->product && $reel->product->sale_price > 0)
-                                                <p class="font-bold text-xs" style="color: var(--color-text-primary);">
-                                                    Rs. {{ number_format($reel->product->sale_price) }}</p>
                                                 <p class="text-[9px] text-gray-400 line-through">
                                                     Rs. {{ number_format($reel->product->price) }}</p>
+                                                <p class="font-bold text-xs" style="color: var(--color-text-primary);">
+                                                    Rs. {{ number_format($reel->product->sale_price) }}</p>
                                             @else
                                                 <p class="font-semibold text-xs" style="color: var(--color-text-primary);">
                                                     Rs. {{ number_format($reel->product->price ?? 0) }}</p>

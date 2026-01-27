@@ -269,10 +269,10 @@
                             </div>
                             ${colorBadge}
                             <div class="mt-1">
-                                <span class="text-[15px] font-bold" style="color: var(--color-text-primary);">
+                                ${item.original_price ? `<span class="text-xs text-gray-400 line-through">Rs. ${Number(item.original_price).toLocaleString()}</span>` : ''}
+                                <span class="text-[15px] font-bold ${item.original_price ? 'ml-2' : ''}" style="color: var(--color-text-primary);">
                                     Rs. ${Number(item.price).toLocaleString()}
                                 </span>
-                                ${item.original_price ? `<span class="text-xs text-gray-400 line-through ml-2">Rs. ${Number(item.original_price).toLocaleString()}</span>` : ''}
                             </div>
                         </div>
                         <button onclick="openQuickViewFromWishlist(event, ${item.product_id})" 
@@ -319,10 +319,10 @@
                             <a href="/product/${product.slug}">${product.name}</a>
                         </h4>
                         <div class="mt-1">
-                            <span class="text-[15px] font-bold" style="color: var(--color-text-primary);">
+                            ${product.original_price ? `<span class="text-xs text-gray-400 line-through">Rs. ${Number(product.original_price).toLocaleString()}</span>` : ''}
+                            <span class="text-[15px] font-bold ${product.original_price ? 'ml-2' : ''}" style="color: var(--color-text-primary);">
                                 Rs. ${Number(product.price).toLocaleString()}
                             </span>
-                            ${product.original_price ? `<span class="text-xs text-gray-400 line-through ml-2">Rs. ${Number(product.original_price).toLocaleString()}</span>` : ''}
                         </div>
                     </div>
                     <button onclick="openQuickViewFromWishlist(event, ${product.id})" 
