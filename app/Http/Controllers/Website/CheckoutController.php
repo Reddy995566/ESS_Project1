@@ -169,8 +169,11 @@ class CheckoutController extends Controller
             }
             $total = $subtotal; // Add tax/shipping logic here if needed
 
-            // Create Order
-            $orderNumber = 'ORD-' . strtoupper(Str::random(10));
+            // Generate Order Number - Pure digits with leading zeros
+            $lastOrder = Order::orderBy('id', 'desc')->first();
+            $nextNumber = $lastOrder ? $lastOrder->id + 1 : 1;
+            $orderNumber = str_pad($nextNumber, 9, '0', STR_PAD_LEFT); // 000000001, 000000002, etc.
+            
             $order = Order::create(array_merge($addressData, $billingData, [
                 'order_number' => $orderNumber,
                 'user_id' => $user->id,
