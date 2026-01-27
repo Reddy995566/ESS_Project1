@@ -1,6 +1,6 @@
 @extends('website.layouts.master')
 
-@section('title', 'Bulk Order Enquiry - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
+@section('title', 'Bulk Order Enquiry - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
 
 @section('content')
 

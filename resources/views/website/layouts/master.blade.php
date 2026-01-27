@@ -11,7 +11,7 @@
         $fontHeading = $themeFonts['font_heading'] ?? 'Playfair Display';
         $fontBody = $themeFonts['font_body'] ?? 'Inter';
     @endphp
-    <title>@yield('title', ($siteSettings['site_name'] ?? 'Fashion Store') . ' - Premium Fashion Store')</title>
+    <title>@yield('title', $siteSettings['site_name'] ?? 'Fashion Store')</title>
 
     <!-- SEO Meta Tags -->
     @yield('meta')

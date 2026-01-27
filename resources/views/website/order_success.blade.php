@@ -1,6 +1,6 @@
 @extends('website.layouts.master')
 
-@section('title', 'Order Confirmed - ' . ($siteSettings['site_name'] ?? 'The Trusted Store'))
+@section('title', 'Order Confirmed - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
 
 @section('content')
 <div class="min-h-screen bg-[#fff7ec] py-16 px-4 sm:px-6 lg:px-8">
