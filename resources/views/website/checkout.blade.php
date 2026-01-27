@@ -135,20 +135,9 @@
                             <input type="text" name="city" placeholder="City" value="{{ old('city') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="city"></span>
                         </div>
-                        <div class="w-1/3 relative">
-                            <select name="state" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none text-gray-800 text-sm bg-white shadow-sm appearance-none form-select">
-                                <option value="">Select State</option>
-                                <option value="West Bengal" {{ old('state') == 'West Bengal' ? 'selected' : '' }}>West Bengal</option>
-                                <option value="Maharashtra" {{ old('state') == 'Maharashtra' ? 'selected' : '' }}>Maharashtra</option>
-                                <option value="Delhi" {{ old('state') == 'Delhi' ? 'selected' : '' }}>Delhi</option>
-                                <option value="Karnataka" {{ old('state') == 'Karnataka' ? 'selected' : '' }}>Karnataka</option>
-                                <!-- Add more states as needed -->
-                            </select>
+                        <div class="w-1/3">
+                            <input type="text" name="state" placeholder="State" value="{{ old('state') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="state"></span>
-                        </div>
-                    </div>
-                            <input type="text" name="zipcode" placeholder="PIN code" value="{{ old('zipcode') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
-                            <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="zipcode"></span>
                         </div>
                     </div>
 
@@ -217,18 +206,8 @@
                         <div class="w-1/3">
                             <input type="text" name="billing_city" placeholder="City" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
-                        <div class="w-1/3 relative">
-                            <select name="billing_state" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none text-gray-800 text-sm bg-white shadow-sm appearance-none form-select">
-                                <option value="">Select State</option>
-                                <option value="West Bengal">West Bengal</option>
-                                <option value="Maharashtra">Maharashtra</option>
-                                <option value="Delhi">Delhi</option>
-                                <option value="Karnataka">Karnataka</option>
-                                <!-- Add more states as needed -->
-                            </select>
-                        </div>
-                    </div>
-                            <input type="text" name="billing_zipcode" placeholder="PIN code" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <div class="w-1/3">
+                            <input type="text" name="billing_state" placeholder="State" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
                     </div>
 
@@ -393,6 +372,91 @@
                     }
                 }
             }
+        }
+
+        // Pincode API Auto-fill functionality
+        let pincodeTimeout = null;
+        
+        async function fetchPincodeDetails(pincode, cityField, stateField) {
+            // Clear previous timeout
+            if (pincodeTimeout) {
+                clearTimeout(pincodeTimeout);
+            }
+            
+            // Only proceed if pincode is 6 digits
+            if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
+                return;
+            }
+            
+            // Add loading state
+            cityField.value = 'Loading...';
+            stateField.value = 'Loading...';
+            cityField.disabled = true;
+            stateField.disabled = true;
+            
+            try {
+                const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+                const data = await response.json();
+                
+                if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+                    const postOffice = data[0].PostOffice[0];
+                    cityField.value = postOffice.District || '';
+                    stateField.value = postOffice.State || '';
+                } else {
+                    // Invalid pincode
+                    cityField.value = '';
+                    stateField.value = '';
+                    alert('Invalid PIN code. Please enter a valid 6-digit PIN code.');
+                }
+            } catch (error) {
+                console.error('Pincode API error:', error);
+                cityField.value = '';
+                stateField.value = '';
+                alert('Unable to fetch location details. Please enter manually.');
+            } finally {
+                cityField.disabled = false;
+                stateField.disabled = false;
+            }
+        }
+        
+        // Shipping Address Pincode Handler
+        const shippingPincode = document.querySelector('input[name="pincode"]');
+        const shippingCity = document.querySelector('input[name="city"]');
+        const shippingState = document.querySelector('input[name="state"]');
+        
+        if (shippingPincode && shippingCity && shippingState) {
+            shippingPincode.addEventListener('input', function() {
+                const pincode = this.value.trim();
+                
+                // Clear timeout and set new one for debouncing
+                if (pincodeTimeout) {
+                    clearTimeout(pincodeTimeout);
+                }
+                
+                pincodeTimeout = setTimeout(() => {
+                    fetchPincodeDetails(pincode, shippingCity, shippingState);
+                }, 500); // Wait 500ms after user stops typing
+            });
+        }
+        
+        // Billing Address Pincode Handler
+        const billingPincode = document.querySelector('input[name="billing_pincode"]');
+        const billingCity = document.querySelector('input[name="billing_city"]');
+        const billingState = document.querySelector('input[name="billing_state"]');
+        
+        if (billingPincode && billingCity && billingState) {
+            billingPincode.addEventListener('input', function() {
+                const pincode = this.value.trim();
+                
+                // Clear timeout and set new one for debouncing
+                if (pincodeTimeout) {
+                    clearTimeout(pincodeTimeout);
+                }
+                
+                pincodeTimeout = setTimeout(() => {
+                    fetchPincodeDetails(pincode, billingCity, billingState);
+                }, 500); // Wait 500ms after user stops typing
+            });
         }
 
         // Razorpay Integration
