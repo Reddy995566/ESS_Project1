@@ -502,7 +502,7 @@
                 </div>
                 <div class="dataTables_paginate">
                     @if($products->hasPages())
-                        {{ $products->appends(request()->query())->links() }}
+                        {{ $products->appends(request()->query())->links('admin.pagination.custom') }}
                     @endif
                 </div>
             </div>
