@@ -180,7 +180,7 @@
                         <!-- Price -->
                         <div class="flex items-center gap-3">
                             @if($product->sale_price > 0)
-                                <div class="font-serif-elegant text-[18px] text-gray-400 line-through">
+                                <div class="font-serif-elegant text-[18px] text-red-500 line-through">
                                     Rs. {{ number_format($product->price) }}
                                 </div>
                                 <div class="font-serif-elegant text-[24px] font-bold text-[#4b0f27] tracking-wide">
