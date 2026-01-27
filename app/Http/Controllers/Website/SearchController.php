@@ -16,8 +16,10 @@ class SearchController extends Controller
             // If AJAX request, return JSON
             if ($request->ajax() || $request->input('ajax')) {
                 return response()->json([
+                    'suggestions' => [],
                     'products' => [],
                     'total' => 0,
+                    'total_products' => 0,
                     'html' => view('website.partials.no-products')->render()
                 ]);
             }
@@ -94,22 +96,32 @@ class SearchController extends Controller
                          $request->has('sort');
             
             if (!$hasFilters) {
-                // Autocomplete suggestions
-                $productsData = $products->take(50)->map(function ($product) {
+                // Autocomplete suggestions - Generate suggestions from product names
+                $suggestions = $products->pluck('name')
+                    ->unique()
+                    ->take(5)
+                    ->values()
+                    ->toArray();
+                
+                // Autocomplete products data
+                $productsData = $products->take(10)->map(function ($product) {
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
                         'slug' => $product->slug,
                         'url' => route('product.show', $product->slug),
-                        'price' => number_format($product->sale_price > 0 ? $product->sale_price : $product->price, 0),
-                        'original_price' => $product->sale_price > 0 ? number_format($product->price, 0) : null,
+                        'price' => $product->sale_price > 0 ? $product->sale_price : $product->price,
+                        'original_price' => $product->sale_price > 0 ? $product->price : null,
                         'image' => $product->image_url ?? null,
+                        'rating' => 5,
+                        'reviews_count' => 0,
                     ];
                 });
 
                 return response()->json([
+                    'suggestions' => $suggestions,
                     'products' => $productsData,
-                    'total' => $total
+                    'total_products' => $total
                 ]);
             }
 
