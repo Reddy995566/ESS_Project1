@@ -99,6 +99,16 @@ Route::get('/search', [App\Http\Controllers\Website\SearchController::class, 'se
 Route::get('/search/ajax', [App\Http\Controllers\Website\SearchController::class, 'search'])->name('search.ajax');
 Route::get('/search/quick-view/{id}', [App\Http\Controllers\Website\SearchController::class, 'quickView'])->name('search.quickview');
 
+// Test route for debugging
+Route::get('/test-search-ajax', function() {
+    return response()->json([
+        'test' => 'working',
+        'suggestions' => ['test1', 'test2'],
+        'products' => [],
+        'total_products' => 0
+    ]);
+})->name('test.search.ajax');
+
 // Product Details
 Route::get('/product/{slug}', [App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
 Route::post('/track-recently-viewed/{product}', [App\Http\Controllers\ProductController::class, 'trackRecentlyViewed']);

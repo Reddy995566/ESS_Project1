@@ -277,24 +277,50 @@
         }
 
         function performSearch(query) {
-            fetch(`{{ route('search.ajax') }}?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    searchSkeleton.classList.add('hidden'); // Hide Skeleton
-                    searchIconStatic.classList.remove('hidden');
+            const url = `{{ route('search.ajax') }}?q=${encodeURIComponent(query)}`;
+            console.log('Fetching:', url);
+            
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers.get('content-type'));
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return response.text();
+                })
+                .then(text => {
+                    console.log('Response text:', text.substring(0, 200));
+                    
+                    try {
+                        const data = JSON.parse(text);
+                        searchSkeleton.classList.add('hidden');
+                        searchIconStatic.classList.remove('hidden');
 
-                    if (data.suggestions.length > 0 || data.products.length > 0) {
-                        searchResultsContainer.classList.remove('hidden');
-                        renderSuggestions(data.suggestions, query);
-                        renderProducts(data.products, data.total_products);
-                    } else {
-                        // No results found
-                        searchResultsContainer.classList.add('hidden');
+                        if (data.suggestions.length > 0 || data.products.length > 0) {
+                            searchResultsContainer.classList.remove('hidden');
+                            renderSuggestions(data.suggestions, query);
+                            renderProducts(data.products, data.total_products);
+                        } else {
+                            searchResultsContainer.classList.add('hidden');
+                        }
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        console.error('Response was:', text);
+                        searchSkeleton.classList.add('hidden');
+                        searchIconStatic.classList.remove('hidden');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    searchSkeleton.classList.add('hidden'); // Hide Skeleton
+                    console.error('Fetch error:', error);
+                    searchSkeleton.classList.add('hidden');
                     searchIconStatic.classList.remove('hidden');
                 });
         }
