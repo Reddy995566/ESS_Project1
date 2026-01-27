@@ -663,8 +663,6 @@
 @endsection
 
 @push('scripts')
-    @include('website.includes.search_sidebar')
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             initProductSwipers();
