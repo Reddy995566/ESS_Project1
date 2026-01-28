@@ -63,7 +63,7 @@ class CheckoutController extends Controller
             'address' => 'required_without:shipping_address_id',
             'city' => 'required_without:shipping_address_id',
             'state' => 'required_without:shipping_address_id',
-            'zipcode' => 'required_without:shipping_address_id',
+            'pincode' => 'required_without:shipping_address_id',
             'phone' => 'required_without:shipping_address_id',
             // Billing Address Validation
             'billing_selection' => 'required|in:same,different',
@@ -71,19 +71,19 @@ class CheckoutController extends Controller
             'billing_address' => 'required_if:billing_selection,different',
             'billing_city' => 'required_if:billing_selection,different',
             'billing_state' => 'required_if:billing_selection,different',
-            'billing_zipcode' => 'required_if:billing_selection,different',
+            'billing_pincode' => 'required_if:billing_selection,different',
         ], [
             'first_name.required_without' => 'First name is required',
             'address.required_without' => 'Address is required',
             'city.required_without' => 'City is required',
             'state.required_without' => 'State is required',
-            'zipcode.required_without' => 'PIN code is required',
+            'pincode.required_without' => 'PIN code is required',
             'phone.required_without' => 'Phone number is required',
             'billing_first_name.required_if' => 'Billing first name is required',
             'billing_address.required_if' => 'Billing address is required',
             'billing_city.required_if' => 'Billing city is required',
             'billing_state.required_if' => 'Billing state is required',
-            'billing_zipcode.required_if' => 'Billing PIN code is required',
+            'billing_pincode.required_if' => 'Billing PIN code is required',
         ]);
 
         $cart = session()->get('cart', []);
@@ -128,7 +128,7 @@ class CheckoutController extends Controller
                     'address_line_2' => $request->apartment,
                     'city' => $request->city,
                     'state' => $request->state,
-                    'zipcode' => $request->zipcode,
+                    'zipcode' => $request->pincode,
                 ];
             }
 
@@ -144,7 +144,7 @@ class CheckoutController extends Controller
                     'billing_address_line_2' => $request->billing_address_line_2,
                     'billing_city' => $request->billing_city,
                     'billing_state' => $request->billing_state,
-                    'billing_zipcode' => $request->billing_zipcode,
+                    'billing_zipcode' => $request->billing_pincode,
                 ];
             } else {
                 // Copy shipping address to billing address
