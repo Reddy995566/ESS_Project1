@@ -95,6 +95,17 @@ class Product extends Model
         return $query->where('status', 'active');
     }
 
+    public function scopeApproved($query)
+    {
+        return $query->where('approval_status', 'approved');
+    }
+
+    public function scopeActiveAndApproved($query)
+    {
+        return $query->where('status', 'active')
+                    ->where('approval_status', 'approved');
+    }
+
     public function scopeFeatured($query)
     {
         return $query->where('featured', true);
@@ -379,5 +390,35 @@ class Product extends Model
             }
         }
         return $grouped;
+    }
+
+    /**
+     * Check if product stock is low
+     */
+    public function isLowStock($threshold = 5)
+    {
+        return $this->stock <= $threshold && $this->stock > 0;
+    }
+
+    /**
+     * Check if product is out of stock
+     */
+    public function isOutOfStock()
+    {
+        return $this->stock <= 0;
+    }
+
+    /**
+     * Get stock status text
+     */
+    public function getStockStatusText()
+    {
+        if ($this->isOutOfStock()) {
+            return 'Out of Stock';
+        } elseif ($this->isLowStock()) {
+            return 'Low Stock';
+        } else {
+            return 'In Stock';
+        }
     }
 }

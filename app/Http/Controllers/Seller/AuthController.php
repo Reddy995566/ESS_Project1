@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Seller;
 use App\Mail\SellerRegistrationNotification;
@@ -120,11 +121,44 @@ class AuthController extends Controller
 
     public function showRegister()
     {
+        // Check if user is already a seller
+        if (auth()->check()) {
+            $user = auth()->user();
+            $existingSeller = Seller::where('user_id', $user->id)->first();
+            
+            if ($existingSeller) {
+                // User already has a seller account
+                if ($existingSeller->status === 'approved') {
+                    return redirect()->route('seller.dashboard')->with('info', 'You already have an approved seller account.');
+                } elseif ($existingSeller->status === 'pending') {
+                    return redirect()->route('seller.login')->with('info', 'Your seller application is under review.');
+                } elseif ($existingSeller->status === 'rejected') {
+                    return redirect()->route('seller.login')->with('error', 'Your seller application was rejected. Please contact support.');
+                }
+            }
+        }
+        
         return view('seller.auth.register');
     }
 
     public function register(Request $request)
     {
+        // Check if user is already a seller
+        if (auth()->check()) {
+            $user = auth()->user();
+            $existingSeller = Seller::where('user_id', $user->id)->first();
+            
+            if ($existingSeller) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You already have a seller account.'
+                    ], 422);
+                }
+                return back()->with('error', 'You already have a seller account.')->withInput();
+            }
+        }
+
         $request->validate([
             // Account Information
             'email' => 'required|email|unique:users,email',
@@ -154,13 +188,24 @@ class AuthController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create user
-            $user = User::create([
-                'name' => $request->contact_person,
-                'email' => $request->email,
-                'mobile' => $request->phone,
-                'password' => Hash::make($request->password),
-            ]);
+            // If user is logged in, use existing user, otherwise create new user
+            if (auth()->check()) {
+                $user = auth()->user();
+                
+                // Update user details if needed
+                $user->update([
+                    'name' => $request->contact_person,
+                    'mobile' => $request->phone,
+                ]);
+            } else {
+                // Create new user
+                $user = User::create([
+                    'name' => $request->contact_person,
+                    'email' => $request->email,
+                    'mobile' => $request->phone,
+                    'password' => Hash::make($request->password),
+                ]);
+            }
 
             // Create seller
             $seller = Seller::create([
@@ -247,8 +292,34 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request)
     {
-        // TODO: Implement forgot password
-        return back()->with('info', 'Password reset functionality coming soon');
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        // Find seller by email
+        $user = User::where('email', $request->email)->first();
+        $seller = Seller::where('user_id', $user->id)->first();
+
+        if (!$seller) {
+            return back()->withErrors(['email' => 'No seller account found with this email.']);
+        }
+
+        // Generate reset token
+        $token = Str::random(64);
+        
+        // Store token in database
+        DB::table('password_resets')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => Hash::make($token),
+                'created_at' => now()
+            ]
+        );
+
+        // Send reset email (for now just log it)
+        \Log::info("Password reset token for seller {$seller->id}: {$token}");
+        
+        return back()->with('success', 'Password reset link sent to your email! (Check logs for token)');
     }
 
     public function showResetPassword($token)
@@ -258,7 +329,35 @@ class AuthController extends Controller
 
     public function resetPassword(Request $request)
     {
-        // TODO: Implement reset password
-        return redirect()->route('seller.login')->with('info', 'Password reset functionality coming soon');
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Verify token
+        $resetRecord = DB::table('password_resets')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$resetRecord || !Hash::check($request->token, $resetRecord->token)) {
+            return back()->withErrors(['token' => 'Invalid or expired reset token.']);
+        }
+
+        // Check if token is not older than 1 hour
+        if (now()->diffInMinutes($resetRecord->created_at) > 60) {
+            return back()->withErrors(['token' => 'Reset token has expired.']);
+        }
+
+        // Update password
+        $user = User::where('email', $request->email)->first();
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        // Delete reset token
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
+        return redirect()->route('seller.login')->with('success', 'Password reset successfully! You can now login.');
     }
 }

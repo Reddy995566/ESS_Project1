@@ -219,18 +219,18 @@
                             <th class="px-4 py-4 text-center w-16">
                                 <span class="text-xs font-black text-gray-700 uppercase">ID</span>
                             </th>
-                            {{-- <th class="px-4 py-4 text-center w-24">
+                            <th class="px-4 py-4 text-center w-24">
                                 <span class="text-xs font-black text-gray-700 uppercase">Color</span>
-                            </th> --}}
+                            </th>
                             <th class="px-4 py-4 text-left min-w-[200px]">
                                 <span class="text-xs font-black text-gray-700 uppercase">Name</span>
                             </th>
-                            {{-- <th class="px-4 py-4 text-center w-32">
+                            <th class="px-4 py-4 text-center w-32">
                                 <span class="text-xs font-black text-gray-700 uppercase">Hex Code</span>
-                            </th> --}}
-                            {{-- <th class="px-4 py-4 text-center w-20">
+                            </th>
+                            <th class="px-4 py-4 text-center w-20">
                                 <span class="text-xs font-black text-gray-700 uppercase">Order</span>
-                            </th> --}}
+                            </th>
                             <th class="px-4 py-4 text-center w-28">
                                 <span class="text-xs font-black text-gray-700 uppercase">Status</span>
                             </th>
@@ -255,31 +255,31 @@
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">#{{ $color->id }}</span>
                             </td>
 
-                            {{-- <!-- Color Preview -->
+                            <!-- Color Preview -->
                             <td class="px-4 py-4 text-center">
                                 <div class="flex justify-center">
-                                    <div class="w-10 h-10 rounded-lg shadow-md border-2 border-gray-300 group-hover:border-purple-400 transition-all" style="background-color: {{ $color->hex_code }};"></div>
+                                    <div class="w-10 h-10 rounded-lg shadow-md border-2 border-gray-300 group-hover:border-purple-400 transition-all" style="background-color: {{ $color->hex_code ?? '#CCCCCC' }};"></div>
                                 </div>
-                            </td> --}}
+                            </td>
 
                             <!-- Name -->
                             <td class="px-4 py-4">
                                 <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-700">{{ $color->name }}</p>
                             </td>
 
-                            {{-- <!-- Hex Code -->
+                            <!-- Hex Code -->
                             <td class="px-4 py-4 text-center">
                                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-gradient-to-r from-indigo-100 to-pink-100 text-indigo-700 border border-purple-300">
-                                    {{ $color->hex_code }}
+                                    {{ $color->hex_code ?? '#CCCCCC' }}
                                 </span>
-                            </td> --}}
+                            </td>
 
-                            {{-- <!-- Sort Order -->
+                            <!-- Sort Order -->
                             <td class="px-4 py-4 text-center">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-indigo-100 to-pink-100 text-indigo-700 border border-purple-300">
-                                    {{ $color->sort_order }}
+                                    {{ $color->sort_order ?? 0 }}
                                 </span>
-                            </td> --}}
+                            </td>
 
                             <!-- Status -->
                             <td class="px-4 py-4 text-center">
@@ -387,16 +387,16 @@
                                 <input type="text" name="name" id="name" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="e.g., Red">
                             </div>
 
-                            {{-- <div>
+                            <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Hex Code *</label>
                                 <div class="flex gap-2">
-                                    <input type="color" name="hex_code_picker" id="hexCodePicker" class="w-16 h-12 border-2 border-gray-300 rounded-xl cursor-pointer">
-                                    <input type="text" name="hex_code" id="hexCode" required pattern="^#[0-9A-Fa-f]{6}$" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all font-mono" placeholder="#FF5733">
+                                    <input type="color" name="hex_code_picker" id="hexCodePicker" value="#FF5733" class="w-16 h-12 border-2 border-gray-300 rounded-xl cursor-pointer">
+                                    <input type="text" name="hex_code" id="hexCode" required pattern="^#[0-9A-Fa-f]{6}$" value="#FF5733" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all font-mono" placeholder="#FF5733">
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
 
-                        {{-- <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Sort Order *</label>
                                 <input type="number" name="sort_order" id="sortOrder" min="0" value="0" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
@@ -409,16 +409,7 @@
                                     <span class="ml-2 text-sm font-medium text-gray-700">Active</span>
                                 </label>
                             </div>
-                        </div> --}}
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                            <label class="flex items-center mt-3">
-                                <input type="checkbox" name="is_active" value="1" checked class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
-                                <span class="ml-2 text-sm font-medium text-gray-700">Active</span>
-                            </label>
                         </div>
-                        <input type="hidden" name="sort_order" id="sortOrder" value="0">
                     </div>
 
                     <!-- Modal Footer -->

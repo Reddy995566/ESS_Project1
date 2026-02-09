@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
             'seller.auth' => \App\Http\Middleware\SellerAuth::class,
+            'seller.ownership' => \App\Http\Middleware\SellerOwnership::class,
             'extend.session' => \App\Http\Middleware\ExtendSessionLifetime::class,
         ]);
         

@@ -518,6 +518,16 @@ Route::prefix('admin')->group(function () {
         Route::get('/sellers/products/approved', [App\Http\Controllers\Admin\SellerController::class, 'approvedProducts'])->name('admin.sellers.approved-products');
         Route::get('/login-history', [App\Http\Controllers\Admin\AdminUserController::class, 'loginHistory']);
 
+        // Document Verification Routes
+        Route::prefix('document-verification')->name('admin.document-verification.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\DocumentVerificationController::class, 'index'])->name('index');
+            Route::get('/{document}', [App\Http\Controllers\Admin\DocumentVerificationController::class, 'show'])->name('show');
+            Route::post('/{document}/approve', [App\Http\Controllers\Admin\DocumentVerificationController::class, 'approve'])->name('approve');
+            Route::post('/{document}/reject', [App\Http\Controllers\Admin\DocumentVerificationController::class, 'reject'])->name('reject');
+            Route::post('/bulk-action', [App\Http\Controllers\Admin\DocumentVerificationController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/seller/{seller}/documents', [App\Http\Controllers\Admin\DocumentVerificationController::class, 'sellerDocuments'])->name('seller-documents');
+        });
+
         Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings');
         Route::post('/settings/imagekit', [App\Http\Controllers\Admin\SettingsController::class, 'updateImageKit'])->name('admin.settings.imagekit');
         Route::post('/settings/general', [App\Http\Controllers\Admin\SettingsController::class, 'updateGeneral'])->name('admin.settings.general');

@@ -125,9 +125,9 @@
 
             <!-- Hidden inputs for variants -->
             <input type="hidden" name="has_variants" id="hasVariantsInput" value="{{ old('has_variants', isset($productData['has_variants']) && $productData['has_variants'] ? '1' : '0') }}">
-            <input type="hidden" name="variant_colors" id="variantColorsInput" value="{{ old('variant_colors', $productData['variant_colors'] ?? '[]') }}">
-            <input type="hidden" name="variant_sizes" id="variantSizesInput" value="{{ old('variant_sizes', $productData['variant_sizes'] ?? '[]') }}">
-            <input type="hidden" name="variant_images" id="variantImagesInput" value="{{ old('variant_images', $productData['variant_images'] ?? '{}') }}">
+            <input type="hidden" name="variant_colors" id="variantColorsInput" value="{{ old('variant_colors', json_encode($productData['variant_colors'] ?? [])) }}">
+            <input type="hidden" name="variant_sizes" id="variantSizesInput" value="{{ old('variant_sizes', json_encode($productData['variant_sizes'] ?? [])) }}">
+            <input type="hidden" name="variant_images" id="variantImagesInput" value="{{ old('variant_images', json_encode($productData['variant_images'] ?? [])) }}">
         </div>
     </div>
 </form>

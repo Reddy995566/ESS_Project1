@@ -7,7 +7,7 @@
 
     if (str_contains($routeName, 'dashboard')) {
         $activeMenu = 'dashboard';
-    } elseif (str_contains($routeName, 'seller') || str_starts_with($routeName, 'admin.sellers') || str_contains($routeName, 'pending-products') || str_contains($routeName, 'approved-products') || str_contains($routeName, 'rejected-products')) {
+    } elseif (str_contains($routeName, 'seller') || str_starts_with($routeName, 'admin.sellers') || str_contains($routeName, 'pending-products') || str_contains($routeName, 'approved-products') || str_contains($routeName, 'rejected-products') || str_contains($routeName, 'document-verification')) {
         $activeMenu = 'sellers';
         $sellerMenuOpen = true;
     } elseif (str_contains($routeName, 'product') || str_contains($routeName, 'products')) {
@@ -375,6 +375,24 @@
                             <span class="font-medium">Rejected Products</span>
                         </a>
                     </li>
+                    {{-- <li>
+                        <a href="{{ route('admin.document-verification.index') }}"
+                            class="flex items-center space-x-3 px-4 py-2.5 pl-12 rounded-lg text-sm {{ request()->routeIs('admin.document-verification.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white hover:text-gray-900' }} transition-all duration-150">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="font-medium">Document Verification</span>
+                            @php
+                                $pendingDocuments = \App\Models\SellerDocument::where('verification_status', 'pending')->count();
+                            @endphp
+                            @if($pendingDocuments > 0)
+                                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    {{ $pendingDocuments }}
+                                </span>
+                            @endif
+                        </a>
+                    </li> --}}
                 </ul>
             </li>
 

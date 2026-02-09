@@ -100,7 +100,7 @@
                 <!-- ➡ RIGHT: Action Icons -->
                 <div class="flex items-center justify-end gap-3 md:gap-4 flex-shrink-0">
                     <!-- Become a Seller Dropdown -->
-                    <div class="relative hidden md:block" x-data="{ open: false }">
+                    <div class="relative hidden md:block" x-data="{ open: false }" style="z-index: 9999;">
                         <button @click="open = !open" @click.away="open = false"
                             class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
@@ -119,7 +119,8 @@
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                            class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+                            style="z-index: 99999;">
                             <div class="py-2">
                                 <a href="{{ route('seller.register') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

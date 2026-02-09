@@ -101,14 +101,13 @@ class SellerController extends Controller
             'rejection_reason' => null,
         ]);
         
-        // Notify seller
-        $product->seller->notifications()->create([
-            'type' => 'product_
-            6pproved',
-            'title' => 'Product Approved',
-            'message' => 'Your product "' . $product->product_name . '" has been approved!',
-            'data' => json_encode(['product_id' => $product->id]),
-        ]);
+        // Send notification using seller's notification system
+        $product->seller->sendNotification(
+            'product_approved',
+            'Product Approved',
+            'Your product "' . $product->product_name . '" has been approved and is now live!',
+            json_encode(['product_id' => $product->id])
+        );
         
         return response()->json([
             'success' => true,
@@ -131,13 +130,13 @@ class SellerController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
         
-        // Notify seller
-        $product->seller->notifications()->create([
-            'type' => 'product_rejected',
-            'title' => 'Product Rejected',
-            'message' => 'Your product "' . $product->product_name . '" was rejected. Reason: ' . $request->rejection_reason,
-            'data' => json_encode(['product_id' => $product->id]),
-        ]);
+        // Send notification using seller's notification system
+        $product->seller->sendNotification(
+            'product_rejected',
+            'Product Rejected',
+            'Your product "' . $product->product_name . '" was rejected. Reason: ' . $request->rejection_reason,
+            json_encode(['product_id' => $product->id, 'rejection_reason' => $request->rejection_reason])
+        );
         
         return response()->json([
             'success' => true,

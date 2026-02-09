@@ -32,11 +32,11 @@ class RecentlyViewed extends Model
     }
 
     /**
-     * Get the product that was viewed
+     * Get the product that was viewed (only approved products)
      */
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->where('status', 'active')->where('approval_status', 'approved');
     }
 
     /**
@@ -72,12 +72,14 @@ class RecentlyViewed extends Model
     }
 
     /**
-     * Get recently viewed products for a user
+     * Get recently viewed products for a user (only approved products)
      */
     public static function getRecentlyViewed($userId, $limit = 10, $excludeProductId = null)
     {
         $query = static::where('user_id', $userId)
-            ->with('product')
+            ->with(['product' => function($q) {
+                $q->where('status', 'active')->where('approval_status', 'approved');
+            }])
             ->orderBy('viewed_at', 'desc')
             ->limit($limit);
 

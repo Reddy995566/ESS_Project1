@@ -82,6 +82,22 @@ class ReviewController extends Controller
                 }
             }
 
+            // Send notification to seller if product has a seller
+            $product = Product::find($request->product_id);
+            if ($product && $product->seller) {
+                $product->seller->sendNotification(
+                    'new_review',
+                    'New Product Review',
+                    'You received a new ' . $request->rating . '-star review for "' . $product->product_name . '" from ' . $request->name,
+                    json_encode([
+                        'product_id' => $product->id,
+                        'review_id' => $review->id,
+                        'rating' => $request->rating,
+                        'reviewer_name' => $request->name
+                    ])
+                );
+            }
+
             DB::commit();
 
             return response()->json([

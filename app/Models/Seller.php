@@ -33,6 +33,10 @@ class Seller extends Authenticatable
         'verification_documents',
         'approved_by',
         'approved_at',
+        'two_factor_enabled',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     protected $casts = [
@@ -40,6 +44,9 @@ class Seller extends Authenticatable
         'commission_rate' => 'decimal:2',
         'verification_documents' => 'array',
         'approved_at' => 'datetime',
+        'two_factor_enabled' => 'boolean',
+        'two_factor_recovery_codes' => 'array',
+        'two_factor_confirmed_at' => 'datetime',
     ];
 
     protected $hidden = [
@@ -128,6 +135,135 @@ class Seller extends Authenticatable
     public function walletTransactions()
     {
         return $this->hasMany(SellerWalletTransaction::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(SellerDocument::class);
+    }
+
+    public function verifications()
+    {
+        return $this->hasMany(SellerVerification::class);
+    }
+
+    // Verification methods
+    public function getVerificationProgress()
+    {
+        $requiredVerifications = [
+            'identity' => 'Identity Verification',
+            'business' => 'Business Verification', 
+            'bank_account' => 'Bank Account Verification',
+            'address' => 'Address Verification',
+        ];
+
+        $progress = [];
+        $totalRequired = count($requiredVerifications);
+        $completed = 0;
+
+        foreach ($requiredVerifications as $type => $name) {
+            $verification = $this->verifications()->where('verification_type', $type)->first();
+            $status = $verification ? $verification->status : 'not_started';
+            
+            if ($status === 'approved') {
+                $completed++;
+            }
+            
+            $progress[$type] = [
+                'name' => $name,
+                'status' => $status,
+                'verification' => $verification,
+            ];
+        }
+
+        return [
+            'progress' => $progress,
+            'completion_percentage' => round(($completed / $totalRequired) * 100),
+            'completed' => $completed,
+            'total' => $totalRequired,
+            'is_complete' => $completed === $totalRequired,
+        ];
+    }
+
+    public function checkVerificationStatus()
+    {
+        $progress = $this->getVerificationProgress();
+        
+        // Update seller verification status based on progress
+        $newStatus = $this->status;
+        
+        if ($progress['is_complete']) {
+            $newStatus = 'active';
+        } elseif ($progress['completed'] > 0) {
+            $newStatus = 'pending'; // Partial verification
+        }
+        
+        if ($newStatus !== $this->status) {
+            $this->update(['status' => $newStatus]);
+            
+            // Send notification
+            $this->sendNotification(
+                'verification_updated',
+                'Verification Status Updated',
+                "Your verification status has been updated. Progress: {$progress['completed']}/{$progress['total']} completed.",
+                json_encode($progress)
+            );
+        }
+        
+        return $progress;
+    }
+
+    public function getRequiredDocuments()
+    {
+        return [
+            'pan_card' => [
+                'name' => 'PAN Card',
+                'required' => true,
+                'description' => 'Clear photo of your PAN card',
+            ],
+            'gst_certificate' => [
+                'name' => 'GST Certificate',
+                'required' => !empty($this->gst_number),
+                'description' => 'GST registration certificate (if applicable)',
+            ],
+            'business_registration' => [
+                'name' => 'Business Registration',
+                'required' => $this->business_type !== 'individual',
+                'description' => 'Business registration certificate or partnership deed',
+            ],
+            'bank_statement' => [
+                'name' => 'Bank Statement',
+                'required' => true,
+                'description' => 'Recent bank statement (last 3 months)',
+            ],
+            'cancelled_cheque' => [
+                'name' => 'Cancelled Cheque',
+                'required' => true,
+                'description' => 'Cancelled cheque or bank account proof',
+            ],
+            'address_proof' => [
+                'name' => 'Address Proof',
+                'required' => true,
+                'description' => 'Utility bill, rent agreement, or address proof',
+            ],
+        ];
+    }
+
+    public function getDocumentStatus($documentType)
+    {
+        $document = $this->documents()->where('document_type', $documentType)->latest()->first();
+        
+        if (!$document) {
+            return 'not_uploaded';
+        }
+        
+        return $document->verification_status;
+    }
+
+    public function isDocumentRequired($documentType)
+    {
+        $requiredDocs = $this->getRequiredDocuments();
+        return isset($requiredDocs[$documentType]) && $requiredDocs[$documentType]['required'];
     }
 
     // Scopes
@@ -264,11 +400,53 @@ class Seller extends Authenticatable
 
     public function sendNotification($type, $title, $message, $data = null)
     {
-        return $this->notifications()->create([
+        // Create in-app notification
+        $notification = $this->notifications()->create([
             'type' => $type,
             'title' => $title,
             'message' => $message,
             'data' => $data,
         ]);
+
+        // Check notification preferences and send email/SMS if enabled
+        $this->sendNotificationBasedOnPreferences($type, $title, $message, $data);
+
+        return $notification;
+    }
+
+    public function sendNotificationBasedOnPreferences($type, $title, $message, $data = null)
+    {
+        $settings = $this->settings()->pluck('value', 'key')->toArray();
+        
+        // Map notification types to email preference keys only
+        $emailPreferenceMap = [
+            'order_placed' => 'email_new_order',
+            'product_approved' => 'email_product_approved',
+            'product_rejected' => 'email_product_rejected',
+            'payout_processed' => 'email_payout_processed',
+            'low_stock' => 'email_low_stock',
+            'new_review' => 'email_new_review',
+        ];
+
+        // Send email notification if enabled
+        if (isset($emailPreferenceMap[$type])) {
+            $emailEnabled = ($settings[$emailPreferenceMap[$type]] ?? '1') === '1';
+            if ($emailEnabled) {
+                $this->sendEmailNotification($type, $title, $message, $data);
+            }
+        }
+    }
+
+    private function sendEmailNotification($type, $title, $message, $data = null)
+    {
+        try {
+            // You can implement actual email sending here
+            // For now, just log it
+            \Log::info("Email notification sent to seller {$this->id}: {$title}");
+            
+            // Example: Mail::to($this->user->email)->send(new SellerNotificationMail($type, $title, $message, $data));
+        } catch (\Exception $e) {
+            \Log::error("Failed to send email notification to seller {$this->id}: " . $e->getMessage());
+        }
     }
 }

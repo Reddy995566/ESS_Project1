@@ -31,7 +31,8 @@ class ProductsController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         $perPage = $request->get('per_page', 10);
 
-        $query = Product::query();
+        // Only show admin-created products (where seller_id is null)
+        $query = Product::query()->whereNull('seller_id');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -55,12 +56,14 @@ class ProductsController extends Controller
         $query->orderBy($sortField, $sortDirection);
         $products = $query->with('category')->paginate($perPage);
 
-        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        // Only get admin categories (where seller_id is null)
+        $categories = Category::whereNull('seller_id')->where('is_active', true)->orderBy('name')->get();
 
-        $totalProducts = Product::count();
-        $activeProducts = Product::where('status', 'active')->count();
-        $featuredProducts = Product::where('is_featured', true)->count();
-        $outOfStockProducts = Product::where('stock_status', 'out_of_stock')->count();
+        // Only count admin products
+        $totalProducts = Product::whereNull('seller_id')->count();
+        $activeProducts = Product::whereNull('seller_id')->where('status', 'active')->count();
+        $featuredProducts = Product::whereNull('seller_id')->where('is_featured', true)->count();
+        $outOfStockProducts = Product::whereNull('seller_id')->where('stock_status', 'out_of_stock')->count();
 
         return view('admin.products.index', [
             'products' => $products,
@@ -80,12 +83,13 @@ class ProductsController extends Controller
 
     public function create()
     {
-        $categories = Category::where('is_active', true)->orderBy('name')->get();
-        $collections = Collection::where('is_active', true)->orderBy('name')->get();
-        $colors = Color::where('is_active', true)->orderBy('name')->get();
-        $sizes = Size::where('is_active', true)->orderBy('name')->get();
-        $brands = Brand::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
-        $tags = Tag::where('is_active', true)
+        // Only show admin categories (where seller_id is null)
+        $categories = Category::whereNull('seller_id')->where('is_active', true)->orderBy('name')->get();
+        $collections = Collection::whereNull('seller_id')->where('is_active', true)->orderBy('name')->get();
+        $colors = Color::whereNull('seller_id')->where('is_active', true)->orderBy('name')->get();
+        $sizes = Size::whereNull('seller_id')->where('is_active', true)->orderBy('name')->get();
+        $brands = Brand::whereNull('seller_id')->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        $tags = Tag::whereNull('seller_id')->where('is_active', true)
             ->orderBy('usage_count', 'desc')
             ->orderBy('name')
             ->get();
@@ -366,31 +370,31 @@ class ProductsController extends Controller
             $count = 0;
             switch ($action) {
                 case 'activate':
-                    $count = Product::whereIn('id', $ids)->update(['status' => 'active']);
+                    $count = Product::whereNull('seller_id')->whereIn('id', $ids)->update(['status' => 'active']);
                     $message = "$count product(s) activated!";
                     break;
                 case 'deactivate':
-                    $count = Product::whereIn('id', $ids)->update(['status' => 'inactive']);
+                    $count = Product::whereNull('seller_id')->whereIn('id', $ids)->update(['status' => 'inactive']);
                     $message = "$count product(s) deactivated!";
                     break;
                 case 'feature':
-                    $count = Product::whereIn('id', $ids)->update(['is_featured' => true]);
+                    $count = Product::whereNull('seller_id')->whereIn('id', $ids)->update(['is_featured' => true]);
                     $message = "$count product(s) marked as featured!";
                     break;
                 case 'unfeature':
-                    $count = Product::whereIn('id', $ids)->update(['is_featured' => false]);
+                    $count = Product::whereNull('seller_id')->whereIn('id', $ids)->update(['is_featured' => false]);
                     $message = "$count product(s) removed from featured!";
                     break;
                 case 'in_stock':
-                    $count = Product::whereIn('id', $ids)->update(['stock_status' => 'in_stock']);
+                    $count = Product::whereNull('seller_id')->whereIn('id', $ids)->update(['stock_status' => 'in_stock']);
                     $message = "$count product(s) marked as in stock!";
                     break;
                 case 'out_of_stock':
-                    $count = Product::whereIn('id', $ids)->update(['stock_status' => 'out_of_stock']);
+                    $count = Product::whereNull('seller_id')->whereIn('id', $ids)->update(['stock_status' => 'out_of_stock']);
                     $message = "$count product(s) marked as out of stock!";
                     break;
                 case 'delete':
-                    $count = Product::whereIn('id', $ids)->delete();
+                    $count = Product::whereNull('seller_id')->whereIn('id', $ids)->delete();
                     $message = "$count product(s) deleted!";
                     break;
                 default:
@@ -405,7 +409,8 @@ class ProductsController extends Controller
 
     public function export(Request $request)
     {
-        $query = Product::query();
+        // Only export admin products (where seller_id is null)
+        $query = Product::query()->whereNull('seller_id');
 
         $search = $request->get('search', '');
         $filterStatus = $request->get('filter_status', '');
@@ -428,7 +433,7 @@ class ProductsController extends Controller
         }
 
         $products = $query->with('category')->orderBy('created_at', 'desc')->get();
-        $filename = 'products_' . date('Y-m-d_His') . '.csv';
+        $filename = 'admin_products_' . date('Y-m-d_His') . '.csv';
         $headers = ['Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\""];
 
         $callback = function () use ($products) {

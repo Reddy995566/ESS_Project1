@@ -274,6 +274,20 @@ class CheckoutController extends Controller
                             ],
                             $order->id
                         );
+
+                        // Send notification to seller about new order
+                        $seller->sendNotification(
+                            'order_placed',
+                            'New Order Received!',
+                            "You have received a new order #{$order->order_number} for {$item['name']} (Qty: {$item['quantity']}). Amount: ₹{$sellerAmount}",
+                            [
+                                'order_id' => $order->id,
+                                'order_number' => $order->order_number,
+                                'product_name' => $item['name'],
+                                'quantity' => $item['quantity'],
+                                'amount' => $sellerAmount,
+                            ]
+                        );
                     }
                 }
             }

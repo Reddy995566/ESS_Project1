@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->foreignId('seller_id')->nullable()->after('id')->constrained()->onDelete('cascade');
-            $table->enum('approval_status', ['draft', 'pending', 'approved', 'rejected'])->default('approved')->after('status');
+            $table->enum('approval_status', ['draft', 'pending', 'approved', 'rejected'])->default('pending')->after('status');
             $table->foreignId('approved_by')->nullable()->after('approval_status')->constrained('admins')->onDelete('set null');
             $table->timestamp('approved_at')->nullable()->after('approved_by');
             $table->text('rejection_reason')->nullable()->after('approved_at');

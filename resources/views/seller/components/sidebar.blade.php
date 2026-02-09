@@ -42,6 +42,8 @@
         $activeMenu = 'analytics';
     } elseif (str_contains($routeName, 'notification')) {
         $activeMenu = 'notifications';
+    } elseif (str_contains($routeName, 'documents')) {
+        $activeMenu = 'documents';
     } elseif (str_contains($routeName, 'setting')) {
         $activeMenu = 'settings';
     } elseif (str_contains($routeName, 'profile')) {
@@ -295,6 +297,31 @@
                     @if($unreadCount > 0)
                         <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                             {{ $unreadCount }}
+                        </span>
+                    @endif
+                </a>
+            </li>
+
+            <!-- Document Verification -->
+            <li>
+                <a href="{{ route('seller.documents.index') }}"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ str_contains($routeName, 'documents') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-white' }} transition-all duration-150">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="text-sm font-medium">Document Verification</span>
+                    @php
+                        $seller = auth('seller')->user();
+                        $verificationProgress = $seller ? $seller->getVerificationProgress() : ['completion_percentage' => 0];
+                    @endphp
+                    @if($verificationProgress['completion_percentage'] < 100)
+                        <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $verificationProgress['completion_percentage'] }}%
+                        </span>
+                    @else
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">
+                            <i class="fas fa-check"></i>
                         </span>
                     @endif
                 </a>

@@ -95,6 +95,14 @@ class SellerPayoutController extends Controller
                 'notes' => $payout->notes . "\n\nApproved by admin on " . now()->format('Y-m-d H:i:s')
             ]);
 
+            // Send notification to seller
+            $payout->seller->sendNotification(
+                'payout_processed',
+                'Payout Approved',
+                'Your payout request of ₹' . number_format($payout->amount, 2) . ' has been approved and is being processed.',
+                json_encode(['payout_id' => $payout->id, 'amount' => $payout->amount])
+            );
+
             DB::commit();
 
             \Log::info('Payout approved successfully', ['payout_id' => $payout->id]);
@@ -200,6 +208,14 @@ class SellerPayoutController extends Controller
             if ($wallet) {
                 $wallet->increment('total_withdrawn', $payout->amount);
             }
+
+            // Send notification to seller
+            $payout->seller->sendNotification(
+                'payout_processed',
+                'Payout Completed',
+                'Your payout of ₹' . number_format($payout->amount, 2) . ' has been successfully transferred to your bank account. Transaction ID: ' . $request->transaction_id,
+                json_encode(['payout_id' => $payout->id, 'amount' => $payout->amount, 'transaction_id' => $request->transaction_id])
+            );
 
             DB::commit();
 

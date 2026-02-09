@@ -27,6 +27,16 @@ class Color extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeForSeller($query, $sellerId)
+    {
+        return $query->where('seller_id', $sellerId);
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(\App\Models\Seller::class);
+    }
+
     public function products()
     {
         return $this->belongsToMany(Product::class, 'product_color', 'color_id', 'product_id')->withTimestamps();

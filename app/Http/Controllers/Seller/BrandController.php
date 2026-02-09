@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Traits\LogsActivity;
+use App\Traits\SellerValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BrandController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SellerValidation;
     public function index(Request $request)
     {
         $seller = Auth::guard('seller')->user();
@@ -58,7 +59,7 @@ class BrandController extends Controller
         $seller = Auth::guard('seller')->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:brands,name,NULL,id,deleted_at,NULL',
+            'name' => $this->getSellerNameValidation('brands'),
             'description' => 'nullable|string|max:1000',
             'sort_order' => 'required|integer|min:0',
             'is_active' => 'nullable|boolean',

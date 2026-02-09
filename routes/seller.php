@@ -11,17 +11,19 @@ use App\Http\Controllers\Seller\NotificationController;
 use App\Http\Controllers\Seller\SettingController;
 use App\Http\Controllers\Seller\ProfileController;
 
-// Guest Routes (Login, Register)
+// Guest Routes (Login, Register) - Allow both guest users and regular logged-in users
 Route::middleware('guest:seller')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('seller.login');
     Route::post('/login', [AuthController::class, 'login'])->name('seller.login.post');
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('seller.register');
-    Route::post('/register', [AuthController::class, 'register'])->name('seller.register.post');
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('seller.forgot-password');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('seller.forgot-password.post');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('seller.reset-password');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('seller.reset-password.post');
 });
+
+// Seller Registration - Allow both guest and logged-in users
+Route::get('/register', [AuthController::class, 'showRegister'])->name('seller.register');
+Route::post('/register', [AuthController::class, 'register'])->name('seller.register.post');
 
 // Authenticated Routes
 Route::middleware(['seller.auth'])->group(function () {
@@ -97,6 +99,9 @@ Route::middleware(['seller.auth'])->group(function () {
     Route::prefix('orders')->name('seller.orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+        Route::post('/{id}/shiprocket', [OrderController::class, 'shipToShiprocket'])->name('shiprocket');
+        Route::get('/{id}/shiprocket/couriers', [OrderController::class, 'getCouriers'])->name('shiprocket.couriers');
+        Route::post('/{id}/shiprocket/awb', [OrderController::class, 'generateAwb'])->name('shiprocket.awb');
         Route::get('/{id}/invoice', [App\Http\Controllers\InvoiceController::class, 'sellerGenerate'])->name('invoice');
         Route::put('/{id}/status', [OrderController::class, 'updateStatus'])->name('update-status');
         Route::post('/{id}/notes', [OrderController::class, 'addNote'])->name('add-note');
@@ -134,6 +139,8 @@ Route::middleware(['seller.auth'])->group(function () {
         Route::get('/sales', [AnalyticsController::class, 'sales'])->name('sales');
         Route::get('/products', [AnalyticsController::class, 'products'])->name('products');
         Route::get('/customers', [AnalyticsController::class, 'customers'])->name('customers');
+        Route::get('/data', [AnalyticsController::class, 'getAnalyticsData'])->name('getAnalyticsData');
+        Route::post('/reports/generate', [AnalyticsController::class, 'generateReport'])->name('generateReport');
         Route::get('/export', [AnalyticsController::class, 'export'])->name('export');
     });
     
@@ -156,8 +163,12 @@ Route::middleware(['seller.auth'])->group(function () {
         Route::put('/profile', [SettingController::class, 'updateProfile'])->name('update-profile');
         Route::put('/business', [SettingController::class, 'updateBusiness'])->name('update-business');
         Route::put('/bank', [SettingController::class, 'updateBank'])->name('update-bank');
+        Route::put('/password', [SettingController::class, 'updatePassword'])->name('update-password');
         Route::put('/notifications', [SettingController::class, 'updateNotifications'])->name('update-notifications');
+        Route::post('/shiprocket', [SettingController::class, 'updateShiprocket'])->name('shiprocket');
+        Route::post('/shiprocket/test', [SettingController::class, 'testShiprocket'])->name('shiprocket.test');
         Route::post('/2fa/enable', [SettingController::class, 'enable2FA'])->name('enable-2fa');
+        Route::post('/2fa/confirm', [SettingController::class, 'confirm2FA'])->name('confirm-2fa');
         Route::post('/2fa/disable', [SettingController::class, 'disable2FA'])->name('disable-2fa');
     });
     
@@ -268,6 +279,15 @@ Route::middleware(['seller.auth'])->group(function () {
         Route::post('/{size}/toggle', [App\Http\Controllers\Seller\SizeController::class, 'toggle'])->name('toggle');
         Route::post('/bulk-action', [App\Http\Controllers\Seller\SizeController::class, 'bulkAction'])->name('bulk-action');
         Route::get('/export', [App\Http\Controllers\Seller\SizeController::class, 'export'])->name('export');
+    });
+    
+    // Documents & Verification
+    Route::prefix('documents')->name('seller.documents.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Seller\DocumentController::class, 'index'])->name('index');
+        Route::post('/upload', [App\Http\Controllers\Seller\DocumentController::class, 'upload'])->name('upload');
+        Route::get('/{document}', [App\Http\Controllers\Seller\DocumentController::class, 'show'])->name('show');
+        Route::delete('/{document}', [App\Http\Controllers\Seller\DocumentController::class, 'delete'])->name('delete');
+        Route::post('/{document}/reupload', [App\Http\Controllers\Seller\DocumentController::class, 'reupload'])->name('reupload');
     });
     
     // Profile main page (alias - redirect to settings)

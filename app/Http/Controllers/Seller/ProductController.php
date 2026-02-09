@@ -845,11 +845,8 @@ class ProductController extends Controller
             ->with(['colors', 'sizes', 'tags', 'collections', 'category', 'brand', 'fabric', 'variants'])
             ->findOrFail($id);
         
-        // Check if product can be edited
-        if ($product->approval_status === 'approved') {
-            return redirect()->route('seller.products.index')
-                ->with('error', 'Cannot edit approved products. Please contact admin.');
-        }
+        // Note: Allow editing approved products but they will need re-approval
+        // No redirect needed - just proceed to edit form
         
         $step = request()->get('step', 1);
         
@@ -865,14 +862,14 @@ class ProductController extends Controller
         
         $viewFile = $stepViewMap[$step] ?? 'step1';
         
-        // Load global data (not seller-specific)
-        $categories = Category::where('is_active', true)->orderBy('name')->get();
-        $collections = Collection::where('is_active', true)->orderBy('name')->get();
-        $colors = Color::where('is_active', true)->orderBy('name')->get();
-        $sizes = Size::where('is_active', true)->orderBy('sort_order')->get();
-        $fabrics = Fabric::where('is_active', true)->orderBy('name')->get();
-        $tags = Tag::where('is_active', true)->orderBy('name')->get();
-        $brands = Brand::where('is_active', true)->orderBy('name')->get();
+        // Load seller-specific data
+        $categories = Category::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
+        $collections = Collection::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
+        $colors = Color::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
+        $sizes = Size::where('seller_id', $seller->id)->where('is_active', true)->orderBy('sort_order')->get();
+        $fabrics = Fabric::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
+        $tags = Tag::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
+        $brands = Brand::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
         
         return view('seller.products.edit.' . $viewFile, compact(
             'step',
@@ -900,13 +897,8 @@ class ProductController extends Controller
             'content_type' => $request->header('Content-Type'),
         ]);
         
-        // Check if product can be edited
-        if ($product->approval_status === 'approved') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot edit approved products. Please contact admin.',
-            ], 403);
-        }
+        // If editing an approved product, reset approval status to pending
+        $wasApproved = $product->approval_status === 'approved';
         
         try {
             DB::beginTransaction();
@@ -1055,13 +1047,28 @@ class ProductController extends Controller
             // Log activity
             $seller->logActivity('product_updated', 'Updated product: ' . $product->name);
             
+            // Add notification if product was previously approved
+            if ($wasApproved) {
+                $seller->notifications()->create([
+                    'type' => 'product_resubmitted',
+                    'title' => 'Product Resubmitted',
+                    'message' => 'Product "' . $product->name . '" was edited and resubmitted for approval.',
+                    'data' => json_encode(['product_id' => $product->id]),
+                    'is_read' => false,
+                ]);
+            }
+            
             DB::commit();
             
             \Log::info('Product update completed successfully', ['product_id' => $product->id]);
             
+            $message = $wasApproved 
+                ? 'Product updated successfully! Since this was an approved product, it has been resubmitted for approval.'
+                : 'Product updated successfully!';
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Product updated successfully and resubmitted for approval!',
+                'message' => $message,
             ]);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -1219,7 +1226,7 @@ class ProductController extends Controller
     public function copy($id)
     {
         $seller = Auth::guard('seller')->user();
-        $product = $seller->products()->findOrFail($id);
+        $product = $seller->products()->with(['colors', 'sizes', 'tags', 'collections'])->findOrFail($id);
         
         try {
             DB::beginTransaction();
@@ -1235,11 +1242,19 @@ class ProductController extends Controller
             $newProduct->updated_at = now();
             $newProduct->save();
             
-            // Copy relationships
-            $newProduct->colors()->sync($product->colors->pluck('id'));
-            $newProduct->sizes()->sync($product->sizes->pluck('id'));
-            $newProduct->tags()->sync($product->tags->pluck('id'));
-            $newProduct->collections()->sync($product->collections->pluck('id'));
+            // Copy relationships with null checks
+            if ($product->colors && $product->colors->count() > 0) {
+                $newProduct->colors()->sync($product->colors->pluck('id'));
+            }
+            if ($product->sizes && $product->sizes->count() > 0) {
+                $newProduct->sizes()->sync($product->sizes->pluck('id'));
+            }
+            if ($product->tags && $product->tags->count() > 0) {
+                $newProduct->tags()->sync($product->tags->pluck('id'));
+            }
+            if ($product->collections && $product->collections->count() > 0) {
+                $newProduct->collections()->sync($product->collections->pluck('id'));
+            }
             
             DB::commit();
             

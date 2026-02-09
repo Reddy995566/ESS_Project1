@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Size;
 use App\Traits\LogsActivity;
+use App\Traits\SellerValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SizeController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SellerValidation;
     public function index(Request $request)
     {
         $seller = Auth::guard('seller')->user();
@@ -58,7 +59,7 @@ class SizeController extends Controller
         $seller = Auth::guard('seller')->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:sizes,name,NULL,id,deleted_at,NULL',
+            'name' => $this->getSellerNameValidation('sizes'),
             'abbreviation' => 'nullable|string|max:10',
             'sort_order' => 'required|integer|min:0',
             'is_active' => 'nullable|boolean',

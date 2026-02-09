@@ -127,6 +127,12 @@
         document.getElementById('methodField').value = 'POST';
         document.getElementById('colorId').value = '';
         document.getElementById('colorForm').reset();
+        
+        // Reset hex code picker to default
+        const hexCodeEl = document.getElementById('hexCode');
+        const hexCodePickerEl = document.getElementById('hexCodePicker');
+        if (hexCodeEl) hexCodeEl.value = '#FF5733';
+        if (hexCodePickerEl) hexCodePickerEl.value = '#FF5733';
     }
 
     function openAddModal() {
@@ -137,8 +143,9 @@
     function openEditModal(data) {
         document.getElementById('modalTitle').textContent = 'Edit Color';
         document.getElementById('submitBtnText').textContent = 'Update Color';
-        document.getElementById('colorForm').action = '/admin/colors/' + data.id;
-        document.getElementById('methodField').value = 'PATCH';
+        const baseUrl = '{{ route('seller.colors.index') }}';
+        document.getElementById('colorForm').action = baseUrl + '/' + data.id;
+        document.getElementById('methodField').value = 'PUT';
         document.getElementById('colorId').value = data.id;
 
         document.getElementById('name').value = data.name;
@@ -407,7 +414,8 @@
                         deleteBtn.disabled = true;
                         deleteBtn.innerHTML = '<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
-                        fetch('/admin/colors/' + colorId, {
+                        const baseUrl = '{{ route('seller.colors.index') }}';
+                        fetch(baseUrl + '/' + colorId, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -452,7 +460,8 @@
                 const field = this.dataset.field;
                 const value = this.checked ? 1 : 0;
 
-                fetch('/admin/colors/' + colorId + '/toggle', {
+                const baseUrl = '{{ route('seller.colors.index') }}';
+                fetch(baseUrl + '/' + colorId + '/toggle', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -548,7 +557,8 @@
 
         // Export button
         document.getElementById('exportBtn')?.addEventListener('click', function() {
-            window.open('/admin/colors/export', '_blank');
+            const baseUrl = '{{ route('seller.colors.index') }}';
+            window.open(baseUrl + '/export', '_blank');
             showToastNotification('Export started', 'success');
         });
 
@@ -587,7 +597,8 @@
 
         function performBulkAction(action, selected) {
 
-                fetch('/admin/colors/bulk-action', {
+                const baseUrl = '{{ route('seller.colors.index') }}';
+                fetch(baseUrl + '/bulk-action', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -801,7 +812,8 @@
                         btn.disabled = true;
                         btn.innerHTML = '<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
-                        fetch('/admin/colors/' + colorId, {
+                        const baseUrl = '{{ route('seller.colors.index') }}';
+                        fetch(baseUrl + '/' + colorId, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -847,7 +859,8 @@
                 const field = this.dataset.field;
                 const value = this.checked ? 1 : 0;
 
-                fetch('/admin/colors/' + colorId + '/toggle', {
+                const baseUrl = '{{ route('seller.colors.index') }}';
+                fetch(baseUrl + '/' + colorId + '/toggle', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

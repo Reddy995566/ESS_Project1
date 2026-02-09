@@ -29,7 +29,7 @@ class CollectionController extends Controller
     public function index(Request $request)
     {
         // Start with active products
-        $query = Product::where('status', 'active')
+        $query = Product::activeAndApproved()
             ->with(['category', 'reviews']);
 
         // 1. Filter by Category (Multiple categories support)
@@ -130,7 +130,7 @@ class CollectionController extends Controller
 
         // Get Min and Max price for the slider (based on current filtered result or global? Usually global for the category)
         // To be performant, let's get global range for active products
-        $priceRange = Product::where('status', 'active')
+        $priceRange = Product::activeAndApproved()
             ->selectRaw('MIN(price) as min, MAX(price) as max')
             ->first();
 
@@ -144,8 +144,8 @@ class CollectionController extends Controller
         $categories = Category::where('is_active', true)->withCount('products')->get();
 
         // Count for Availability Filter (Optional, but good for UI "In stock (18)")
-        $inStockCount = Product::where('status', 'active')->where('stock', '>', 0)->count();
-        $outStockCount = Product::where('status', 'active')->where('stock', '<=', 0)->count();
+        $inStockCount = Product::activeAndApproved()->where('stock', '>', 0)->count();
+        $outStockCount = Product::activeAndApproved()->where('stock', '<=', 0)->count();
 
         return view('website.collection', compact(
             'products',
@@ -161,7 +161,7 @@ class CollectionController extends Controller
     public function filterProducts(Request $request)
     {
         // Start with active products
-        $query = Product::where('status', 'active')
+        $query = Product::activeAndApproved()
             ->with(['category', 'reviews']);
 
         // 1. Filter by Category (Multiple categories support)
@@ -254,8 +254,8 @@ class CollectionController extends Controller
         $products = $query->paginate(12);
 
         // Count for Availability Filter
-        $inStockCount = Product::where('status', 'active')->where('stock', '>', 0)->count();
-        $outStockCount = Product::where('status', 'active')->where('stock', '<=', 0)->count();
+        $inStockCount = Product::activeAndApproved()->where('stock', '>', 0)->count();
+        $outStockCount = Product::activeAndApproved()->where('stock', '<=', 0)->count();
 
         // Return JSON response
         return response()->json([

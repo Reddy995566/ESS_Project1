@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Collection;
 use App\Traits\LogsActivity;
+use App\Traits\SellerValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CollectionController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SellerValidation;
     public function index(Request $request)
     {
         $seller = Auth::guard('seller')->user();

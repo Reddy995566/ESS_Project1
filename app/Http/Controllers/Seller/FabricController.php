@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Fabric;
 use App\Traits\LogsActivity;
+use App\Traits\SellerValidation;
 use App\Services\ImageKitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class FabricController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SellerValidation;
     
     public function index(Request $request)
     {
@@ -62,7 +63,7 @@ class FabricController extends Controller
         $seller = Auth::guard('seller')->user();
         
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:fabrics,name,NULL,id,deleted_at,NULL',
+            'name' => $this->getSellerNameValidation('fabrics'),
             'slug' => 'nullable|string|max:255|unique:fabrics,slug,NULL,id,deleted_at,NULL',
             'description' => 'nullable|string',
             'sort_order' => 'required|integer|min:0',

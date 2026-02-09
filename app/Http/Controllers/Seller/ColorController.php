@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Color;
 use App\Traits\LogsActivity;
+use App\Traits\SellerValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ColorController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SellerValidation;
     public function index(Request $request)
     {
         $seller = Auth::guard('seller')->user();
@@ -58,8 +59,8 @@ class ColorController extends Controller
         $seller = Auth::guard('seller')->user();
         
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:colors,name,NULL,id,deleted_at,NULL',
-            'hex_code' => 'nullable|string|regex:/^#[0-9A-F]{6}$/i',
+            'name' => $this->getSellerNameValidation('colors'),
+            'hex_code' => 'required|string|regex:/^#[0-9A-F]{6}$/i',
             'sort_order' => 'required|integer|min:0',
             'is_active' => 'nullable|boolean',
         ]);
@@ -105,9 +106,11 @@ class ColorController extends Controller
 
     public function update(Request $request, Color $color)
     {
+        $seller = Auth::guard('seller')->user();
+        
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:colors,name,' . $color->id . ',id,deleted_at,NULL',
-            'hex_code' => 'nullable|string|regex:/^#[0-9A-F]{6}$/i',
+            'name' => $this->getSellerNameValidation('colors', $color->id),
+            'hex_code' => 'required|string|regex:/^#[0-9A-F]{6}$/i',
             'sort_order' => 'required|integer|min:0',
             'is_active' => 'nullable|boolean',
         ]);

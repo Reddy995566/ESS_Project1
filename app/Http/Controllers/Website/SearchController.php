@@ -28,7 +28,7 @@ class SearchController extends Controller
         }
 
         // Start query
-        $productsQuery = Product::where('status', 'active')
+        $productsQuery = Product::activeAndApproved()
             ->where(function($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")
@@ -149,7 +149,7 @@ class SearchController extends Controller
             ->get();
 
         // Calculate max price for filter
-        $maxPrice = Product::where('status', 'active')->max('price') ?? 10000;
+        $maxPrice = Product::activeAndApproved()->max('price') ?? 10000;
 
         // Regular search page view
         return view('website.search', [
@@ -164,7 +164,7 @@ class SearchController extends Controller
     public function quickView($id)
     {
         try {
-            $product = Product::where('status', 'active')->find($id);
+            $product = Product::activeAndApproved()->find($id);
 
             if (!$product) {
                 return response()->json(['error' => 'Product not found'], 404);
@@ -206,7 +206,7 @@ class SearchController extends Controller
             // 3. More Colors (Related Products)
             $moreColors = Product::where('category_id', $product->category_id)
                 ->where('id', '!=', $product->id)
-                ->where('status', 'active')
+                ->activeAndApproved()
                 ->limit(4)
                 ->get()
                 ->map(function ($p) {

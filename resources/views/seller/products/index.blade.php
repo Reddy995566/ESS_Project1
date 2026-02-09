@@ -189,7 +189,7 @@
         <!-- Advanced Filters Section -->
         <div class="bg-gray-50 px-6 py-5 border-b border-gray-200">
             <form method="GET" action="{{ route('seller.products.index') }}" id="filtersForm">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                     <!-- Search -->
                     <div class="lg:col-span-2">
                         <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Search Products</label>
@@ -211,6 +211,18 @@
                             <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>✓ Active</option>
                             <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>✗ Inactive</option>
                             <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>📝 Draft</option>
+                        </select>
+                    </div>
+
+                    <!-- Approval Status Filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Approval</label>
+                        <select name="approval_status" id="approvalFilter" class="block w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">All Approval</option>
+                            <option value="approved" {{ request('approval_status') == 'approved' ? 'selected' : '' }}>✅ Approved</option>
+                            <option value="pending" {{ request('approval_status') == 'pending' ? 'selected' : '' }}>⏳ Pending</option>
+                            <option value="rejected" {{ request('approval_status') == 'rejected' ? 'selected' : '' }}>❌ Rejected</option>
+                            <option value="draft" {{ request('approval_status') == 'draft' ? 'selected' : '' }}>📝 Draft</option>
                         </select>
                     </div>
 
@@ -267,8 +279,8 @@
             </form>
         </div>
 
-        <!-- Data Table -->
-        <div class="overflow-x-auto">
+        <!-- Data Table - Desktop View -->
+        <div class="hidden lg:block overflow-x-auto">
             <table id="productsTable" class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-slate-100 to-gray-100">
                     <tr>
@@ -281,22 +293,25 @@
                         <th class="px-4 py-4 text-left min-w-[250px]">
                             <span class="text-xs font-black text-gray-700 uppercase">Product</span>
                         </th>
-                        <th class="px-4 py-4 text-center w-32">
+                        <th class="px-4 py-4 text-center w-32 hidden md:table-cell">
                             <span class="text-xs font-black text-gray-700 uppercase">SKU</span>
                         </th>
-                        <th class="px-4 py-4 text-center w-32">
+                        <th class="px-4 py-4 text-center w-32 hidden sm:table-cell">
                             <span class="text-xs font-black text-gray-700 uppercase">Category</span>
                         </th>
                         <th class="px-4 py-4 text-center w-28">
                             <span class="text-xs font-black text-gray-700 uppercase">Price</span>
                         </th>
-                        <th class="px-4 py-4 text-center w-24">
+                        <th class="px-4 py-4 text-center w-24 hidden sm:table-cell">
                             <span class="text-xs font-black text-gray-700 uppercase">Stock</span>
                         </th>
-                        <th class="px-4 py-4 text-center w-28">
+                        <th class="px-4 py-4 text-center w-28 hidden md:table-cell">
                             <span class="text-xs font-black text-gray-700 uppercase">Status</span>
                         </th>
-                        <th class="px-4 py-4 text-center w-24">
+                        <th class="px-4 py-4 text-center w-32 hidden md:table-cell">
+                            <span class="text-xs font-black text-gray-700 uppercase">Approval</span>
+                        </th>
+                        <th class="px-4 py-4 text-center w-24 hidden md:table-cell">
                             <span class="text-xs font-black text-gray-700 uppercase">Featured</span>
                         </th>
                         <th class="px-4 py-4 text-center w-32">
@@ -358,7 +373,6 @@
                                 </div>
                                 <div class="flex-1">
                                     <h3 class="text-sm font-bold text-gray-900 mb-1">{{ $product->name }}</h3>
-                                    <p class="text-xs text-gray-500 leading-relaxed">{{ Str::limit($product->description ?? 'No description', 60) }}</p>
                                     <div class="flex items-center space-x-2 mt-2">
                                         @if($product->is_featured)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300">
@@ -381,14 +395,14 @@
                         </td>
 
                         <!-- SKU -->
-                        <td class="px-4 py-4 text-center">
+                        <td class="px-4 py-4 text-center hidden md:table-cell">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 border border-blue-300">
                                 {{ $product->sku ?? 'N/A' }}
                             </span>
                         </td>
 
                         <!-- Category -->
-                        <td class="px-4 py-4 text-center">
+                        <td class="px-4 py-4 text-center hidden sm:table-cell">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 border border-indigo-300">
                                 {{ $product->category?->name ?? 'Uncategorized' }}
                             </span>
@@ -406,7 +420,7 @@
                         </td>
 
                         <!-- Stock -->
-                        <td class="px-4 py-4 text-center">
+                        <td class="px-4 py-4 text-center hidden sm:table-cell">
                             <div class="flex flex-col items-center">
                                 <span class="text-sm font-bold text-gray-900">{{ $product->stock ?? 0 }}</span>
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1
@@ -417,15 +431,32 @@
                         </td>
 
                         <!-- Status Toggle -->
-                        <td class="px-4 py-4 text-center">
+                        <td class="px-4 py-4 text-center hidden md:table-cell">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" class="sr-only peer status-toggle" data-id="{{ $product->id }}" data-field="status" {{ $product->status === 'active' ? 'checked' : '' }}>
                                 <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-green-400 peer-checked:to-emerald-500"></div>
                             </label>
                         </td>
 
+                        <!-- Approval Status -->
+                        <td class="px-4 py-4 text-center hidden md:table-cell">
+                            @php
+                                $approvalStatus = $product->approval_status ?? 'pending';
+                                $statusConfig = [
+                                    'approved' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'border' => 'border-green-300', 'icon' => '✅', 'label' => 'Approved'],
+                                    'pending' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'border' => 'border-yellow-300', 'icon' => '⏳', 'label' => 'Pending'],
+                                    'rejected' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'border' => 'border-red-300', 'icon' => '❌', 'label' => 'Rejected'],
+                                    'draft' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'border' => 'border-gray-300', 'icon' => '📝', 'label' => 'Draft']
+                                ];
+                                $config = $statusConfig[$approvalStatus] ?? $statusConfig['pending'];
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold {{ $config['bg'] }} {{ $config['text'] }} border {{ $config['border'] }}">
+                                {{ $config['icon'] }} {{ $config['label'] }}
+                            </span>
+                        </td>
+
                         <!-- Featured Toggle -->
-                        <td class="px-4 py-4 text-center">
+                        <td class="px-4 py-4 text-center hidden md:table-cell">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" class="sr-only peer featured-toggle" data-id="{{ $product->id }}" data-field="is_featured" {{ $product->is_featured ? 'checked' : '' }}>
                                 <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-yellow-400 peer-checked:to-amber-500"></div>
@@ -471,7 +502,7 @@
                     </tr>
                     @empty
                     <tr id="emptyState">
-                        <td colspan="10" class="px-6 py-20">
+                        <td colspan="6" class="px-6 py-20">
                             <div class="text-center">
                                 <div class="mx-auto flex items-center justify-center w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-full mb-6">
                                     <svg class="w-12 h-12 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -492,6 +523,188 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="lg:hidden space-y-4">
+            @forelse($products as $product)
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-all duration-200"
+                 data-id="{{ $product->id }}" 
+                 data-status="{{ $product->status }}" 
+                 data-featured="{{ $product->is_featured ? '1' : '0' }}" 
+                 data-stock="{{ $product->stock_status }}">
+                
+                <!-- Mobile Card Header -->
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" class="row-select w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500" value="{{ $product->id }}">
+                        <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">#{{ $product->id }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <!-- Status Toggle -->
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer status-toggle" data-id="{{ $product->id }}" data-field="status" {{ $product->status === 'active' ? 'checked' : '' }}>
+                            <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-green-400 peer-checked:to-emerald-500"></div>
+                        </label>
+                        <!-- Featured Toggle -->
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer featured-toggle" data-id="{{ $product->id }}" data-field="is_featured" {{ $product->is_featured ? 'checked' : '' }}>
+                            <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-yellow-400 peer-checked:to-amber-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="flex items-start space-x-4 mb-4">
+                    <div class="flex-shrink-0 w-16 h-16">
+                        @php
+                            $firstImage = null;
+                            // Try to get from main images first
+                            if(is_array($product->images) && count($product->images) > 0) {
+                                $firstImage = is_string($product->images[0]) ? $product->images[0] : (is_array($product->images[0]) && isset($product->images[0]['url']) ? $product->images[0]['url'] : null);
+                            } elseif(is_string($product->images) && !empty($product->images)) {
+                                $imagesArray = json_decode($product->images, true);
+                                if(is_array($imagesArray) && count($imagesArray) > 0) {
+                                    $firstImage = is_string($imagesArray[0]) ? $imagesArray[0] : (is_array($imagesArray[0]) && isset($imagesArray[0]['url']) ? $imagesArray[0]['url'] : null);
+                                }
+                            }
+                        @endphp
+                        @if($firstImage && is_string($firstImage))
+                            <img src="{{ $firstImage }}" alt="{{ $product->name }}" class="w-16 h-16 rounded-xl object-cover border-2 border-gray-200 shadow-sm">
+                        @else
+                            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-gray-200">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-bold text-gray-900 mb-1 truncate">{{ $product->name }}</h3>
+                        <div class="flex flex-wrap items-center gap-1 mb-2">
+                            @if($product->is_featured)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300">
+                                    ⭐ Featured
+                                </span>
+                            @endif
+                            @if($product->is_new)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300">
+                                    🆕 New
+                                </span>
+                            @endif
+                            @if($product->is_sale)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-300">
+                                    🔥 Sale
+                                </span>
+                            @endif
+                        </div>
+                        <div class="text-lg font-bold text-gray-900">
+                            ₹{{ number_format($product->price ?? 0, 2) }}
+                            @if($product->sale_price && $product->sale_price < $product->price)
+                                <span class="text-sm text-red-600 line-through ml-2">₹{{ number_format($product->sale_price, 2) }}</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Details Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+                    <div>
+                        <span class="text-gray-500 font-medium">SKU:</span>
+                        <div class="mt-1">
+                            <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 border border-blue-300">
+                                {{ $product->sku ?? 'N/A' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 font-medium">Category:</span>
+                        <div class="mt-1">
+                            <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 border border-indigo-300">
+                                {{ $product->category?->name ?? 'Uncategorized' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 font-medium">Stock:</span>
+                        <div class="mt-1 flex items-center space-x-2">
+                            <span class="text-sm font-bold text-gray-900">{{ $product->stock ?? 0 }}</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                {{ $product->stock_status === 'in_stock' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300' }}">
+                                {{ $product->stock_status === 'in_stock' ? '📦 In Stock' : '❌ Out of Stock' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 font-medium">Status:</span>
+                        <div class="mt-1">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                {{ $product->status === 'active' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-gray-100 text-gray-800 border border-gray-300' }}">
+                                {{ ucfirst($product->status) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <button class="view-btn inline-flex items-center justify-center w-8 h-8 text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-all"
+                                title="View Product"
+                                data-id="{{ $product->id }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                        <button class="edit-btn inline-flex items-center justify-center w-8 h-8 text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-all"
+                                title="Edit Product"
+                                data-id="{{ $product->id }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </button>
+                        <button class="copy-btn inline-flex items-center justify-center w-8 h-8 text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-lg hover:bg-cyan-100 transition-all"
+                                title="Duplicate Product"
+                                data-id="{{ $product->id }}"
+                                data-name="{{ $product->name }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="delete-btn inline-flex items-center justify-center w-8 h-8 text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all" 
+                                title="Delete Product"
+                                data-id="{{ $product->id }}"
+                                data-name="{{ $product->name }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        ID: #{{ $product->id }}
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-8">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-full mb-4">
+                        <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">No Products Found</h3>
+                    <p class="text-gray-500 mb-4 text-sm">Start building your inventory by adding your first product.</p>
+                    <a href="{{ route('seller.products.create.step1') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg transition-all">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Create First Product
+                    </a>
+                </div>
+            </div>
+            @endforelse
         </div>
 
         <!-- Table Footer -->
@@ -517,6 +730,9 @@
  * Products Management Script for Seller Panel
  * Enterprise-level JavaScript functionality for the products management page
  */
+
+// Route templates
+const editRouteTemplate = '{{ route("seller.products.edit", ":id") }}';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize components
@@ -777,7 +993,7 @@ function initializeActionButtons() {
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const productId = this.dataset.id;
-            window.location.href = `/seller/products/${productId}/edit`;
+            window.location.href = editRouteTemplate.replace(':id', productId);
         });
     });
 
@@ -889,6 +1105,7 @@ async function deleteProduct(productId) {
 function initializeFilters() {
     const globalSearch = document.getElementById('globalSearch');
     const statusFilter = document.getElementById('statusFilter');
+    const approvalFilter = document.getElementById('approvalFilter');
     const categoryFilter = document.getElementById('categoryFilter');
     const itemsPerPage = document.getElementById('itemsPerPage');
     const resetFiltersBtn = document.getElementById('resetFilters');
@@ -913,6 +1130,7 @@ function initializeFilters() {
 
     // Auto-submit filters on change
     statusFilter?.addEventListener('change', () => document.getElementById('filtersForm').submit());
+    approvalFilter?.addEventListener('change', () => document.getElementById('filtersForm').submit());
     categoryFilter?.addEventListener('change', () => document.getElementById('filtersForm').submit());
     itemsPerPage?.addEventListener('change', () => document.getElementById('filtersForm').submit());
 

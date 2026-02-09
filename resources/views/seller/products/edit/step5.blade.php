@@ -164,9 +164,9 @@
 
             <!-- Hidden inputs for variants -->
             <input type="hidden" name="has_variants" id="hasVariantsInput" value="{{ old('has_variants', $productData['has_variants']) }}">
-            <input type="hidden" name="variant_colors" id="variantColorsInput" value="{{ old('variant_colors', $productData['variant_colors']) }}">
-            <input type="hidden" name="variant_sizes" id="variantSizesInput" value="{{ old('variant_sizes', $productData['variant_sizes']) }}">
-            <input type="hidden" name="variant_images" id="variantImagesInput" value="{{ old('variant_images', $productData['variant_images']) }}">
+            <input type="hidden" name="variant_colors" id="variantColorsInput" value="{{ old('variant_colors', json_encode($productData['variant_colors'] ?? [])) }}">
+            <input type="hidden" name="variant_sizes" id="variantSizesInput" value="{{ old('variant_sizes', json_encode($productData['variant_sizes'] ?? [])) }}">
+            <input type="hidden" name="variant_images" id="variantImagesInput" value="{{ old('variant_images', json_encode($productData['variant_images'] ?? [])) }}">
         </div>
     </div>
 </form>
@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!loadedFromOld) {
         @if(isset($productData['variant_colors']) && $productData['variant_colors'])
         try {
-            const existingColors = JSON.parse('{!! addslashes($productData['variant_colors']) !!}');
+            const existingColors = @json($productData['variant_colors']);
             if (Array.isArray(existingColors) && existingColors.length > 0) {
                 selectedColors = existingColors.map(String);
             }
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         @if(isset($productData['variant_sizes']) && $productData['variant_sizes'])
         try {
-            const existingSizes = JSON.parse('{!! addslashes($productData['variant_sizes']) !!}');
+            const existingSizes = @json($productData['variant_sizes']);
             if (Array.isArray(existingSizes) && existingSizes.length > 0) {
                 selectedSizes = existingSizes.map(String);
             }
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         @if(isset($productData['variant_images']) && $productData['variant_images'])
         try {
-            const existingImages = JSON.parse('{!! addslashes($productData['variant_images']) !!}');
+            const existingImages = @json($productData['variant_images']);
             if (existingImages && typeof existingImages === 'object') {
                 // Normalize existing images if they are simple URLs
                 for (const [cId, imgs] of Object.entries(existingImages)) {

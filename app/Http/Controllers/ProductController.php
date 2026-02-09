@@ -11,7 +11,7 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::where('slug', $slug)
-            ->where('status', 'active')
+            ->activeAndApproved()
             ->with(['colors', 'sizes']) // Load colors and sizes relationships
             ->withCount('approvedReviews')
             ->firstOrFail();
@@ -28,7 +28,7 @@ class ProductController extends Controller
         // Get similar products from the same category
         $similarProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->where('status', 'active')
+            ->activeAndApproved()
             ->limit(4)
             ->get();
 
@@ -94,7 +94,7 @@ class ProductController extends Controller
 
         // Get products in the order they were viewed
         $products = Product::whereIn('id', $productIds)
-            ->where('status', 'active')
+            ->activeAndApproved()
             ->when($excludeId, function ($query) use ($excludeId) {
                 return $query->where('id', '!=', $excludeId);
             })

@@ -58,7 +58,7 @@ class SellerSetting extends Model
             ->delete();
     }
 
-    public static function all($sellerId)
+    public static function getAllForSeller($sellerId)
     {
         return self::where('seller_id', $sellerId)
             ->pluck('value', 'key')

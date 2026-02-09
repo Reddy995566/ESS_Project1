@@ -55,7 +55,7 @@ class HomeController extends Controller
             $allCategoryIds = array_merge($allCategoryIds, $childIds);
 
             $products = Product::whereIn('category_id', $allCategoryIds)
-                ->where('status', 'active')
+                ->activeAndApproved()
                 ->with('variants')
                 ->latest()
                 ->take(8)
@@ -108,7 +108,7 @@ class HomeController extends Controller
             ->get();
 
         // Get 4 products to show for ALL fabrics (same products in each tab)
-        $fabricProducts = Product::where('status', 'active')
+        $fabricProducts = Product::activeAndApproved()
             ->with('variants')
             ->latest()
             ->take(4)
@@ -123,8 +123,7 @@ class HomeController extends Controller
         $budgetCards = BudgetCard::active()->ordered()->get();
 
         // Fetch Best Sellers (Top 8 products by order count)
-        $bestSellers = Product::where('status', 'active')
-            ->where('approval_status', 'approved')
+        $bestSellers = Product::activeAndApproved()
             ->withCount(['orderItems as total_sold' => function ($query) {
                 $query->select(\DB::raw('SUM(quantity)'));
             }])

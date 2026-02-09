@@ -7,32 +7,38 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\AnalyticsService;
+use App\Services\ReportService;
 
 class AnalyticsController extends Controller
 {
+    protected $analyticsService;
+    protected $reportService;
+
+    public function __construct(AnalyticsService $analyticsService, ReportService $reportService)
+    {
+        $this->analyticsService = $analyticsService;
+        $this->reportService = $reportService;
+    }
+
     public function sales(Request $request)
     {
         $seller = Auth::guard('seller')->user();
+        $dateRange = $request->get('range', 30);
+        
+        // Get enhanced analytics data
+        $analytics = $this->analyticsService->getDashboardAnalytics($seller->id, $dateRange);
         
         // Date range
-        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : now()->subDays(30);
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : now()->subDays($dateRange);
         $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : now();
         
-        // Key metrics
+        // Legacy metrics for backward compatibility
         $metrics = [
-            'total_revenue' => $seller->orderItems()
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->sum('seller_amount') ?? 0,
-            'total_orders' => $seller->orderItems()
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->distinct('order_id')
-                ->count('order_id') ?? 0,
-            'average_order_value' => $seller->orderItems()
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->avg('seller_amount') ?? 0,
-            'total_items_sold' => $seller->orderItems()
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->sum('quantity') ?? 0,
+            'total_revenue' => $analytics['overview']['revenue']['current'],
+            'total_orders' => $analytics['overview']['orders']['current'],
+            'average_order_value' => $analytics['overview']['average_order_value']['current'],
+            'total_items_sold' => $analytics['overview']['items_sold']['current'],
         ];
         
         // Sales trend
@@ -53,8 +59,35 @@ class AnalyticsController extends Controller
             ->orderByDesc('revenue')
             ->get();
         
-        // Top products
-        $topProducts = $seller->products()
+        // Top products from analytics service
+        $topProducts = $analytics['top_products'];
+        
+        return view('seller.analytics.sales', compact(
+            'analytics',
+            'metrics',
+            'salesTrend',
+            'revenueByCategory',
+            'topProducts',
+            'startDate',
+            'endDate',
+            'dateRange'
+        ));
+    }
+    
+    public function products(Request $request)
+    {
+        $seller = Auth::guard('seller')->user();
+        $dateRange = $request->get('range', 30);
+        
+        $startDate = Carbon::now()->subDays($dateRange);
+        $endDate = Carbon::now();
+        
+        // Get enhanced product analytics
+        $topProducts = $this->analyticsService->getTopProducts($seller->id, $startDate, $endDate, 20);
+        $performanceMetrics = $this->analyticsService->getPerformanceMetrics($seller->id, $startDate, $endDate);
+        
+        // Product performance
+        $products = $seller->products()
             ->withCount(['orderItems as units_sold' => function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate])
                       ->select(DB::raw('SUM(quantity)'));
@@ -62,32 +95,6 @@ class AnalyticsController extends Controller
             ->withSum(['orderItems as revenue' => function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }], 'seller_amount')
-            ->with('category')
-            ->having('units_sold', '>', 0)
-            ->orderByDesc('units_sold')
-            ->limit(10)
-            ->get();
-        
-        return view('seller.analytics.sales', compact(
-            'metrics',
-            'salesTrend',
-            'revenueByCategory',
-            'topProducts',
-            'startDate',
-            'endDate'
-        ));
-    }
-    
-    public function products(Request $request)
-    {
-        $seller = Auth::guard('seller')->user();
-        
-        // Product performance
-        $products = $seller->products()
-            ->withCount(['orderItems as units_sold' => function ($query) {
-                $query->select(DB::raw('SUM(quantity)'));
-            }])
-            ->withSum('orderItems as revenue', 'seller_amount')
             ->withAvg('reviews as average_rating', 'rating')
             ->with('category')
             ->orderByDesc('units_sold')
@@ -95,30 +102,40 @@ class AnalyticsController extends Controller
         
         // Low stock products
         $lowStockProducts = $seller->products()
-            ->where('stock', '>', 0)
-            ->where('stock', '<=', 10)
+            ->where('stock_quantity', '>', 0)
+            ->where('stock_quantity', '<=', 10)
             ->where('status', 'active')
-            ->orderBy('stock')
+            ->orderBy('stock_quantity')
             ->limit(10)
             ->get();
         
         // Out of stock products
         $outOfStockProducts = $seller->products()
-            ->where('stock', 0)
+            ->where('stock_quantity', 0)
             ->where('status', 'active')
             ->limit(10)
             ->get();
         
         return view('seller.analytics.products', compact(
+            'topProducts',
+            'performanceMetrics',
             'products',
             'lowStockProducts',
-            'outOfStockProducts'
+            'outOfStockProducts',
+            'dateRange'
         ));
     }
     
     public function customers(Request $request)
     {
         $seller = Auth::guard('seller')->user();
+        $dateRange = $request->get('range', 30);
+        
+        $startDate = Carbon::now()->subDays($dateRange);
+        $endDate = Carbon::now();
+        
+        // Get enhanced customer insights
+        $customerInsights = $this->analyticsService->getCustomerInsights($seller->id, $startDate, $endDate);
         
         // Customer stats
         $stats = [
@@ -140,17 +157,108 @@ class AnalyticsController extends Controller
                 ->count(),
         ];
         
-        // Top customers
-        $topCustomers = $seller->orderItems()
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('users', 'orders.user_id', '=', 'users.id')
-            ->selectRaw('users.id, users.name, users.email, COUNT(DISTINCT orders.id) as total_orders, SUM(order_items.seller_amount) as total_spent, MAX(orders.created_at) as last_order_date')
-            ->groupBy('users.id', 'users.name', 'users.email')
-            ->orderByDesc('total_spent')
-            ->limit(20)
-            ->get();
+        // Top customers from analytics service
+        $topCustomers = $customerInsights['top_customers'];
         
-        return view('seller.analytics.customers', compact('stats', 'topCustomers'));
+        return view('seller.analytics.customers', compact(
+            'customerInsights',
+            'stats', 
+            'topCustomers',
+            'dateRange'
+        ));
+    }
+
+    /**
+     * Get analytics data via API
+     */
+    public function getAnalyticsData(Request $request)
+    {
+        $seller = Auth::guard('seller')->user();
+        $type = $request->get('type', 'overview');
+        $dateRange = $request->get('range', 30);
+        
+        $startDate = Carbon::now()->subDays($dateRange);
+        $endDate = Carbon::now();
+        
+        switch ($type) {
+            case 'overview':
+                $data = $this->analyticsService->getOverviewMetrics($seller->id, $startDate, $endDate);
+                break;
+            case 'sales_chart':
+                $data = $this->analyticsService->getSalesChartData($seller->id, $startDate, $endDate);
+                break;
+            case 'top_products':
+                $data = $this->analyticsService->getTopProducts($seller->id, $startDate, $endDate);
+                break;
+            case 'customer_insights':
+                $data = $this->analyticsService->getCustomerInsights($seller->id, $startDate, $endDate);
+                break;
+            case 'revenue_breakdown':
+                $data = $this->analyticsService->getRevenueBreakdown($seller->id, $startDate, $endDate);
+                break;
+            default:
+                $data = $this->analyticsService->getDashboardAnalytics($seller->id, $dateRange);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Generate and download reports
+     */
+    public function generateReport(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:sales,products,customers,inventory',
+            'format' => 'required|in:pdf,excel,csv',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $seller = Auth::guard('seller')->user();
+        $type = $request->type;
+        $format = $request->format;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        try {
+            switch ($type) {
+                case 'sales':
+                    $result = $this->reportService->generateSalesReport($seller->id, $startDate, $endDate, $format);
+                    break;
+                case 'products':
+                    $result = $this->reportService->generateProductReport($seller->id, $startDate, $endDate, $format);
+                    break;
+                case 'customers':
+                    $result = $this->reportService->generateCustomerReport($seller->id, $startDate, $endDate, $format);
+                    break;
+                case 'inventory':
+                    $result = $this->reportService->generateInventoryReport($seller->id, $format);
+                    break;
+                default:
+                    throw new \Exception('Invalid report type');
+            }
+
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Report generated successfully',
+                    'download_url' => $result['url'],
+                    'filename' => $result['filename'],
+                ]);
+            } else {
+                throw new \Exception('Failed to generate report');
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating report: ' . $e->getMessage(),
+            ], 500);
+        }
     }
     
     public function export(Request $request)
@@ -249,7 +357,7 @@ class AnalyticsController extends Controller
                     $product->name,
                     $product->sku ?? 'N/A',
                     $product->category->name ?? 'Uncategorized',
-                    $product->stock,
+                    $product->stock_quantity,
                     $product->price,
                     $product->units_sold ?? 0,
                     $product->revenue ?? 0,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Traits\LogsActivity;
+use App\Traits\SellerValidation;
 use App\Services\ImageKitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SellerValidation;
     public function index(Request $request)
     {
         $seller = Auth::guard('seller')->user();
@@ -120,8 +121,8 @@ class CategoryController extends Controller
         $seller = Auth::guard('seller')->user();
         
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,NULL,id,deleted_at,NULL',
-            'slug' => 'nullable|string|max:255|unique:categories,slug,NULL,id,deleted_at,NULL',
+            'name' => $this->getSellerNameValidation('categories'),
+            'slug' => $this->getSellerSlugValidation('categories'),
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
             'sort_order' => 'required|integer|min:0',

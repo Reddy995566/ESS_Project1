@@ -24,30 +24,49 @@
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                            <input type="email" id="email" name="email" value="{{ old('email') }}" required
-                                class="input-focus block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                placeholder="seller@example.com">
-                            <span class="text-red-500 text-xs mt-1 hidden" id="email-error"></span>
-                        </div>
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
-                            <div class="relative">
-                                <input type="password" id="password" name="password" required
-                                    class="input-focus block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                    placeholder="••••••••">
-                                <button 
-                                    type="button" 
-                                    onclick="togglePasswordVisibility('password', 'eyeIcon1')"
-                                    class="absolute inset-y-0 right-0 pr-4 flex items-center"
-                                >
-                                    <svg id="eyeIcon1" class="h-5 w-5 text-gray-400 hover:text-gray-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </button>
+                        @auth
+                            <!-- Logged in user - show email as readonly -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                <input type="email" id="email" name="email" value="{{ auth()->user()->email }}" readonly
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-gray-100 cursor-not-allowed"
+                                    placeholder="seller@example.com">
+                                <p class="text-xs text-gray-500 mt-1">Using your current account email</p>
                             </div>
+                            <!-- No password field for logged in users -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
+                                <div class="px-4 py-3 border border-green-300 rounded-lg bg-green-50">
+                                    <p class="text-sm text-green-700">✓ Using existing account: {{ auth()->user()->name }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <!-- Guest user - show email and password fields -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                <input type="email" id="email" name="email" value="{{ old('email') }}" required
+                                    class="input-focus block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    placeholder="seller@example.com">
+                                <span class="text-red-500 text-xs mt-1 hidden" id="email-error"></span>
+                            </div>
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                                <div class="relative">
+                                    <input type="password" id="password" name="password" required
+                                        class="input-focus block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        placeholder="••••••••">
+                                    <button 
+                                        type="button" 
+                                        onclick="togglePasswordVisibility('password', 'eyeIcon1')"
+                                        class="absolute inset-y-0 right-0 pr-4 flex items-center"
+                                    >
+                                        <svg id="eyeIcon1" class="h-5 w-5 text-gray-400 hover:text-gray-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                        @endauth
                             <span class="text-red-500 text-xs mt-1 hidden" id="password-error"></span>
                         </div>
                         <div class="md:col-span-2">

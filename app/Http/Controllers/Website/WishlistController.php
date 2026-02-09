@@ -39,7 +39,7 @@ class WishlistController extends Controller
         }
         
         // Get 5 random products for "Explore Our Best Sellers"
-        $randomProducts = Product::where('status', 'active')
+        $randomProducts = Product::activeAndApproved()
             ->inRandomOrder()
             ->limit(5)
             ->get()
