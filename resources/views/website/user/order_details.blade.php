@@ -52,7 +52,7 @@
                                         <div>
                                             <h3 class="font-medium text-gray-900 text-lg">{{ $item->product_name }}</h3>
                                             @if($item->variant_name)
-                                                <p class="text-sm text-gray-500 mt-0.5">Color: {{ $item->variant_name }}</p>
+                                                <p class="text-sm text-gray-500 mt-0.5">{{ $item->variant_name }}</p>
                                             @endif
                                         </div>
                                         <p class="font-semibold text-[#3D0C1F]">Rs. {{ number_format($item->total) }}</p>
@@ -61,6 +61,40 @@
                                         <div class="text-sm text-gray-500">
                                             Qty: {{ $item->quantity }} &times; Rs. {{ number_format($item->price) }}
                                         </div>
+                                        
+                                        @php
+                                            $canReturn = false;
+                                            $returnMessage = '';
+                                            $existingReturn = $item->returns()->first();
+                                            
+                                            if ($existingReturn) {
+                                                $returnMessage = 'Return ' . $existingReturn->status;
+                                            } elseif ($order->status !== 'delivered') {
+                                                $returnMessage = 'Return available after delivery';
+                                            } elseif (!$order->delivered_at) {
+                                                $returnMessage = 'Delivery date not confirmed';
+                                            } elseif ($order->delivered_at->lt(now()->subDays(3))) {
+                                                $returnMessage = 'Return period expired';
+                                            } else {
+                                                $canReturn = true;
+                                            }
+                                        @endphp
+                                        
+                                        @if($canReturn)
+                                            <a href="{{ route('user.returns.create', [$order->id, $item->id]) }}" 
+                                               class="text-sm px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-all">
+                                                Request Return
+                                            </a>
+                                        @elseif($existingReturn)
+                                            <a href="{{ route('user.returns.show', $existingReturn->id) }}" 
+                                               class="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-all">
+                                                {{ $returnMessage }}
+                                            </a>
+                                        @else
+                                            <span class="text-sm px-3 py-1 bg-gray-100 text-gray-500 rounded">
+                                                {{ $returnMessage }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -98,7 +132,7 @@
                         </div>
 
                         <!-- Cost Summary -->
-                        <div class="bg-[#fdf2f2] rounded-xl p-6 border border-[#4b0f27] border-opacity-10">
+                        <div class="rounded-xl p-6 border border-opacity-10" style="background-color: var(--color-bg-tertiary); border-color: var(--color-primary);">
                             <h3 class="text-sm font-medium text-[#4b0f27] uppercase tracking-wider mb-4">Order Summary</h3>
                             <div class="space-y-2 text-sm text-gray-600">
                                 <div class="flex justify-between">

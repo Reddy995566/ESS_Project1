@@ -58,16 +58,9 @@ class ImageKitService
                 $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             }
 
-            // Upload original image without compression
+            // Upload directly without GD processing
             $originalData = file_get_contents($file->getPathname());
-            $originalSize = strlen($originalData);
-            
             $fileContent = base64_encode($originalData);
-            $image = imagecreatefromstring($originalData);
-            $imageWidth = imagesx($image);
-            $imageHeight = imagesy($image);
-            imagedestroy($image);
-            $actualSize = $originalSize;
 
             $uploadParams = [
                 'file' => $fileContent,
@@ -97,10 +90,10 @@ class ImageKitService
                     'url' => $response->result->url,
                     'thumbnail_url' => $response->result->thumbnailUrl,
                     'file_path' => $response->result->filePath,
-                    'size' => $actualSize,
+                    'size' => $file->getSize(),
                     'original_size' => $file->getSize(),
-                    'width' => $imageWidth,
-                    'height' => $imageHeight,
+                    'width' => $response->result->width ?? null,
+                    'height' => $response->result->height ?? null,
                     'format' => $response->result->fileType ?? $file->getClientOriginalExtension()
                 ];
             } else {
@@ -179,16 +172,9 @@ class ImageKitService
                 $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             }
 
+            // Upload directly without GD processing
             $originalData = file_get_contents($file->getPathname());
-            $originalSize = strlen($originalData);
-            
-            // Disable compression as requested by user
             $fileContent = base64_encode($originalData);
-            $image = imagecreatefromstring($originalData);
-            $imageWidth = imagesx($image);
-            $imageHeight = imagesy($image);
-            imagedestroy($image);
-            $actualSize = $originalSize;
 
             $uploadParams = [
                 'file' => $fileContent,
@@ -218,10 +204,10 @@ class ImageKitService
                     'url' => $response->result->url,
                     'thumbnail_url' => $response->result->thumbnailUrl,
                     'file_path' => $response->result->filePath,
-                    'size' => $actualSize,
+                    'size' => $file->getSize(),
                     'original_size' => $file->getSize(),
-                    'width' => $imageWidth,
-                    'height' => $imageHeight,
+                    'width' => $response->result->width ?? null,
+                    'height' => $response->result->height ?? null,
                     'format' => $response->result->fileType ?? $file->getClientOriginalExtension()
                 ];
             } else {
@@ -251,26 +237,13 @@ class ImageKitService
 
     private function compressOnly(UploadedFile $file, int $quality): array
     {
+        // GD extension not available, return original file data
         $imageData = file_get_contents($file->getPathname());
-        $image = imagecreatefromstring($imageData);
         
-        if ($image === false) {
-            throw new \Exception('Failed to create image from file');
-        }
-
-        $width = imagesx($image);
-        $height = imagesy($image);
-
-        ob_start();
-        imagejpeg($image, null, $quality);
-        $compressedData = ob_get_clean();
-
-        imagedestroy($image);
-
         return [
-            'data' => $compressedData,
-            'width' => $width,
-            'height' => $height
+            'data' => $imageData,
+            'width' => null,
+            'height' => null
         ];
     }
 

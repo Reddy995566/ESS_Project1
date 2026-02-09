@@ -1,17 +1,17 @@
 @extends('admin.products.edit._layout')
 
-@section('step_title', 'Step 5: Product Variants')
+@section('step_title', 'Step 2: Product Variants')
 @section('step_description', 'Configure colors, sizes and variant-specific options')
 
 @section('step_content')
 @php
-    $currentStep = 5;
-    $prevStepRoute = route('admin.products.edit.step4', $product->id);
+    $currentStep = 2;
+    $prevStepRoute = route('admin.products.edit.step1', $product->id);
     $colors = App\Models\Color::all();
     $sizes = App\Models\Size::all();
 @endphp
 
-<form id="stepForm" action="{{ route('admin.products.edit.step5.process', $product->id) }}" method="POST">
+<form id="stepForm" action="{{ route('admin.products.edit.step2.process', $product->id) }}" method="POST">
     @csrf
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">
@@ -44,7 +44,6 @@
                             </div>
                         </label>
                     </div>
-                    {{-- 
                     <div>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" id="hasSizeVariants" class="h-5 w-5 text-purple-600 border-gray-300 rounded">
@@ -57,7 +56,6 @@
                             </div>
                         </label>
                     </div>
-                    --}}
                 </div>
             </div>
 
@@ -106,7 +104,6 @@
             </div>
 
             <!-- Size Variants Section -->
-            {{-- 
             <div id="sizeVariantsSection" class="bg-white border-2 border-indigo-200 rounded-xl p-6" style="display: none;">
                 <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
                     <span class="text-indigo-600">📏</span>
@@ -119,7 +116,7 @@
                     <div class="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-3">
                         @foreach($sizes as $size)
                         <label class="cursor-pointer">
-                            <input type="checkbox" name="selected_sizes[]" value="{{ $size->id }}" class="hidden size-checkbox">
+                            <input type="checkbox" name="selected_sizes[]" value="{{ $size->id }}" class="hidden size-checkbox" data-size-id="{{ $size->id }}" data-size-name="{{ $size->name }}" data-size-abbr="{{ $size->abbreviation }}">
                             <div class="relative">
                                 <div class="w-16 h-12 rounded-lg border-2 border-gray-300 transition-all duration-200 flex items-center justify-center font-bold text-lg bg-white text-gray-700 hover:border-indigo-300 size-box">
                                     {{ $size->abbreviation ?? substr($size->name, 0, 2) }}
@@ -134,7 +131,6 @@
                     </div>
                 </div>
             </div>
-            --}}
 
             <!-- Hidden inputs for variants -->
             <input type="hidden" name="has_variants" id="hasVariantsInput" value="{{ old('has_variants', isset($productData['has_variants']) && $productData['has_variants'] ? '1' : '0') }}">

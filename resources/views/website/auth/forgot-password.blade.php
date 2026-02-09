@@ -3,7 +3,7 @@
 @section('title', 'Forgot Password')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FAF5ED] to-[#E5E0D8] py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style="background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);">
     <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-2xl">
         <!-- Header -->
         <div class="text-center">

@@ -1,4 +1,4 @@
-@extends('website.layouts.master')
+@extends('website.layouts.checkout')
 
 @section('title', 'Checkout - ' . ($siteSettings['site_name'] ?? 'Fashion Store'))
 
@@ -40,7 +40,7 @@
     <div class="flex flex-col lg:flex-row min-h-screen">
         
         <!-- LEFT COLUMN - FORMS (58%) -->
-        <div class="w-full lg:w-[58%] border-r border-[#e5e7eb] px-4 py-8 lg:px-12 lg:py-14 bg-[#fff7ec]">
+        <div class="w-full lg:w-[58%] border-r border-[#e5e7eb] px-4 py-8 lg:px-12 lg:py-14" style="background-color: var(--color-bg-primary);">
             
             <form action="{{ route('checkout.store') }}" method="POST" id="checkoutForm">
             @csrf
@@ -132,11 +132,11 @@
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="pincode"></span>
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="city" placeholder="City" value="{{ old('city') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="city" placeholder="City" value="{{ old('city') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="city"></span>
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="state" placeholder="State" value="{{ old('state') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="state" placeholder="State" value="{{ old('state') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="state"></span>
                         </div>
                     </div>
@@ -204,10 +204,10 @@
                             <input type="text" name="billing_pincode" placeholder="PIN Code" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="billing_city" placeholder="City" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="billing_city" placeholder="City" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="billing_state" placeholder="State" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="billing_state" placeholder="State" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                         </div>
                     </div>
 
@@ -267,7 +267,7 @@
 
 
         <!-- RIGHT COLUMN - SUMMARY (42%) -->
-        <div class="hidden lg:block w-[42%] bg-[#fff1e4] border-l border-[#e5e7eb] px-8 py-14">
+        <div class="hidden lg:block w-[42%] border-l border-[#e5e7eb] px-8 py-14" style="background-color: var(--color-bg-secondary);">
             <div class="sticky top-14 max-w-[400px]">
                 
                 @foreach($cart as $item)
@@ -279,9 +279,17 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-sm font-medium text-gray-800">{{ $item['name'] }}</h3>
-                        @if(isset($item['color_name']))
+                        @if(isset($item['color_name']) || isset($item['size_name']))
                         <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
-                             Color: {{ $item['color_name'] }}
+                             @if(isset($item['color_name']))
+                                Color: {{ $item['color_name'] }}
+                             @endif
+                             @if(isset($item['color_name']) && isset($item['size_name']))
+                                |
+                             @endif
+                             @if(isset($item['size_name']))
+                                Size: {{ $item['size_name'] }}
+                             @endif
                         </p>
                         @endif
                     </div>
@@ -291,12 +299,34 @@
                 </div>
                 @endforeach
 
+                <!-- Discount Code Section -->
+                <div class="mb-6 border-t border-gray-200 pt-6">
+                    <div class="flex gap-2">
+                        <input type="text" id="couponCode" placeholder="Discount code" class="flex-1 h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <button type="button" id="applyCouponBtn" class="px-6 h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded font-medium text-sm transition-colors border border-gray-300">
+                            Apply
+                        </button>
+                    </div>
+                    <div id="couponMessage" class="mt-2 text-sm hidden"></div>
+                </div>
+
                 <!-- Price Breakdown -->
                 <div class="space-y-3 mb-6 border-t border-gray-200 pt-6">
                     <div class="flex justify-between text-sm text-gray-600">
                         <span>Subtotal</span>
                         <span class="font-medium text-gray-800">Rs. {{ number_format($subtotal) }}</span>
                     </div>
+                    @if(isset($discount) && $discount > 0)
+                    <div id="discountRow" class="flex justify-between text-sm text-gray-600">
+                        <span id="discountLabel">Discount @if(isset($appliedCoupon))({{ $appliedCoupon['code'] }})@endif</span>
+                        <span id="discountAmount" class="font-medium text-green-600">-Rs. {{ number_format($discount) }}</span>
+                    </div>
+                    @else
+                    <div id="discountRow" class="flex justify-between text-sm text-gray-600 hidden">
+                        <span id="discountLabel">Discount</span>
+                        <span id="discountAmount" class="font-medium text-green-600">-Rs. 0</span>
+                    </div>
+                    @endif
                     <div class="flex justify-between text-sm text-gray-600">
                         <div class="flex items-center gap-1">
                             <span>Shipping</span>
@@ -310,7 +340,7 @@
                     <span class="text-lg font-medium text-[#333]">Total</span>
                     <div class="text-right">
                         <span class="text-xs text-gray-500 mr-2">INR</span>
-                        <span class="text-2xl font-medium text-[#333]">Rs. {{ number_format($total) }}</span>
+                        <span id="totalAmount" class="text-2xl font-medium text-[#333]">Rs. {{ number_format($total) }}</span>
                     </div>
                 </div>
                 
@@ -391,8 +421,6 @@
             // Add loading state
             cityField.value = 'Loading...';
             stateField.value = 'Loading...';
-            cityField.disabled = true;
-            stateField.disabled = true;
             
             try {
                 const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
@@ -413,9 +441,6 @@
                 cityField.value = '';
                 stateField.value = '';
                 alert('Unable to fetch location details. Please enter manually.');
-            } finally {
-                cityField.disabled = false;
-                stateField.disabled = false;
             }
         }
         
@@ -467,6 +492,14 @@
             
             const formData = new FormData(this);
             const paymentMethod = formData.get('payment_method');
+            
+            // Add applied coupon data if exists
+            if (appliedCoupon) {
+                formData.append('applied_coupon_id', appliedCoupon.id);
+                formData.append('applied_coupon_code', appliedCoupon.code);
+                formData.append('discount_amount', currentDiscount);
+            }
+            
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerHTML;
             
@@ -590,5 +623,139 @@
                 submitBtn.innerHTML = originalBtnText;
             }
         });
+
+        // Coupon/Discount Functionality
+        let appliedCoupon = @json($appliedCoupon ?? null);
+        let originalSubtotal = {{ $subtotal }};
+        let currentDiscount = {{ $discount ?? 0 }};
+
+        // Initialize UI if coupon is already applied
+        if (appliedCoupon && currentDiscount > 0) {
+            document.getElementById('couponCode').value = appliedCoupon.code;
+            updatePriceDisplay();
+            showCouponMessage(`Coupon "${appliedCoupon.code}" applied! You saved Rs. ${currentDiscount}`, 'success');
+            
+            const applyBtn = document.getElementById('applyCouponBtn');
+            applyBtn.textContent = 'Remove';
+            applyBtn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+            applyBtn.classList.add('bg-red-100', 'hover:bg-red-200', 'text-red-700');
+        }
+
+        document.getElementById('applyCouponBtn').addEventListener('click', async function() {
+            const couponCode = document.getElementById('couponCode').value.trim();
+            const messageDiv = document.getElementById('couponMessage');
+            const applyBtn = this;
+            
+            if (!couponCode) {
+                showCouponMessage('Please enter a coupon code', 'error');
+                return;
+            }
+
+            // Show loading state
+            applyBtn.disabled = true;
+            applyBtn.textContent = 'Applying...';
+            messageDiv.classList.add('hidden');
+
+            try {
+                const response = await fetch('{{ route("checkout.apply-coupon") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        coupon_code: couponCode,
+                        subtotal: originalSubtotal
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Apply discount
+                    appliedCoupon = data.coupon;
+                    currentDiscount = data.discount_amount;
+                    
+                    // Update UI
+                    updatePriceDisplay();
+                    showCouponMessage(`Coupon "${couponCode}" applied! You saved Rs. ${data.discount_amount}`, 'success');
+                    
+                    // Change button to "Remove"
+                    applyBtn.textContent = 'Remove';
+                    applyBtn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+                    applyBtn.classList.add('bg-red-100', 'hover:bg-red-200', 'text-red-700');
+                    
+                } else {
+                    showCouponMessage(data.message || 'Invalid coupon code', 'error');
+                }
+            } catch (error) {
+                console.error('Coupon error:', error);
+                showCouponMessage('Something went wrong. Please try again.', 'error');
+            } finally {
+                applyBtn.disabled = false;
+                if (applyBtn.textContent === 'Applying...') {
+                    applyBtn.textContent = 'Apply';
+                }
+            }
+        });
+
+        // Handle coupon removal
+        document.getElementById('applyCouponBtn').addEventListener('click', function() {
+            if (this.textContent === 'Remove') {
+                removeCoupon();
+            }
+        });
+
+        function removeCoupon() {
+            appliedCoupon = null;
+            currentDiscount = 0;
+            
+            // Reset UI
+            updatePriceDisplay();
+            document.getElementById('couponCode').value = '';
+            document.getElementById('couponMessage').classList.add('hidden');
+            
+            const applyBtn = document.getElementById('applyCouponBtn');
+            applyBtn.textContent = 'Apply';
+            applyBtn.classList.remove('bg-red-100', 'hover:bg-red-200', 'text-red-700');
+            applyBtn.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+        }
+
+        function updatePriceDisplay() {
+            const discountRow = document.getElementById('discountRow');
+            const discountLabel = document.getElementById('discountLabel');
+            const discountAmount = document.getElementById('discountAmount');
+            const totalAmount = document.getElementById('totalAmount');
+            
+            if (currentDiscount > 0) {
+                // Show discount row
+                discountRow.classList.remove('hidden');
+                discountLabel.textContent = appliedCoupon ? `Discount (${appliedCoupon.code})` : 'Discount';
+                discountAmount.textContent = `-Rs. ${Math.round(currentDiscount).toLocaleString()}`;
+                
+                // Update total
+                const newTotal = originalSubtotal - currentDiscount;
+                totalAmount.textContent = `Rs. ${Math.round(newTotal).toLocaleString()}`;
+            } else {
+                // Hide discount row
+                discountRow.classList.add('hidden');
+                
+                // Reset total
+                totalAmount.textContent = `Rs. ${originalSubtotal.toLocaleString()}`;
+            }
+        }
+
+        function showCouponMessage(message, type) {
+            const messageDiv = document.getElementById('couponMessage');
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('hidden', 'text-red-600', 'text-green-600');
+            
+            if (type === 'error') {
+                messageDiv.classList.add('text-red-600');
+            } else if (type === 'success') {
+                messageDiv.classList.add('text-green-600');
+            }
+        }
     </script>
 @endsection

@@ -1,15 +1,15 @@
 @extends('admin.products.edit._layout')
 
-@section('step_title', 'Step 6: SEO Optimization')
+@section('step_title', 'Step 5: SEO Optimization')
 @section('step_description', 'Optimize for search engines and social media')
 
 @section('step_content')
 @php
-    $currentStep = 6;
-    $prevStepRoute = route('admin.products.edit.step5', $product->id);
+    $currentStep = 5;
+    $prevStepRoute = route('admin.products.edit.step4', $product->id);
 @endphp
 
-<form id="stepForm" action="{{ route('admin.products.edit.step6.process', $product->id) }}" method="POST">
+<form id="stepForm" action="{{ route('admin.products.edit.step5.process', $product->id) }}" method="POST">
     @csrf
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">

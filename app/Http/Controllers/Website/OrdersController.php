@@ -21,7 +21,7 @@ class OrdersController extends Controller
     }
     public function show($id)
     {
-        $order = Order::with(['items.product'])->findOrFail($id);
+        $order = Order::with(['items.product', 'items.returns'])->findOrFail($id);
 
         // Authorization Check
         if(Auth::id() != $order->user_id) {

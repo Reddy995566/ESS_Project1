@@ -99,6 +99,44 @@
 
                 <!-- ➡ RIGHT: Action Icons -->
                 <div class="flex items-center justify-end gap-3 md:gap-4 flex-shrink-0">
+                    <!-- Become a Seller Dropdown -->
+                    <div class="relative hidden md:block" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false"
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                            <span>Become a Seller</span>
+                            <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" 
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                            <div class="py-2">
+                                <a href="{{ route('seller.register') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                    </svg>
+                                    <span>Register as Seller</span>
+                                </a>
+                                <a href="{{ route('seller.login') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                    </svg>
+                                    <span>Seller Login</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     @auth
                         <!-- Logged In - Go to Dashboard -->
                         <a href="{{ route('user.dashboard') }}"
@@ -233,6 +271,14 @@
         <a href="{{ route('bulk-orders') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Bulk Orders</a>
         <a href="{{ route('about') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">About Us</a>
         <a href="{{ route('contact') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">Contact Us</a>
+        
+        <!-- Seller Links -->
+        <div class="py-3" style="border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <p class="font-bold text-sm mb-2" style="color: var(--color-accent-gold);">🏪 Become a Seller</p>
+            <a href="{{ route('seller.register') }}" class="block text-sm py-2 pl-4" style="color: var(--color-header-text);">→ Register as Seller</a>
+            <a href="{{ route('seller.login') }}" class="block text-sm py-2 pl-4" style="color: var(--color-header-text);">→ Seller Login</a>
+        </div>
+        
         @auth
         <a href="{{ route('user.dashboard') }}" class="block font-medium text-sm py-3" style="color: var(--color-header-text); border-bottom: 1px solid rgba(0,0,0,0.1);">My Account</a>
         @else

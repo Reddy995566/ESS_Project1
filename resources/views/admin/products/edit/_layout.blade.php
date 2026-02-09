@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Edit Product - Step {{ $currentStep ?? 1 }} of 7')
+@section('title', 'Edit Product - Step {{ $currentStep ?? 1 }} of 6')
 
 @push('styles')
 <!-- Alpine.js -->
@@ -136,12 +136,11 @@
                         @php
                             $steps = [
                                 ['number' => 1, 'title' => 'Basic Info', 'description' => 'Product details', 'route' => 'admin.products.edit.step1'],
-                                ['number' => 2, 'title' => 'Media', 'description' => 'Images & videos', 'route' => 'admin.products.edit.step2'],
+                                ['number' => 2, 'title' => 'Variants', 'description' => 'Colors & sizes', 'route' => 'admin.products.edit.step5'],
                                 ['number' => 3, 'title' => 'Pricing', 'description' => 'Price & inventory', 'route' => 'admin.products.edit.step3'],
                                 ['number' => 4, 'title' => 'Categories', 'description' => 'Organization', 'route' => 'admin.products.edit.step4'],
-                                ['number' => 5, 'title' => 'Variants', 'description' => 'Colors & sizes', 'route' => 'admin.products.edit.step5'],
-                                ['number' => 6, 'title' => 'SEO', 'description' => 'Optimization', 'route' => 'admin.products.edit.step6'],
-                                ['number' => 7, 'title' => 'Settings', 'description' => 'Status & publish', 'route' => 'admin.products.edit.step7']
+                                ['number' => 5, 'title' => 'SEO', 'description' => 'Optimization', 'route' => 'admin.products.edit.step6'],
+                                ['number' => 6, 'title' => 'Settings', 'description' => 'Status & publish', 'route' => 'admin.products.edit.step7']
                             ];
                             $current = $currentStep;
                         @endphp

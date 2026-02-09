@@ -1,15 +1,15 @@
 @extends('admin.products.create._layout')
 
-@section('step_title', 'Step 5: Product Variants')
+@section('step_title', 'Step 2: Product Variants')
 @section('step_description', 'Configure colors, sizes and variant-specific options')
 
 @section('step_content')
 @php
-    $currentStep = 5;
-    $prevStepRoute = route('admin.products.create.step4');
+    $currentStep = 2;
+    $prevStepRoute = route('admin.products.create.step1');
 @endphp
 
-<form id="stepForm" action="{{ route('admin.products.create.step5.process') }}" method="POST">
+<form id="stepForm" action="{{ route('admin.products.create.step2.process') }}" method="POST">
     @csrf
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">
@@ -42,7 +42,6 @@
                             </div>
                         </label>
                     </div>
-                    {{-- 
                     <div>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" id="hasSizeVariants" class="h-5 w-5 text-purple-600 border-gray-300 rounded">
@@ -55,7 +54,6 @@
                             </div>
                         </label>
                     </div>
-                    --}}
                 </div>
             </div>
 
@@ -97,7 +95,6 @@
             </div>
 
             <!-- Size Variants Section -->
-            {{-- 
             <div id="sizeVariantsSection" class="bg-white border-2 border-indigo-200 rounded-xl p-6" style="display: none;">
                 <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
                     <span class="text-indigo-600">📏</span>
@@ -110,7 +107,7 @@
                     <div class="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-3">
                         @foreach($sizes as $size)
                         <label class="cursor-pointer">
-                            <input type="checkbox" name="selected_sizes[]" value="{{ $size->id }}" class="hidden size-checkbox">
+                            <input type="checkbox" name="selected_sizes[]" value="{{ $size->id }}" class="hidden size-checkbox" data-size-id="{{ $size->id }}" data-size-name="{{ $size->name }}" data-size-abbr="{{ $size->abbreviation }}">
                             <div class="relative">
                                 <div class="w-16 h-12 rounded-lg border-2 border-gray-300 transition-all duration-200 flex items-center justify-center font-bold text-lg bg-white text-gray-700 hover:border-indigo-300 size-box">
                                     {{ $size->abbreviation ?? substr($size->name, 0, 2) }}
@@ -125,7 +122,6 @@
                     </div>
                 </div>
             </div>
-            --}}
 
             <!-- Hidden inputs for variants -->
             <input type="hidden" name="has_variants" id="hasVariantsInput" value="{{ old('has_variants', isset($productData['has_variants']) && $productData['has_variants'] ? '1' : '0') }}">
@@ -185,6 +181,24 @@ document.addEventListener('DOMContentLoaded', function() {
                if(cb) {
                    cb.checked = true;
                    updateCheckboxUI(cb, true);
+               }
+            });
+        }
+        
+        const oldSelectedSizes = document.getElementById('variantSizesInput').value;
+        if (oldSelectedSizes && oldSelectedSizes !== '[]') {
+            selectedSizes = JSON.parse(oldSelectedSizes);
+            // Re-check size boxes
+            selectedSizes.forEach(id => {
+               const cb = document.querySelector(`.size-checkbox[value="${id}"]`);
+               if(cb) {
+                   cb.checked = true;
+                   const parent = cb.parentElement;
+                   const sizeBox = parent.querySelector('.size-box');
+                   const checkmark = parent.querySelector('.size-checkmark');
+                   sizeBox.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+                   sizeBox.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+                   checkmark.classList.remove('hidden');
                }
             });
         }
@@ -586,6 +600,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if(selectedColors.length > 0) {
         updateColorImagesUI();
     }
+    
+    // Handle next button (continue to step 3)
+    document.getElementById('nextBtn')?.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        const stepForm = document.getElementById('stepForm');
+        const formData = new FormData(stepForm);
+        
+        try {
+            const response = await fetch(stepForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                window.location.href = result.next_step_url || '{{ route("admin.products.create.step3") }}';
+            } else {
+                alert('Error: ' + (result.message || 'Failed to save step'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+
+    document.getElementById('prevBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = '{{ route("admin.products.create.step1") }}';
+    });
 });
 </script>
 @endpush

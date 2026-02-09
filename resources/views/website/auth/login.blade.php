@@ -3,7 +3,7 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FAF5ED] to-[#E5E0D8] py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style="background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);">
     <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-2xl">
         <!-- Header -->
         <div class="text-center">
@@ -76,6 +76,7 @@
                         id="remember" 
                         name="remember" 
                         type="checkbox" 
+                        checked
                         class="h-4 w-4 text-[#3D0C1F] focus:ring-[#3D0C1F] border-gray-300 rounded"
                     >
                     <label for="remember" class="ml-2 block text-sm text-gray-900">Remember me</label>

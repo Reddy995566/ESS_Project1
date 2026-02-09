@@ -88,6 +88,13 @@
                             </svg>
                             Contact Info
                         </button>
+                        <button onclick="switchTab('policies')" 
+                                class="tab-btn text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-1 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Policies
+                        </button>
                     </nav>
                 </div>
             </div>
@@ -632,6 +639,74 @@
 
             <!-- SEO Settings Tab -->
             @include('admin.settings.partials.seo-tab')
+
+            <!-- Policies Tab -->
+            <div id="policies-tab" class="{{ $activeTab === 'policies' ? '' : 'hidden' }}">
+                <div class="bg-white shadow-xl rounded-2xl border border-gray-200">
+                    <div class="px-8 py-6 border-b border-gray-200">
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Product Policies
+                        </h2>
+                        <p class="mt-2 text-sm text-gray-600">Manage washing instructions, shipping information, and return policies displayed on product pages</p>
+                    </div>
+
+                    <form action="{{ route('admin.settings.policies.update') }}" method="POST" class="ajax-form">
+                        @csrf
+                        <div class="px-8 py-6 space-y-8">
+                            
+                            <!-- Product Badges -->
+                            <div class="space-y-4">
+                                <label class="block text-sm font-semibold text-gray-900">Product Badges</label>
+                                <p class="text-xs text-gray-500">Badges shown on product pages (separate with | symbol)</p>
+                                <textarea name="product_badges" rows="2" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                    placeholder="🚚 Free Shipping|🎧 24/7 Support|↩ 3 Days Return">{{ \App\Models\SiteSetting::where('key', 'product_badges')->value('value') ?? '🚚 Free Shipping|🎧 24/7 Support|↩ 3 Days Return' }}</textarea>
+                            </div>
+
+                            <!-- Washing Instructions -->
+                            <div class="space-y-4">
+                                <label class="block text-sm font-semibold text-gray-900">Washing Instructions</label>
+                                <p class="text-xs text-gray-500">Care instructions for products (separate with | symbol)</p>
+                                <textarea name="washing_instructions" rows="4" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                    placeholder="Dry clean only recommended.|Do not bleach.|Iron on low heat if necessary.">{{ \App\Models\SiteSetting::where('key', 'washing_instructions')->value('value') ?? 'Dry clean only recommended.|Do not bleach.|Iron on low heat if necessary.' }}</textarea>
+                            </div>
+
+                            <!-- Shipping Information -->
+                            <div class="space-y-4">
+                                <label class="block text-sm font-semibold text-gray-900">Shipping Information</label>
+                                <p class="text-xs text-gray-500">Shipping details and policies (separate with | symbol)</p>
+                                <textarea name="shipping_information" rows="4" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                    placeholder="Standard shipping: 3-5 business days. Express available.|Free shipping on orders above Rs. 999.">{{ \App\Models\SiteSetting::where('key', 'shipping_information')->value('value') ?? 'Standard shipping: 3-5 business days. Express available.' }}</textarea>
+                            </div>
+
+                            <!-- Return & Refund Policy -->
+                            <div class="space-y-4">
+                                <label class="block text-sm font-semibold text-gray-900">Return & Refund Policy</label>
+                                <p class="text-xs text-gray-500">Return and refund terms (separate with | symbol)</p>
+                                <textarea name="return_refund_policy" rows="4" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                    placeholder="7-day return policy for unused items with original tags.|Items must be in original condition.">{{ \App\Models\SiteSetting::where('key', 'return_refund_policy')->value('value') ?? '7-day return policy for unused items with original tags.' }}</textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="px-8 py-6 bg-gray-50 border-t border-gray-200 rounded-b-2xl">
+                            <button type="submit" 
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Update Policies
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
     </div>
@@ -684,7 +759,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function switchTab(tabName) {
-    const tabs = ['general-tab', 'imagekit-tab', 'payment-tab', 'shiprocket-tab', 'social-tab', 'maintenance-tab', 'seo-tab'];
+    const tabs = ['general-tab', 'imagekit-tab', 'payment-tab', 'shiprocket-tab', 'social-tab', 'maintenance-tab', 'seo-tab', 'policies-tab'];
     tabs.forEach(tabId => {
         const tab = document.getElementById(tabId);
         if (tab) tab.classList.add('hidden');

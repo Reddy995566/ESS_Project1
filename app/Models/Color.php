@@ -10,6 +10,7 @@ class Color extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'seller_id',
         'name',
         'hex_code',
         'sort_order',

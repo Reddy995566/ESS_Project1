@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 class Product extends Model
 {
     protected $fillable = [
+        'seller_id',
         'name',
         'slug',
         'sku',
@@ -26,6 +27,10 @@ class Product extends Model
         'images',
         'status',
         'visibility',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejection_reason',
         'featured',
         'is_featured',
         'is_new',
@@ -110,6 +115,16 @@ class Product extends Model
         return $this->belongsTo(Fabric::class);
     }
 
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(Admin::class, 'approved_by');
+    }
+
     public function colors()
     {
         return $this->belongsToMany(Color::class, 'product_color', 'product_id', 'color_id')->withTimestamps();
@@ -138,6 +153,11 @@ class Product extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 
     public function approvedReviews()

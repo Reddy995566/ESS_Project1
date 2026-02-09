@@ -85,10 +85,19 @@ class AuthController extends Controller
             }
 
             $credentials = $request->only('email', 'password');
+            $remember = $request->filled('remember');
 
-            if (Auth::attempt($credentials, $request->filled('remember'))) {
+            if (Auth::attempt($credentials, $remember)) {
                 $user = Auth::user();
                 $request->session()->regenerate();
+
+                // If remember me is checked, extend session lifetime
+                if ($remember) {
+                    // Set session to expire in 1 year (525600 minutes)
+                    config(['session.lifetime' => 525600]);
+                    // Also set cookie lifetime to 1 year
+                    $request->session()->put('remember_token', $user->remember_token);
+                }
 
                 // Sync Guest Cart to DB
                 CartController::syncUserCart($user);

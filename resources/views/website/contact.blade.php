@@ -29,7 +29,8 @@
                 <!-- Your Name -->
                 <div>
                     <input type="text" name="name" id="name" placeholder="Your Name"
-                        class="w-full px-4 py-3 bg-[#FAF5ED] border border-[#D6B27A]/50 rounded-sm focus:outline-none focus:border-[#4A0F23] placeholder-[#5C3A2E]/60 text-[#2A1810]"
+                        class="w-full px-4 py-3 border rounded-sm focus:outline-none placeholder-[#5C3A2E]/60 text-[#2A1810]"
+                        style="background-color: var(--color-bg-primary); border-color: var(--color-border); focus:border-color: var(--color-primary);"
                         required>
                     <span class="text-xs text-red-500 hidden mt-1 error-message" id="error-name"></span>
                 </div>
@@ -37,7 +38,8 @@
                 <!-- Your Email -->
                 <div>
                     <input type="email" name="email" id="email" placeholder="Your Email"
-                        class="w-full px-4 py-3 bg-[#FAF5ED] border border-[#D6B27A]/50 rounded-sm focus:outline-none focus:border-[#4A0F23] placeholder-[#5C3A2E]/60 text-[#2A1810]"
+                        class="w-full px-4 py-3 border rounded-sm focus:outline-none placeholder-[#5C3A2E]/60 text-[#2A1810]"
+                        style="background-color: var(--color-bg-primary); border-color: var(--color-border); focus:border-color: var(--color-primary);"
                         required>
                     <span class="text-xs text-red-500 hidden mt-1 error-message" id="error-email"></span>
                 </div>
@@ -45,14 +47,16 @@
                 <!-- Your Phone -->
                 <div>
                     <input type="tel" name="phone" id="phone" placeholder="Your Phone (optional)"
-                        class="w-full px-4 py-3 bg-[#FAF5ED] border border-[#D6B27A]/50 rounded-sm focus:outline-none focus:border-[#4A0F23] placeholder-[#5C3A2E]/60 text-[#2A1810]">
+                        class="w-full px-4 py-3 border rounded-sm focus:outline-none placeholder-[#5C3A2E]/60 text-[#2A1810]"
+                        style="background-color: var(--color-bg-primary); border-color: var(--color-border); focus:border-color: var(--color-primary);">
                     <span class="text-xs text-red-500 hidden mt-1 error-message" id="error-phone"></span>
                 </div>
 
                 <!-- Your Message -->
                 <div>
                     <textarea name="message" id="message" rows="6" placeholder="Your Message"
-                        class="w-full px-4 py-3 bg-[#FAF5ED] border border-[#D6B27A]/50 rounded-sm focus:outline-none focus:border-[#4A0F23] placeholder-[#5C3A2E]/60 text-[#2A1810] resize-none"
+                        class="w-full px-4 py-3 border rounded-sm focus:outline-none placeholder-[#5C3A2E]/60 text-[#2A1810] resize-none"
+                        style="background-color: var(--color-bg-primary); border-color: var(--color-border); focus:border-color: var(--color-primary);"
                         required></textarea>
                     <span class="text-xs text-red-500 hidden mt-1 error-message" id="error-message"></span>
                 </div>

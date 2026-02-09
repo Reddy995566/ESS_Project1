@@ -5,7 +5,7 @@
 @section('content')
 
 <!-- Search Results Page with Sidebar Filters -->
-<div class="min-h-screen py-8 md:py-12 bg-white">
+<div class="min-h-screen py-8 md:py-12" style="background-color: var(--color-bg-primary);">
     <div class="max-w-[1800px] mx-auto px-4 md:px-8 lg:px-12">
         
         <div class="flex flex-col lg:flex-row gap-6">

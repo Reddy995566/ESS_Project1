@@ -10,16 +10,23 @@ class OrderItem extends Model
         'order_id',
         'product_id',
         'variant_id',
+        'seller_id',
         'product_name',
         'variant_name',
         'price',
         'quantity',
-        'total'
+        'total',
+        'commission_rate',
+        'commission_amount',
+        'seller_amount',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'total' => 'decimal:2',
+        'commission_rate' => 'decimal:2',
+        'commission_amount' => 'decimal:2',
+        'seller_amount' => 'decimal:2',
     ];
 
     public function order()
@@ -35,6 +42,16 @@ class OrderItem extends Model
     public function variant()
     {
         return $this->belongsTo(ProductVariant::class);
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
+
+    public function returns()
+    {
+        return $this->hasMany(\App\Models\ProductReturn::class);
     }
 
     /**

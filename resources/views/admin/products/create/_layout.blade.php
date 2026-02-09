@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Create Product - Step {{ $currentStep ?? 1 }} of 7')
+@section('title', 'Create Product - Step {{ $currentStep ?? 1 }} of 6')
 
 @push('styles')
 <!-- Alpine.js -->
@@ -132,35 +132,35 @@
                     <div class="flex items-center space-x-4 sm:space-x-6 lg:space-x-8 xl:space-x-10">
                         @php
                             $steps = [
-                                ['number' => 1, 'title' => 'Basic Info', 'description' => 'Product details', 'route' => 'admin.products.create.step1'],
-                                ['number' => 2, 'title' => 'Media', 'description' => 'Images & videos', 'route' => 'admin.products.create.step2'],
-                                ['number' => 3, 'title' => 'Categories', 'description' => 'Organization', 'route' => 'admin.products.create.step3'],
-                                ['number' => 4, 'title' => 'Inventory', 'description' => 'Stock & pricing', 'route' => 'admin.products.create.step4'],
-                                ['number' => 5, 'title' => 'Variants', 'description' => 'Colors & sizes', 'route' => 'admin.products.create.step5'],
-                                ['number' => 6, 'title' => 'SEO', 'description' => 'Optimization', 'route' => 'admin.products.create.step6'],
-                                ['number' => 7, 'title' => 'Settings', 'description' => 'Configuration', 'route' => 'admin.products.create.step7']
+                                ['number' => 1, 'actual' => 1, 'title' => 'Basic Info', 'description' => 'Product details', 'route' => 'admin.products.create.step1'],
+                                ['number' => 2, 'actual' => 2, 'title' => 'Variants', 'description' => 'Colors & sizes', 'route' => 'admin.products.create.step5'],
+                                // ['number' => 2, 'actual' => 2, 'title' => 'Media', 'description' => 'Images & videos', 'route' => 'admin.products.create.step2'], // Step 2 hidden
+                                ['number' => 3, 'actual' => 3, 'title' => 'Categories', 'description' => 'Organization', 'route' => 'admin.products.create.step3'],
+                                ['number' => 4, 'actual' => 4, 'title' => 'Inventory', 'description' => 'Stock & pricing', 'route' => 'admin.products.create.step4'],
+                                ['number' => 5, 'actual' => 5, 'title' => 'SEO', 'description' => 'Optimization', 'route' => 'admin.products.create.step6'],
+                                ['number' => 6, 'actual' => 6, 'title' => 'Settings', 'description' => 'Configuration', 'route' => 'admin.products.create.step7']
                             ];
                             $current = $currentStep;
                         @endphp
                         
                         @foreach($steps as $index => $step)
                             <!-- Step {{ $step['number'] }} -->
-                            <div class="flex flex-col items-center space-y-1 sm:space-y-2 cursor-pointer group step-indicator {{ $step['number'] == $current ? 'active' : '' }} {{ $step['number'] < $current ? 'completed' : '' }}" 
-                                 onclick="navigateToStep({{ $step['number'] }})">
+                            <div class="flex flex-col items-center space-y-1 sm:space-y-2 cursor-pointer group step-indicator {{ $step['actual'] == $current ? 'active' : '' }} {{ $step['actual'] < $current ? 'completed' : '' }}" 
+                                 onclick="navigateToStep({{ $step['actual'] }})">
                                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-200
-                                    {{ $step['number'] == $current ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' : '' }}
-                                    {{ $step['number'] < $current ? 'bg-gradient-to-r from-green-600 to-green-700 text-white' : '' }}
-                                    {{ $step['number'] > $current ? 'bg-gray-300 text-gray-600' : '' }}">
-                                    {{ $step['number'] < $current ? '✓' : $step['number'] }}
+                                    {{ $step['actual'] == $current ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' : '' }}
+                                    {{ $step['actual'] < $current ? 'bg-gradient-to-r from-green-600 to-green-700 text-white' : '' }}
+                                    {{ $step['actual'] > $current ? 'bg-gray-300 text-gray-600' : '' }}">
+                                    {{ $step['actual'] < $current ? '✓' : $step['number'] }}
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-xs sm:text-sm font-semibold {{ $step['number'] == $current ? 'text-gray-900' : ($step['number'] < $current ? 'text-green-700' : 'text-gray-600') }}">{{ $step['title'] }}</div>
-                                    <div class="text-xs {{ $step['number'] == $current ? 'text-gray-500' : ($step['number'] < $current ? 'text-green-500' : 'text-gray-400') }} hidden sm:block">{{ $step['description'] }}</div>
+                                    <div class="text-xs sm:text-sm font-semibold {{ $step['actual'] == $current ? 'text-gray-900' : ($step['actual'] < $current ? 'text-green-700' : 'text-gray-600') }}">{{ $step['title'] }}</div>
+                                    <div class="text-xs {{ $step['actual'] == $current ? 'text-gray-500' : ($step['actual'] < $current ? 'text-green-500' : 'text-gray-400') }} hidden sm:block">{{ $step['description'] }}</div>
                                 </div>
                             </div>
 
                             @if($index < count($steps) - 1)
-                                <div class="w-8 sm:w-12 lg:w-16 h-0.5 rounded-full progress-line {{ $step['number'] < $current ? 'active bg-gradient-to-r from-green-500 to-green-600' : 'bg-gray-300' }}"></div>
+                                <div class="w-8 sm:w-12 lg:w-16 h-0.5 rounded-full progress-line {{ $step['actual'] < $current ? 'active bg-gradient-to-r from-green-500 to-green-600' : 'bg-gray-300' }}"></div>
                             @endif
                         @endforeach
                     </div>
@@ -183,7 +183,7 @@
                 @endif
             </div>
             <div class="flex space-x-3">
-                @if($currentStep < 7)
+                @if($currentStep < 6)
                     <button type="button" id="nextBtn" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
                         Continue to Step {{ $currentStep + 1 }} →
                     </button>
@@ -203,21 +203,16 @@
 
 <script>
 function navigateToStep(stepNumber) {
-    // Only allow navigation to completed steps or current step
-    const currentStep = {{ $currentStep }};
-    if (stepNumber <= currentStep) {
-        const routes = {
-            1: '{{ route("admin.products.create.step1") }}',
-            2: '{{ route("admin.products.create.step2") }}',
-            3: '{{ route("admin.products.create.step3") }}',
-            4: '{{ route("admin.products.create.step4") }}',
-            5: '{{ route("admin.products.create.step5") }}',
-            6: '{{ route("admin.products.create.step6") }}',
-            7: '{{ route("admin.products.create.step7") }}'
-        };
-        if (routes[stepNumber]) {
-            window.location.href = routes[stepNumber];
-        }
+    const routes = {
+        1: '{{ route("admin.products.create.step1") }}',
+        2: '{{ route("admin.products.create.step2") }}', // Step 2 is Variants
+        3: '{{ route("admin.products.create.step3") }}',
+        4: '{{ route("admin.products.create.step4") }}',
+        5: '{{ route("admin.products.create.step5") }}', // Step 5 is SEO
+        6: '{{ route("admin.products.create.step6") }}'  // Step 6 is Settings
+    };
+    if (routes[stepNumber]) {
+        window.location.href = routes[stepNumber];
     }
 }
 

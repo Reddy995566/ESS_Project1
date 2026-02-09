@@ -10,6 +10,7 @@ class Size extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'seller_id',
         'name',
         'abbreviation',
         'sort_order',

@@ -67,6 +67,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function returns()
+    {
+        return $this->hasMany(\App\Models\ProductReturn::class);
+    }
+
     public function getFullNameAttribute()
     {
         return $this->first_name . ' ' . $this->last_name;

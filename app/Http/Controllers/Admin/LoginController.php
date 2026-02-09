@@ -45,8 +45,15 @@ class LoginController extends Controller
                 'login_at' => now(),
             ]);
 
-            // Login using Laravel Auth guard with remember me (stays logged in for 5 years)
-            Auth::guard('admin')->login($admin, true);
+            // Login using Laravel Auth guard with remember me functionality
+            $remember = $request->filled('remember');
+            Auth::guard('admin')->login($admin, $remember);
+
+            // If remember me is checked, extend session lifetime
+            if ($remember) {
+                // Set session to expire in 1 year (525600 minutes)
+                config(['session.lifetime' => 525600]);
+            }
 
             // Set session with long lifetime
             session([

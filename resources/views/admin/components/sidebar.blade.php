@@ -3,9 +3,13 @@
     $routeName = request()->route()->getName() ?? '';
     $activeMenu = 'dashboard';
     $productMenuOpen = false;
+    $sellerMenuOpen = false;
 
     if (str_contains($routeName, 'dashboard')) {
         $activeMenu = 'dashboard';
+    } elseif (str_contains($routeName, 'seller') || str_starts_with($routeName, 'admin.sellers') || str_contains($routeName, 'pending-products') || str_contains($routeName, 'approved-products') || str_contains($routeName, 'rejected-products')) {
+        $activeMenu = 'sellers';
+        $sellerMenuOpen = true;
     } elseif (str_contains($routeName, 'product') || str_contains($routeName, 'products')) {
         $activeMenu = 'products';
         $productMenuOpen = true;
@@ -58,6 +62,8 @@
         $activeMenu = 'promotional-banners';
     } elseif (str_contains($routeName, 'budget-card') || str_starts_with($routeName, 'admin.budget-cards')) {
         $activeMenu = 'budget-cards';
+    } elseif (str_contains($routeName, 'seller-payout') || str_contains($routeName, 'payouts')) {
+        $activeMenu = 'seller-payouts';
     } elseif (str_contains($routeName, 'setting')) {
         $activeMenu = 'settings';
     }
@@ -169,7 +175,7 @@
                             <span class="font-medium">Fabrics</span>
                         </a>
                     </li>
-                    {{-- <li>
+                    <li>
                         <a href="{{ route('admin.sizes.index') }}"
                             class="flex items-center space-x-3 px-4 py-2.5 pl-12 rounded-lg text-sm {{ request()->routeIs('admin.sizes.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white hover:text-gray-900' }} transition-all duration-150">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +184,7 @@
                             </svg>
                             <span class="font-medium">Sizes</span>
                         </a>
-                    </li> --}}
+                    </li>
                     {{-- <li>
                         <a href="{{ route('admin.brands.index') }}"
                             class="flex items-center space-x-3 px-4 py-2.5 pl-12 rounded-lg text-sm {{ request()->routeIs('admin.brands.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white hover:text-gray-900' }} transition-all duration-150">
@@ -306,6 +312,93 @@
                             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     <span class="text-sm font-medium">Users</span>
+                </a>
+            </li>
+
+            <!-- Seller Management -->
+            <li>
+                <button onclick="toggleSellerMenu()"
+                    class="flex items-center justify-between w-full px-4 py-3 rounded-lg {{ $activeMenu === 'sellers' ? 'bg-black text-white' : 'text-gray-700 hover:bg-white' }} transition-all duration-150">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span class="text-sm font-medium">Sellers</span>
+                    </div>
+                    <svg id="sellerMenuIcon"
+                        class="w-4 h-4 transition-transform duration-200 {{ $sellerMenuOpen ? 'rotate-180' : '' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <!-- Submenu -->
+                <ul id="sellerSubmenu" class="mt-2 space-y-1 {{ $sellerMenuOpen ? '' : 'hidden' }}">
+                    <li>
+                        <a href="{{ route('admin.sellers.index') }}"
+                            class="flex items-center space-x-3 px-4 py-2.5 pl-12 rounded-lg text-sm {{ request()->routeIs('admin.sellers.index') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white hover:text-gray-900' }} transition-all duration-150">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span class="font-medium">All Sellers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.sellers.pending-products') }}"
+                            class="flex items-center space-x-3 px-4 py-2.5 pl-12 rounded-lg text-sm {{ request()->routeIs('admin.sellers.pending-products') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white hover:text-gray-900' }} transition-all duration-150">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium">Pending Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.sellers.approved-products') }}"
+                            class="flex items-center space-x-3 px-4 py-2.5 pl-12 rounded-lg text-sm {{ request()->routeIs('admin.sellers.approved-products') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white hover:text-gray-900' }} transition-all duration-150">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium">Approved Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.sellers.rejected-products') }}"
+                            class="flex items-center space-x-3 px-4 py-2.5 pl-12 rounded-lg text-sm {{ request()->routeIs('admin.sellers.rejected-products') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white hover:text-gray-900' }} transition-all duration-150">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium">Rejected Products</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Seller Payouts -->
+            <li>
+                <a href="{{ route('admin.seller-payouts.index') }}"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ $activeMenu === 'seller-payouts' ? 'bg-black text-white' : 'text-gray-700 hover:bg-white' }} transition-all duration-150">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span class="text-sm font-medium">Seller Payouts</span>
+                </a>
+            </li>
+
+            <!-- Returns -->
+            <li>
+                <a href="{{ route('admin.returns.index') }}"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ $activeMenu === 'returns' ? 'bg-black text-white' : 'text-gray-700 hover:bg-white' }} transition-all duration-150">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+                    </svg>
+                    <span class="text-sm font-medium">Returns</span>
                 </a>
             </li>
 
@@ -444,6 +537,19 @@
     function toggleProductMenu() {
         const submenu = document.getElementById('productSubmenu');
         const icon = document.getElementById('productMenuIcon');
+
+        if (submenu.classList.contains('hidden')) {
+            submenu.classList.remove('hidden');
+            icon.classList.add('rotate-180');
+        } else {
+            submenu.classList.add('hidden');
+            icon.classList.remove('rotate-180');
+        }
+    }
+
+    function toggleSellerMenu() {
+        const submenu = document.getElementById('sellerSubmenu');
+        const icon = document.getElementById('sellerMenuIcon');
 
         if (submenu.classList.contains('hidden')) {
             submenu.classList.remove('hidden');

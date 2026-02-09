@@ -183,6 +183,11 @@
                                 Us</a></li>
                         <li><a href="{{ route('faqs') }}" class="text-xs font-medium hover:opacity-80 transition-opacity block" style="color: var(--color-footer-text);">FAQs</a>
                         </li>
+                        <li class="pt-2 border-t" style="border-color: rgba(68, 18, 39, 0.2);">
+                            <a href="{{ route('seller.register') }}" class="text-xs font-bold hover:opacity-80 transition-opacity block" style="color: var(--color-accent-gold);">🏪 Become a Seller</a>
+                        </li>
+                        <li><a href="{{ route('seller.login') }}" class="text-xs font-medium hover:opacity-80 transition-opacity block pl-4" style="color: var(--color-footer-text);">→ Seller Login</a>
+                        </li>
                     </ul>
                 </div>
 

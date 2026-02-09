@@ -33,7 +33,7 @@
 @endsection
 
 @section('content')
-    <div class="bg-[#faf5ed] min-h-screen p-6 font-sans text-gray-700">
+    <div class="min-h-screen p-6 font-sans text-gray-700" style="background-color: var(--color-bg-primary);">
         <div class="mx-auto w-full max-w-[1600px]"> <!-- Full width but capped for sanity on huge screens -->
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -42,7 +42,7 @@
                 <div class="lg:col-span-5">
                     <div class="sticky top-6">
                         <!-- Main Image Swiper -->
-                        <div class="mb-4 overflow-hidden rounded-md bg-[#f0ece4] relative group">
+                        <div class="mb-4 overflow-hidden rounded-md relative group" style="background-color: var(--color-bg-secondary);">
                             <div class="swiper main-swiper w-full max-w-[635px] h-auto mx-auto" id="mainSwiperContainer">
                                 <div class="swiper-wrapper">
                                     @php
@@ -134,18 +134,18 @@
 
                         <!-- Badges -->
                         <div class="flex flex-wrap gap-2">
-                            <span
-                                class="rounded bg-[#fef3c7] px-2 py-1 text-[10px] uppercase font-bold tracking-wide text-[#92400e]">
-                                🚚 Free Shipping
-                            </span>
-                            <span
-                                class="rounded bg-[#ffedd5] px-2 py-1 text-[10px] uppercase font-bold tracking-wide text-[#9a3412]">
-                                🎧 24/7 Support
-                            </span>
-                            <span
-                                class="rounded bg-[#fef3c7] px-2 py-1 text-[10px] uppercase font-bold tracking-wide text-[#92400e]">
-                                ↩ 3 Days Return
-                            </span>
+                            @php
+                                $productBadges = \App\Models\SiteSetting::where('key', 'product_badges')->value('value') ?? '🚚 Free Shipping|🎧 24/7 Support|↩ 3 Days Return';
+                                $badges = explode('|', $productBadges);
+                            @endphp
+                            @foreach($badges as $badge)
+                                @if(trim($badge))
+                                    <span
+                                        class="rounded px-2 py-1 text-[10px] uppercase font-bold tracking-wide" style="background-color: var(--color-bg-tertiary); color: var(--color-text-primary);">
+                                        {{ trim($badge) }}
+                                    </span>
+                                @endif
+                            @endforeach
                         </div>
 
                         <!-- Title -->
@@ -154,6 +154,23 @@
                                 class="font-serif-elegant text-[26px] font-semibold leading-tight text-[#4b0f27] tracking-wide">
                                 {{ $product->name }}
                             </h1>
+                            
+                            <!-- Seller Info (if seller product) -->
+                            @if($product->seller_id)
+                            <div class="mt-2 flex items-center gap-2 text-sm">
+                                <span class="text-gray-600">Sold by:</span>
+                                <span class="font-semibold text-[#4b0f27]">{{ $product->seller->business_name }}</span>
+                                @if($product->seller->is_verified)
+                                <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                                    <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Verified
+                                </span>
+                                @endif
+                            </div>
+                            @endif
+                            
                             <!-- Rating -->
                             <div class="mt-1 flex items-center gap-1">
                                 <div class="flex text-[#fbbf24]">
@@ -172,7 +189,7 @@
 
                         <!-- Layout: Bought count badge -->
                         @if($recentPurchases > 0)
-                        <div class="w-fit rounded-full bg-[#fae8e8] px-3 py-1 text-xs font-medium text-[#4b0f27]">
+                        <div class="w-fit rounded-full px-3 py-1 text-xs font-medium" style="background-color: var(--color-bg-tertiary); color: var(--color-primary);">
                             ⚡ {{ $recentPurchases }} Bought this in 24 hours
                         </div>
                         @endif
@@ -197,7 +214,7 @@
                         </div>
 
                         <!-- Offer Box -->
-                        <div class="relative overflow-hidden rounded border border-[#4b0f27] bg-[#fcecc6] p-3">
+                        <div class="relative overflow-hidden rounded border p-3" style="border-color: var(--color-primary); background-color: var(--color-bg-tertiary);">
                             <!-- Shimmer Overlay -->
                             <div class="shimmer-overlay"></div>
 
@@ -222,7 +239,7 @@
 
                         <!-- Pay Online Stripe -->
                         <div
-                            class="rounded bg-[#ffdb89] py-2 text-center text-xs font-bold text-black uppercase tracking-wider">
+                            class="rounded py-2 text-center text-xs font-bold text-black uppercase tracking-wider" style="background-color: var(--color-accent-gold);">
                             Pay Online & Get Extra ₹100 Off
                         </div>
 
@@ -232,7 +249,7 @@
                             <div class="flex gap-4 h-11">
                                 <!-- Quantity -->
                                 <div
-                                    class="w-32 flex items-center justify-between rounded border border-[#2A1810]/20 bg-[#FAF5ED] px-1">
+                                    class="w-32 flex items-center justify-between rounded border px-1" style="border-color: var(--color-text-primary); background-color: var(--color-bg-primary);">
                                     <button onclick="updateQty(-1)"
                                         class="h-full px-3 text-xl text-[#2A1810] hover:bg-black/5 transition flex items-center justify-center">-</button>
                                     <input type="text" id="qtyInput" value="1"
@@ -343,6 +360,42 @@
                             </div>
                         @endif
 
+                        <!-- Size Selection -->
+                        @php
+                            $productSizes = $product->sizes()->orderBy('sort_order')->get();
+                            
+                            // Auto-select if only one size and not already selected
+                            if (!$selectedSizeId && $productSizes->count() === 1) {
+                                $selectedSizeId = $productSizes->first()->id;
+                            }
+                        @endphp
+                        @if($productSizes->count() > 0)
+                            <div class="mt-4" id="sizesSection">
+                                <h3 class="mb-3 text-sm font-semibold text-gray-800">Select Size</h3>
+                                <div class="flex flex-wrap gap-2" id="sizesGrid">
+                                    @foreach($productSizes as $size)
+                                        @php
+                                            $isSelected = ($size->id == $selectedSizeId);
+                                        @endphp
+                                        <button 
+                                            onclick="selectSize({{ $size->id }}, '{{ addslashes($size->name) }}', this)" 
+                                            data-size-id="{{ $size->id }}"
+                                            data-size-name="{{ $size->name }}"
+                                            class="size-option px-4 py-2 border-2 rounded-lg text-sm font-semibold transition-all {{ $isSelected ? 'border-[#4b0f27] bg-[#4b0f27] text-white' : 'border-gray-300 text-gray-700 hover:border-[#4b0f27]' }}">
+                                            {{ $size->abbreviation ?? $size->name }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500" id="selectedSizeText">
+                                    @if($selectedSizeId)
+                                        Selected: {{ $productSizes->where('id', $selectedSizeId)->first()->name ?? '' }}
+                                    @else
+                                        Please select a size
+                                    @endif
+                                </p>
+                            </div>
+                        @endif
+
                         <!-- Accordions (No JS, using details/summary) -->
                         <!-- Accordion Sections (Animated) -->
                         <div class="mt-6 border-t border-[#4b0f27]/10">
@@ -382,11 +435,30 @@
                                 <div
                                     class="overflow-hidden transition-all duration-300 max-h-0 opacity-0 accordion-content">
                                     <div class="pb-4 text-sm text-[#4b0f27]/80 leading-relaxed font-sans-premium">
-                                        <ul class="list-disc pl-5 space-y-1">
-                                            <li>Dry clean only recommended.</li>
-                                            <li>Do not bleach.</li>
-                                            <li>Iron on low heat if necessary.</li>
-                                        </ul>
+                                        @if($product->washing_instructions)
+                                            @php
+                                                $instructions = explode('|', strip_tags($product->washing_instructions));
+                                            @endphp
+                                            <ul class="list-disc pl-5 space-y-1">
+                                                @foreach($instructions as $instruction)
+                                                    @if(trim($instruction))
+                                                        <li>{{ trim($instruction) }}</li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            @php
+                                                $washingInstructions = \App\Models\SiteSetting::where('key', 'washing_instructions')->value('value') ?? 'Dry clean only recommended.|Do not bleach.|Iron on low heat if necessary.';
+                                                $instructions = explode('|', strip_tags($washingInstructions));
+                                            @endphp
+                                            <ul class="list-disc pl-5 space-y-1">
+                                                @foreach($instructions as $instruction)
+                                                    @if(trim($instruction))
+                                                        <li>{{ trim($instruction) }}</li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -406,7 +478,36 @@
                                 <div
                                     class="overflow-hidden transition-all duration-300 max-h-0 opacity-0 accordion-content">
                                     <div class="pb-4 text-sm text-[#4b0f27]/80 leading-relaxed font-sans-premium">
-                                        <p>Standard shipping: 3-5 business days. Express available.</p>
+                                        @if($product->shipping_information)
+                                            @php
+                                                $shippingPoints = explode('|', strip_tags($product->shipping_information));
+                                            @endphp
+                                            <ul class="space-y-2">
+                                                @foreach($shippingPoints as $point)
+                                                    @if(trim($point))
+                                                        <li class="flex items-start">
+                                                            <span class="text-[#4b0f27] mr-2">•</span>
+                                                            <span>{{ trim($point) }}</span>
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            @php
+                                                $shippingInfo = \App\Models\SiteSetting::where('key', 'shipping_information')->value('value') ?? 'Standard shipping: 3-5 business days. Express available.';
+                                                $shippingPoints = explode('|', strip_tags($shippingInfo));
+                                            @endphp
+                                            <ul class="space-y-2">
+                                                @foreach($shippingPoints as $point)
+                                                    @if(trim($point))
+                                                        <li class="flex items-start">
+                                                            <span class="text-[#4b0f27] mr-2">•</span>
+                                                            <span>{{ trim($point) }}</span>
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -426,7 +527,36 @@
                                 <div
                                     class="overflow-hidden transition-all duration-300 max-h-0 opacity-0 accordion-content">
                                     <div class="pb-4 text-sm text-[#4b0f27]/80 leading-relaxed font-sans-premium">
-                                        <p>7-day return policy for unused items with original tags.</p>
+                                        @if($product->returns_refunds)
+                                            @php
+                                                $policyPoints = explode('|', strip_tags($product->returns_refunds));
+                                            @endphp
+                                            <ul class="space-y-2">
+                                                @foreach($policyPoints as $point)
+                                                    @if(trim($point))
+                                                        <li class="flex items-start">
+                                                            <span class="text-[#4b0f27] mr-2">•</span>
+                                                            <span>{{ trim($point) }}</span>
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            @php
+                                                $returnPolicy = \App\Models\SiteSetting::where('key', 'return_refund_policy')->value('value') ?? '7-day return policy for unused items with original tags.';
+                                                $policyPoints = explode('|', strip_tags($returnPolicy));
+                                            @endphp
+                                            <ul class="space-y-2">
+                                                @foreach($policyPoints as $point)
+                                                    @if(trim($point))
+                                                        <li class="flex items-start">
+                                                            <span class="text-[#4b0f27] mr-2">•</span>
+                                                            <span>{{ trim($point) }}</span>
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -573,7 +703,7 @@
     </div>
 
     <!-- REVIEWS SECTION -->
-    <div class="w-full bg-[#faf5ed] py-8 md:py-12">
+    <div class="w-full py-8 md:py-12" style="background-color: var(--color-bg-primary);">
         <div class="mx-auto w-full max-w-[1600px] px-4 md:px-6">
 
             <!-- Reviews Header & Summary -->
@@ -742,7 +872,7 @@
 
 <!-- RECOMMENDED PRODUCTS SECTION -->
 @if($similarProducts && $similarProducts->count() > 0)
-    <div class="w-full bg-[#FAF5ED] pt-8 md:pt-12 pb-12 md:pb-16">
+    <div class="w-full pt-8 md:pt-12 pb-12 md:pb-16" style="background-color: var(--color-bg-primary);">
         <div class="max-w-[1800px] mx-auto px-4 sm:px-6 md:px-8">
             <!-- Section Header -->
             <div class="flex flex-col items-center mb-8 md:mb-10">
@@ -897,6 +1027,23 @@
         }
     }
 
+    /* Shake Animation for Size Validation */
+    @keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        10%, 30%, 50%, 70%, 90% {
+            transform: translateX(-5px);
+        }
+        20%, 40%, 60%, 80% {
+            transform: translateX(5px);
+        }
+    }
+
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+
     /* Pausing on hover is nice but optional */
     .marquee-container:hover .marquee-content {
         animation-play-state: paused;
@@ -992,9 +1139,25 @@
                 $firstColorName = "'" . addslashes($selectedColorObj->name) . "'";
             }
         }
+        
+        // Get product sizes for initialization
+        $productSizesForInit = $product->sizes()->orderBy('sort_order')->get();
+        $selectedSizeIdValue = $selectedSizeId ?? null;
+        $selectedSizeNameValue = 'null';
+        
+        // Auto-select if only one size exists
+        if (!$selectedSizeIdValue && $productSizesForInit->count() === 1) {
+            $onlySize = $productSizesForInit->first();
+            $selectedSizeIdValue = $onlySize->id;
+            $selectedSizeNameValue = "'" . addslashes($onlySize->name) . "'";
+        } elseif ($selectedSizeIdValue && $productSizesForInit->where('id', $selectedSizeIdValue)->first()) {
+            $selectedSizeNameValue = "'" . addslashes($productSizesForInit->where('id', $selectedSizeIdValue)->first()->name) . "'";
+        }
     @endphp
     window.selectedColorId = {{ $firstColorId }};
     window.selectedColorName = {!! $firstColorName !!};
+    window.selectedSizeId = {{ $selectedSizeIdValue ?? 'null' }};
+    window.selectedSizeName = {!! $selectedSizeNameValue !!};
 
     function updateQty(change) {
         const input = document.getElementById('qtyInput');
@@ -1008,10 +1171,45 @@
         const productId = {{ $product->id }};
         const qty = parseInt(document.getElementById('qtyInput').value) || 1;
 
-        // Basic Validation: If product has colors, maybe force selection?
-        // Assuming user might want to buy base product if no color selected, OR logic forces selection.
-        // Given the UI allows switching, let's assume if colors exist, one must be picked if strict, 
-        // OR we just send what we have. API handles it.
+        // Check if product has sizes
+        const hasSizes = document.getElementById('sizesSection') !== null;
+        const sizesCount = hasSizes ? document.querySelectorAll('.size-option').length : 0;
+        
+        // Validation: If product has MULTIPLE sizes, size must be selected
+        // If only 1 size, it's auto-selected, so skip validation
+        if (hasSizes && sizesCount > 1 && !window.selectedSizeId) {
+            // Highlight size section with animation
+            const sizeSection = document.getElementById('sizesSection');
+            if (sizeSection) {
+                sizeSection.classList.add('animate-shake');
+                sizeSection.style.border = '2px solid #ef4444';
+                sizeSection.style.padding = '12px';
+                sizeSection.style.borderRadius = '8px';
+                sizeSection.style.backgroundColor = '#fee2e2';
+                
+                // Update the text to show error
+                const selectedSizeText = document.getElementById('selectedSizeText');
+                if (selectedSizeText) {
+                    selectedSizeText.textContent = '⚠️ Please select a size';
+                    selectedSizeText.style.color = '#ef4444';
+                    selectedSizeText.style.fontWeight = '600';
+                }
+                
+                setTimeout(() => {
+                    sizeSection.classList.remove('animate-shake');
+                    sizeSection.style.border = '';
+                    sizeSection.style.padding = '';
+                    sizeSection.style.backgroundColor = '';
+                    
+                    if (selectedSizeText) {
+                        selectedSizeText.textContent = 'Please select a size';
+                        selectedSizeText.style.color = '';
+                        selectedSizeText.style.fontWeight = '';
+                    }
+                }, 3000);
+            }
+            return;
+        }
 
         const btn = document.getElementById('addToCartBtn');
         const originalText = btn.innerText;
@@ -1028,7 +1226,8 @@
                 body: JSON.stringify({
                     product_id: productId,
                     quantity: qty,
-                    color_id: selectedColorId
+                    color_id: window.selectedColorId || null,
+                    size_id: window.selectedSizeId || null
                 })
             });
 
@@ -1084,6 +1283,26 @@
         updateMoreColorsSection(colorId);
     }
     
+    function selectSize(sizeId, sizeName, element) {
+        window.selectedSizeId = sizeId;
+        window.selectedSizeName = sizeName;
+        
+        // Update active state
+        document.querySelectorAll('.size-option').forEach(btn => {
+            btn.classList.remove('border-[#4b0f27]', 'bg-[#4b0f27]', 'text-white');
+            btn.classList.add('border-gray-300', 'text-gray-700');
+        });
+        
+        element.classList.remove('border-gray-300', 'text-gray-700');
+        element.classList.add('border-[#4b0f27]', 'bg-[#4b0f27]', 'text-white');
+        
+        // Update selected size text
+        const selectedSizeText = document.getElementById('selectedSizeText');
+        if (selectedSizeText) {
+            selectedSizeText.textContent = 'Selected: ' + sizeName;
+        }
+    }
+    
     function updateMoreColorsSection(selectedColorId) {
         const moreColorItems = document.querySelectorAll('.more-color-item');
         
@@ -1100,8 +1319,48 @@
         });
     }
 
-    // On Load: Highlight default color if selected
+    // On Load: Highlight default color if selected and auto-select if only one color/size
     document.addEventListener('DOMContentLoaded', () => {
+        // Auto-select single color if product has only one color
+        @php
+            $productColorsCount = $product->colors()->count();
+            $productSizesCount = $product->sizes()->count();
+        @endphp
+        const productColorsCount = {{ $productColorsCount }};
+        const productSizesCount = {{ $productSizesCount }};
+        
+        // Auto-select single color
+        if (productColorsCount === 1 && !window.selectedColorId) {
+            const firstColorElement = document.querySelector('.color-swatch');
+            if (firstColorElement) {
+                const colorId = firstColorElement.getAttribute('onclick').match(/switchColor\((\d+)/);
+                if (colorId && colorId[1]) {
+                    const colorName = firstColorElement.getAttribute('onclick').match(/switchColor\(\d+,\s*'([^']+)'/);
+                    if (colorName && colorName[1]) {
+                        window.selectedColorId = parseInt(colorId[1]);
+                        window.selectedColorName = colorName[1];
+                    }
+                }
+            }
+        }
+        
+        // If size is already selected (auto-selected or from URL), highlight it visually
+        if (window.selectedSizeId) {
+            const selectedSizeButton = document.querySelector(`.size-option[data-size-id="${window.selectedSizeId}"]`);
+            if (selectedSizeButton) {
+                // Remove default styling
+                selectedSizeButton.classList.remove('border-gray-300', 'text-gray-700');
+                // Add selected styling
+                selectedSizeButton.classList.add('border-[#4b0f27]', 'bg-[#4b0f27]', 'text-white');
+                
+                // Update selected size text
+                const selectedSizeText = document.getElementById('selectedSizeText');
+                if (selectedSizeText && window.selectedSizeName) {
+                    selectedSizeText.textContent = 'Selected: ' + window.selectedSizeName;
+                }
+            }
+        }
+        
         if (selectedColorId) {
             const swatch = document.querySelector(`.color-swatch[onclick*="switchColor(${selectedColorId}"] > div`);
             if (swatch) {
@@ -1254,15 +1513,55 @@
     <script>
         // Make globally accessible with a unique name
         window.processBuyNow = async function () {
+            const qty = parseInt(document.getElementById('qtyInput').value);
+            const productId = {{ $product->id }};
+            
+            // Check if product has sizes
+            const hasSizes = document.getElementById('sizesSection') !== null;
+            const sizesCount = hasSizes ? document.querySelectorAll('.size-option').length : 0;
+            
+            // Validation: If product has MULTIPLE sizes, size must be selected
+            // If only 1 size, it's auto-selected, so skip validation
+            if (hasSizes && sizesCount > 1 && !window.selectedSizeId) {
+                // Highlight size section with animation
+                const sizeSection = document.getElementById('sizesSection');
+                if (sizeSection) {
+                    sizeSection.classList.add('animate-shake');
+                    sizeSection.style.border = '2px solid #ef4444';
+                    sizeSection.style.padding = '12px';
+                    sizeSection.style.borderRadius = '8px';
+                    sizeSection.style.backgroundColor = '#fee2e2';
+                    
+                    // Update the text to show error
+                    const selectedSizeText = document.getElementById('selectedSizeText');
+                    if (selectedSizeText) {
+                        selectedSizeText.textContent = '⚠️ Please select a size';
+                        selectedSizeText.style.color = '#ef4444';
+                        selectedSizeText.style.fontWeight = '600';
+                    }
+                    
+                    setTimeout(() => {
+                        sizeSection.classList.remove('animate-shake');
+                        sizeSection.style.border = '';
+                        sizeSection.style.padding = '';
+                        sizeSection.style.backgroundColor = '';
+                        
+                        if (selectedSizeText) {
+                            selectedSizeText.textContent = 'Please select a size';
+                            selectedSizeText.style.color = '';
+                            selectedSizeText.style.fontWeight = '';
+                        }
+                    }, 3000);
+                }
+                return;
+            }
+            
             const btn = document.querySelector('button[onclick="processBuyNow()"]');
             if (btn) {
                 const originalText = btn.innerHTML;
                 btn.innerHTML = 'Processing...';
                 btn.disabled = true;
             }
-
-            const qty = parseInt(document.getElementById('qtyInput').value);
-            const productId = {{ $product->id }};
 
             try {
                 const response = await fetch('{{ route("cart.add") }}', {
@@ -1274,7 +1573,8 @@
                     body: JSON.stringify({
                         product_id: productId,
                         quantity: qty,
-                        color_name: selectedColorName
+                        color_id: window.selectedColorId || null,
+                        size_id: window.selectedSizeId || null
                     })
                 });
 
@@ -1284,17 +1584,17 @@
                     // Redirect directly to checkout
                     window.location.href = '{{ route("checkout") }}';
                 } else {
-                    showToast(data.message, 'error');
+                    alert(data.message || 'Failed to process');
                     if (btn) {
-                        btn.innerHTML = 'BUY IT NOW'; // Reset text
+                        btn.innerHTML = 'BUY IT NOW';
                         btn.disabled = false;
                     }
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showToast('Something went wrong', 'error');
+                alert('Something went wrong');
                 if (btn) {
-                    btn.innerHTML = 'BUY IT NOW'; // Reset text
+                    btn.innerHTML = 'BUY IT NOW';
                     btn.disabled = false;
                 }
             }

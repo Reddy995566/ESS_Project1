@@ -37,6 +37,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-account/orders', [App\Http\Controllers\Website\OrdersController::class, 'index'])->name('user.orders');
     Route::get('/my-account/orders/{id}', [App\Http\Controllers\Website\OrdersController::class, 'show'])->name('user.orders.show');
 
+    // Invoice Routes
+    Route::get('/invoice/{order}', [App\Http\Controllers\InvoiceController::class, 'generate'])->name('invoice.generate');
+
+    // Return Routes
+    Route::get('/my-account/returns', [App\Http\Controllers\Website\ReturnController::class, 'index'])->name('user.returns.index');
+    Route::get('/my-account/returns/{id}', [App\Http\Controllers\Website\ReturnController::class, 'show'])->name('user.returns.show');
+    Route::get('/my-account/orders/{orderId}/items/{itemId}/return', [App\Http\Controllers\Website\ReturnController::class, 'create'])->name('user.returns.create');
+    Route::post('/my-account/orders/{orderId}/items/{itemId}/return', [App\Http\Controllers\Website\ReturnController::class, 'store'])->name('user.returns.store');
+    Route::patch('/my-account/returns/{id}/cancel', [App\Http\Controllers\Website\ReturnController::class, 'cancel'])->name('user.returns.cancel');
+
     Route::get('/my-account/wishlist', function () {
         return view('website.user.wishlist');
     })->name('user.wishlist');
@@ -117,6 +127,7 @@ Route::post('/track-recently-viewed/{product}', [App\Http\Controllers\ProductCon
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [App\Http\Controllers\Website\CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/place-order', [App\Http\Controllers\Website\CheckoutController::class, 'store'])->name('checkout.store');
+    Route::post('/checkout/apply-coupon', [App\Http\Controllers\Website\CheckoutController::class, 'applyCoupon'])->name('checkout.apply-coupon');
     Route::post('/checkout/verify-payment', [App\Http\Controllers\Website\CheckoutController::class, 'verifyPayment'])->name('checkout.verify');
     Route::get('/order/success/{id}', [App\Http\Controllers\Website\CheckoutController::class, 'success'])->name('order.success');
 });
@@ -236,8 +247,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/create/step-1', [App\Http\Controllers\Admin\ProductsController::class, 'createStep1'])->name('admin.products.create.step1');
         Route::post('/products/create/step-1', [App\Http\Controllers\Admin\ProductsController::class, 'processStep1'])->name('admin.products.create.step1.process');
 
-        Route::get('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'createStep2'])->name('admin.products.create.step2');
-        Route::post('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'processStep2'])->name('admin.products.create.step2.process');
+        // Step 2 is now Variants (previously step 5)
+        Route::get('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'createStep5'])->name('admin.products.create.step2');
+        Route::post('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'processStep5'])->name('admin.products.create.step2.process');
 
         Route::get('/products/create/step-3', [App\Http\Controllers\Admin\ProductsController::class, 'createStep3'])->name('admin.products.create.step3');
         Route::post('/products/create/step-3', [App\Http\Controllers\Admin\ProductsController::class, 'processStep3'])->name('admin.products.create.step3.process');
@@ -245,22 +257,30 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/create/step-4', [App\Http\Controllers\Admin\ProductsController::class, 'createStep4'])->name('admin.products.create.step4');
         Route::post('/products/create/step-4', [App\Http\Controllers\Admin\ProductsController::class, 'processStep4'])->name('admin.products.create.step4.process');
 
-        Route::get('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'createStep5'])->name('admin.products.create.step5');
-        Route::post('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'processStep5'])->name('admin.products.create.step5.process');
+        // Step 5 is now SEO (previously step 6)
+        Route::get('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'createStep6'])->name('admin.products.create.step5');
+        Route::post('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'processStep6'])->name('admin.products.create.step5.process');
 
-        Route::get('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'createStep6'])->name('admin.products.create.step6');
-        Route::post('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'processStep6'])->name('admin.products.create.step6.process');
+        // Step 6 is now Settings (previously step 7)
+        Route::get('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'createStep7'])->name('admin.products.create.step6');
+        Route::post('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'processStep7'])->name('admin.products.create.step6.process');
 
-        Route::get('/products/create/step-7', [App\Http\Controllers\Admin\ProductsController::class, 'createStep7'])->name('admin.products.create.step7');
-        Route::post('/products/create/step-7', [App\Http\Controllers\Admin\ProductsController::class, 'processStep7'])->name('admin.products.create.step7.process');
+        // Old step 6 and 7 routes redirect to new routes
+        Route::get('/products/create/step-7', function() {
+            return redirect()->route('admin.products.create.step6');
+        })->name('admin.products.create.step7');
+        Route::post('/products/create/step-7', function() {
+            return redirect()->route('admin.products.create.step6');
+        })->name('admin.products.create.step7.process');
 
         Route::post('/products/create/clear-session', [App\Http\Controllers\Admin\ProductsController::class, 'clearSession'])->name('admin.products.create.clear-session');
 
         Route::get('/products/{product}/edit/step1', [App\Http\Controllers\Admin\ProductsController::class, 'editStep1'])->name('admin.products.edit.step1');
         Route::post('/products/{product}/edit/step1', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep1'])->name('admin.products.edit.step1.process');
 
-        Route::get('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'editStep2'])->name('admin.products.edit.step2');
-        Route::post('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep2'])->name('admin.products.edit.step2.process');
+        // Step 2 is now Variants (previously step 5)
+        Route::get('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'editStep5'])->name('admin.products.edit.step2');
+        Route::post('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep5'])->name('admin.products.edit.step2.process');
 
         Route::get('/products/{product}/edit/step3', [App\Http\Controllers\Admin\ProductsController::class, 'editStep3'])->name('admin.products.edit.step3');
         Route::post('/products/{product}/edit/step3', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep3'])->name('admin.products.edit.step3.process');
@@ -268,14 +288,21 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/{product}/edit/step4', [App\Http\Controllers\Admin\ProductsController::class, 'editStep4'])->name('admin.products.edit.step4');
         Route::post('/products/{product}/edit/step4', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep4'])->name('admin.products.edit.step4.process');
 
-        Route::get('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'editStep5'])->name('admin.products.edit.step5');
-        Route::post('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep5'])->name('admin.products.edit.step5.process');
+        // Step 5 is now SEO (previously step 6)
+        Route::get('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'editStep6'])->name('admin.products.edit.step5');
+        Route::post('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep6'])->name('admin.products.edit.step5.process');
 
-        Route::get('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'editStep6'])->name('admin.products.edit.step6');
-        Route::post('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep6'])->name('admin.products.edit.step6.process');
+        // Step 6 is now Settings (previously step 7)
+        Route::get('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'editStep7'])->name('admin.products.edit.step6');
+        Route::post('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep7'])->name('admin.products.edit.step6.process');
 
-        Route::get('/products/{product}/edit/step7', [App\Http\Controllers\Admin\ProductsController::class, 'editStep7'])->name('admin.products.edit.step7');
-        Route::post('/products/{product}/edit/step7', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep7'])->name('admin.products.edit.step7.process');
+        // Old routes redirect to new structure
+        Route::get('/products/{product}/edit/step7', function ($product) {
+            return redirect()->route('admin.products.edit.step6', $product);
+        })->name('admin.products.edit.step7');
+        Route::post('/products/{product}/edit/step7', function ($product) {
+            return redirect()->route('admin.products.edit.step6', $product);
+        })->name('admin.products.edit.step7.process');
 
         Route::get('/products/create', function () {
             return redirect()->route('admin.products.create.step1');
@@ -456,6 +483,39 @@ Route::prefix('admin')->group(function () {
 
         // Activity Logs & Login History
         Route::get('/activity-logs', [App\Http\Controllers\Admin\AdminUserController::class, 'activityLogs']);
+
+        // Seller Management Routes
+        Route::get('/sellers-test', function() {
+            $sellers = \App\Models\Seller::with('user')->withCount('products')->get();
+            return response()->json([
+                'count' => $sellers->count(),
+                'sellers' => $sellers->map(function($s) {
+                    return [
+                        'id' => $s->id,
+                        'business_name' => $s->business_name,
+                        'status' => $s->status,
+                        'user' => $s->user ? $s->user->name : 'No user',
+                        'products_count' => $s->products_count
+                    ];
+                })
+            ]);
+        });
+        
+        Route::get('/sellers', [App\Http\Controllers\Admin\SellerController::class, 'index'])->name('admin.sellers.index');
+        
+        Route::get('/sellers-debug', function(Request $request) {
+            $query = \App\Models\Seller::with('user')->withCount('products');
+            $sellers = $query->latest()->paginate(20);
+            return view('admin.sellers.index-simple', compact('sellers'));
+        });
+        Route::get('/sellers/{id}', [App\Http\Controllers\Admin\SellerController::class, 'show'])->name('admin.sellers.show');
+        Route::put('/sellers/{id}/status', [App\Http\Controllers\Admin\SellerController::class, 'updateStatus'])->name('admin.sellers.update-status');
+        Route::get('/sellers/{id}/products', [App\Http\Controllers\Admin\SellerController::class, 'getSellerProducts'])->name('admin.sellers.products');
+        Route::post('/sellers/products/{productId}/approve', [App\Http\Controllers\Admin\SellerController::class, 'approveProduct'])->name('admin.sellers.approve-product');
+        Route::post('/sellers/products/{productId}/reject', [App\Http\Controllers\Admin\SellerController::class, 'rejectProduct'])->name('admin.sellers.reject-product');
+        Route::get('/sellers/products/pending', [App\Http\Controllers\Admin\SellerController::class, 'pendingProducts'])->name('admin.sellers.pending-products');
+        Route::get('/sellers/products/rejected', [App\Http\Controllers\Admin\SellerController::class, 'rejectedProducts'])->name('admin.sellers.rejected-products');
+        Route::get('/sellers/products/approved', [App\Http\Controllers\Admin\SellerController::class, 'approvedProducts'])->name('admin.sellers.approved-products');
         Route::get('/login-history', [App\Http\Controllers\Admin\AdminUserController::class, 'loginHistory']);
 
         Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings');
@@ -469,6 +529,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/settings/upload-og-image', [App\Http\Controllers\Admin\SettingsController::class, 'uploadOGImage'])->name('admin.settings.uploadOGImage');
         Route::post('/settings/generate-sitemap', [App\Http\Controllers\Admin\SettingsController::class, 'generateSitemap'])->name('admin.settings.generateSitemap');
         Route::post('/settings/shiprocket', [App\Http\Controllers\Admin\SettingsController::class, 'updateShiprocket'])->name('admin.settings.shiprocket');
+        Route::post('/settings/policies', [App\Http\Controllers\Admin\SettingsController::class, 'updatePolicies'])->name('admin.settings.policies.update');
         Route::post('/orders/{id}/shiprocket', [App\Http\Controllers\Admin\OrderController::class, 'shipToShiprocket'])->name('admin.orders.shiprocket');
         Route::get('/orders/{id}/shiprocket/couriers', [App\Http\Controllers\Admin\OrderController::class, 'getCouriers'])->name('admin.orders.shiprocket.couriers');
         Route::post('/orders/{id}/shiprocket/awb', [App\Http\Controllers\Admin\OrderController::class, 'generateAwb'])->name('admin.orders.shiprocket.awb');
@@ -535,6 +596,38 @@ Route::prefix('admin')->group(function () {
         Route::delete('/budget-cards/{budgetCard}', [App\Http\Controllers\Admin\BudgetCardsController::class, 'destroy'])->name('admin.budget-cards.destroy');
         Route::post('/budget-cards/{budgetCard}/toggle', [App\Http\Controllers\Admin\BudgetCardsController::class, 'toggleStatus'])->name('admin.budget-cards.toggle');
         Route::post('/budget-cards/update-order', [App\Http\Controllers\Admin\BudgetCardsController::class, 'updateOrder'])->name('admin.budget-cards.update-order');
+
+        // Invoice Routes
+        Route::get('/orders/{id}/invoice', [App\Http\Controllers\InvoiceController::class, 'adminGenerate'])->name('admin.orders.invoice');
+
+        // Seller Payouts Management
+        Route::get('/seller-payouts', [App\Http\Controllers\Admin\SellerPayoutController::class, 'index'])->name('admin.seller-payouts.index');
+        Route::get('/seller-payouts/{payout}', [App\Http\Controllers\Admin\SellerPayoutController::class, 'show'])->name('admin.seller-payouts.show');
+        Route::post('/seller-payouts/{payout}/approve', [App\Http\Controllers\Admin\SellerPayoutController::class, 'approve'])->name('admin.seller-payouts.approve');
+        Route::post('/seller-payouts/{payout}/reject', [App\Http\Controllers\Admin\SellerPayoutController::class, 'reject'])->name('admin.seller-payouts.reject');
+        Route::post('/seller-payouts/{payout}/complete', [App\Http\Controllers\Admin\SellerPayoutController::class, 'complete'])->name('admin.seller-payouts.complete');
+        Route::post('/seller-payouts/bulk-action', [App\Http\Controllers\Admin\SellerPayoutController::class, 'bulkAction'])->name('admin.seller-payouts.bulk-action');
+
+        // Returns Management
+        Route::get('/returns', [App\Http\Controllers\Admin\ReturnController::class, 'index'])->name('admin.returns.index');
+        Route::get('/returns/export', [App\Http\Controllers\Admin\ReturnController::class, 'export'])->name('admin.returns.export');
+        Route::get('/returns/{return}', [App\Http\Controllers\Admin\ReturnController::class, 'show'])->name('admin.returns.show');
+        Route::post('/returns/{return}/approve', [App\Http\Controllers\Admin\ReturnController::class, 'approve'])->name('admin.returns.approve');
+        Route::post('/returns/{return}/reject', [App\Http\Controllers\Admin\ReturnController::class, 'reject'])->name('admin.returns.reject');
+        Route::post('/returns/{return}/pickup', [App\Http\Controllers\Admin\ReturnController::class, 'markPickedUp'])->name('admin.returns.pickup');
+        Route::post('/returns/{return}/refund', [App\Http\Controllers\Admin\ReturnController::class, 'processRefund'])->name('admin.returns.refund');
+        Route::post('/returns/bulk-action', [App\Http\Controllers\Admin\ReturnController::class, 'bulkAction'])->name('admin.returns.bulk-action');
+        
+        // Debug route for testing
+        Route::get('/seller-payouts-test/{id}', function($id) {
+            $payout = \App\Models\SellerPayout::findOrFail($id);
+            return response()->json([
+                'payout_id' => $payout->id,
+                'status' => $payout->status,
+                'amount' => $payout->amount,
+                'can_approve' => $payout->status === 'pending'
+            ]);
+        });
 
         Route::get('/logout', [App\Http\Controllers\Admin\LoginController::class, 'logout'])->name('admin.logout');
     });

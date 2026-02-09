@@ -6,7 +6,7 @@
 @section('step_content')
 @php
     $currentStep = 3;
-    $prevStepRoute = route('admin.products.edit.step2', $product->id);
+    $prevStepRoute = route('admin.products.edit.step5', $product->id);
 @endphp
 
 <form id="stepForm" action="{{ route('admin.products.edit.step3.process', $product->id) }}" method="POST">

@@ -12,6 +12,7 @@ class ProductController extends Controller
     {
         $product = Product::where('slug', $slug)
             ->where('status', 'active')
+            ->with(['colors', 'sizes']) // Load colors and sizes relationships
             ->withCount('approvedReviews')
             ->firstOrFail();
 
@@ -20,8 +21,9 @@ class ProductController extends Controller
             RecentlyViewed::trackView(auth()->id(), $product->id);
         }
 
-        // Get selected color from query param
+        // Get selected color and size from query params
         $selectedColorId = request()->query('color');
+        $selectedSizeId = request()->query('size');
 
         // Get similar products from the same category
         $similarProducts = Product::where('category_id', $product->category_id)
@@ -47,7 +49,7 @@ class ProductController extends Controller
         // You can implement this based on your orders/sales tracking
         $recentPurchases = 0; // TODO: Implement based on your orders table
         
-        return view('website.product-details', compact('product', 'similarProducts', 'recentlyViewed', 'recentPurchases', 'selectedColorId'));
+        return view('website.product-details', compact('product', 'similarProducts', 'recentlyViewed', 'recentPurchases', 'selectedColorId', 'selectedSizeId'));
 
     }
 

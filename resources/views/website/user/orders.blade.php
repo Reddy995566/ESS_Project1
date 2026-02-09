@@ -3,7 +3,7 @@
 @section('title', 'My Orders')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-[#FAF5ED] to-[#E5E0D8] py-8">
+<div class="min-h-screen py-8" style="background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
@@ -58,10 +58,15 @@
                                     <img src="{{ $item->product->image_url ?? 'https://via.placeholder.com/100' }}" alt="{{ $item->product_name }}" class="w-20 h-20 object-cover rounded-lg bg-gray-50" loading="lazy">
                                     <div class="flex-1">
                                         <h4 class="font-medium text-gray-900 line-clamp-1">{{ $item->product_name }}</h4>
+                                        @if($item->variant_name)
                                         <p class="text-sm text-gray-500">
-                                            @if($item->variant_name) Color: {{ $item->variant_name }} | @endif
+                                            {{ $item->variant_name }} | Qty: {{ $item->quantity }}
+                                        </p>
+                                        @else
+                                        <p class="text-sm text-gray-500">
                                             Qty: {{ $item->quantity }}
                                         </p>
+                                        @endif
                                         <p class="text-lg font-semibold text-[#3D0C1F] mt-1">Rs. {{ number_format($item->price) }}</p>
                                     </div>
                                 </div>

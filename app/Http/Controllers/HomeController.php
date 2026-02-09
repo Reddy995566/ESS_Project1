@@ -122,6 +122,18 @@ class HomeController extends Controller
         // Fetch Budget Cards for 'Shop By Budget' Section
         $budgetCards = BudgetCard::active()->ordered()->get();
 
+        // Fetch Best Sellers (Top 8 products by order count)
+        $bestSellers = Product::where('status', 'active')
+            ->where('approval_status', 'approved')
+            ->withCount(['orderItems as total_sold' => function ($query) {
+                $query->select(\DB::raw('SUM(quantity)'));
+            }])
+            ->having('total_sold', '>', 0)
+            ->orderByDesc('total_sold')
+            ->with(['variants', 'seller'])
+            ->take(8)
+            ->get();
+
         return view('website.home', compact(
             'heroBanners',
             'mainCategories', 
@@ -131,7 +143,8 @@ class HomeController extends Controller
             'circleCategories',
             'promotionalBanners',
             'homepageFabrics',
-            'budgetCards'
+            'budgetCards',
+            'bestSellers'
         ));
     }
 }

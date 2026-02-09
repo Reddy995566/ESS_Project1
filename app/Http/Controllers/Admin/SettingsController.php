@@ -426,4 +426,69 @@ class SettingsController extends Controller
             ], 500);
         }
     }
+
+    public function updatePolicies(Request $request)
+    {
+        try {
+            $request->validate([
+                'product_badges' => 'nullable|string',
+                'washing_instructions' => 'nullable|string',
+                'shipping_information' => 'nullable|string',
+                'return_refund_policy' => 'nullable|string',
+            ]);
+
+            // Update or create each policy setting
+            \App\Models\SiteSetting::updateOrCreate(
+                ['key' => 'product_badges', 'group' => 'policies'],
+                ['value' => $request->product_badges ?? '']
+            );
+
+            \App\Models\SiteSetting::updateOrCreate(
+                ['key' => 'washing_instructions', 'group' => 'policies'],
+                ['value' => $request->washing_instructions ?? '']
+            );
+
+            \App\Models\SiteSetting::updateOrCreate(
+                ['key' => 'shipping_information', 'group' => 'policies'],
+                ['value' => $request->shipping_information ?? '']
+            );
+
+            \App\Models\SiteSetting::updateOrCreate(
+                ['key' => 'return_refund_policy', 'group' => 'policies'],
+                ['value' => $request->return_refund_policy ?? '']
+            );
+
+            // Clear cache
+            \App\Models\SiteSetting::clearCache();
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Policy settings updated successfully!'
+                ]);
+            }
+
+            return redirect()->route('admin.settings', ['tab' => 'policies'])
+                ->with('success', 'Policy settings updated successfully!');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed: ' . implode(' ', $e->validator->errors()->all())
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while updating policy settings: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->route('admin.settings', ['tab' => 'policies'])
+                ->with('error', 'An error occurred while updating policy settings.');
+        }
+    }
 }

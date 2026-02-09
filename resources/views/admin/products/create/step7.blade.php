@@ -1,15 +1,15 @@
 @extends('admin.products.create._layout')
 
-@section('step_title', 'Step 7: Final Settings')
+@section('step_title', 'Step 6: Final Settings')
 @section('step_description', 'Complete product configuration and publish settings')
 
 @section('step_content')
 @php
-    $currentStep = 7;
-    $prevStepRoute = route('admin.products.create.step6');
+    $currentStep = 6;
+    $prevStepRoute = route('admin.products.create.step5');
 @endphp
 
-<form id="stepForm" action="{{ route('admin.products.create.step7.process') }}" method="POST">
+<form id="stepForm" action="{{ route('admin.products.create.step6.process') }}" method="POST">
     @csrf
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">

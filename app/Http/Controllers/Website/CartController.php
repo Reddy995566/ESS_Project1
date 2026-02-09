@@ -16,8 +16,9 @@ class CartController extends Controller
             $productId = $request->input('product_id');
             $quantity = $request->input('quantity', 1);
             $colorId = $request->input('color_id');
+            $sizeId = $request->input('size_id');
 
-            $product = Product::with(['colors', 'variants'])->find($productId);
+            $product = Product::with(['colors', 'sizes', 'variants', 'seller'])->find($productId);
 
             if (!$product) {
                 return response()->json(['success' => false, 'message' => 'Product not found'], 404);
@@ -25,8 +26,8 @@ class CartController extends Controller
 
             $cart = session()->get('cart', []);
 
-            // Unique key for cart item (Product + Color)
-            $cartKey = $productId . ($colorId ? '_' . $colorId : '');
+            // Unique key for cart item (Product + Color + Size)
+            $cartKey = $productId . ($colorId ? '_' . $colorId : '') . ($sizeId ? '_' . $sizeId : '');
 
             // Get Color Details if applicable
             $colorName = null;
@@ -36,6 +37,17 @@ class CartController extends Controller
                 if ($color) {
                     $colorName = $color->name;
                     $colorHex = $color->hex_code;
+                }
+            }
+
+            // Get Size Details if applicable
+            $sizeName = null;
+            $sizeAbbr = null;
+            if ($sizeId) {
+                $size = \App\Models\Size::find($sizeId);
+                if ($size) {
+                    $sizeName = $size->name;
+                    $sizeAbbr = $size->abbreviation;
                 }
             }
 
@@ -62,6 +74,7 @@ class CartController extends Controller
 
             $itemData = [
                 'product_id' => $product->id,
+                'seller_id' => $product->seller_id, // Add seller_id to cart
                 'name' => $product->name,
                 'price' => $product->sale_price > 0 ? $product->sale_price : $product->price,
                 'original_price' => $product->sale_price > 0 ? $product->price : null,
@@ -70,6 +83,9 @@ class CartController extends Controller
                 'color_id' => $colorId,
                 'color_name' => $colorName,
                 'color_hex' => $colorHex,
+                'size_id' => $sizeId,
+                'size_name' => $sizeName,
+                'size_abbr' => $sizeAbbr,
                 'key' => $cartKey // Store key in session for consistency
             ];
 

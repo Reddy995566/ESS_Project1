@@ -4,7 +4,7 @@
 
 @section('content')
 
-<main class="w-full pt-8 pb-16 min-h-screen bg-white">
+<main class="w-full pt-8 pb-16 min-h-screen" style="background-color: var(--color-bg-primary);">
     <div class="max-w-[1800px] mx-auto px-4 md:px-8 lg:px-12">
 
         <!-- Mobile Filter Button -->
@@ -132,7 +132,7 @@
                 </div>
 
                 <!-- Products Grid -->
-                <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div id="products-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     @forelse($products as $product)
                     <div class="flex flex-col group items-center">
                         <div class="relative w-full h-auto rounded-lg overflow-hidden bg-gray-100 group">
@@ -180,8 +180,8 @@
                             </a>
                             <div class="flex items-center justify-center gap-1 md:gap-2 mt-1">
                                 @if($product->sale_price > 0)
+                                    <p class="text-red-500 text-[10px] md:text-xs line-through">Rs. {{ number_format($product->price) }}</p>
                                     <p class="text-[#441227]/80 text-xs md:text-sm font-bold">Rs. {{ number_format($product->sale_price) }}</p>
-                                    <p class="text-gray-400 text-[10px] md:text-xs line-through">Rs. {{ number_format($product->price) }}</p>
                                 @else
                                     <p class="text-[#441227]/80 text-xs md:text-sm font-medium">Rs. {{ number_format($product->price) }}</p>
                                 @endif

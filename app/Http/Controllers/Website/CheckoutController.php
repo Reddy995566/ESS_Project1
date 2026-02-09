@@ -32,14 +32,29 @@ class CheckoutController extends Controller
             $subtotal += $item['price'] * $item['quantity'];
         }
 
+        // Check for applied coupon
+        $discount = 0;
+        $appliedCoupon = session('applied_coupon');
+        if ($appliedCoupon) {
+            // Validate coupon is still valid
+            $coupon = \App\Models\Coupon::find($appliedCoupon['id']);
+            if ($coupon && $coupon->isValid() && (!$coupon->min_purchase || $subtotal >= $coupon->min_purchase)) {
+                $discount = $appliedCoupon['discount_amount'];
+            } else {
+                // Coupon is no longer valid, remove it
+                session()->forget('applied_coupon');
+                $appliedCoupon = null;
+            }
+        }
+
         $tax = 0;
         $shipping = 0;
-        $total = $subtotal + $tax + $shipping;
+        $total = $subtotal + $tax + $shipping - $discount;
 
         // Get Razorpay Key for frontend
         $razorpayKey = Setting::get('razorpay_key_id', '');
 
-        return view('website.checkout', compact('cart', 'user', 'addresses', 'subtotal', 'tax', 'shipping', 'total', 'razorpayKey'));
+        return view('website.checkout', compact('cart', 'user', 'addresses', 'subtotal', 'tax', 'shipping', 'discount', 'total', 'razorpayKey', 'appliedCoupon'));
     }
 
     public function store(Request $request)
@@ -167,7 +182,23 @@ class CheckoutController extends Controller
             foreach($cart as $item) {
                 $subtotal += $item['price'] * $item['quantity'];
             }
-            $total = $subtotal; // Add tax/shipping logic here if needed
+            
+            // Apply discount if coupon was applied
+            $discount = 0;
+            $appliedCoupon = session('applied_coupon');
+            if ($appliedCoupon) {
+                $discount = $appliedCoupon['discount_amount'];
+                
+                // Validate coupon is still valid
+                $coupon = \App\Models\Coupon::find($appliedCoupon['id']);
+                if (!$coupon || !$coupon->isValid() || ($coupon->min_purchase && $subtotal < $coupon->min_purchase)) {
+                    // Coupon is no longer valid, remove it
+                    session()->forget('applied_coupon');
+                    $discount = 0;
+                }
+            }
+            
+            $total = $subtotal - $discount; // Add tax/shipping logic here if needed
 
             // Generate Order Number - Pure digits with leading zeros
             $lastOrder = Order::orderBy('id', 'desc')->first();
@@ -179,6 +210,7 @@ class CheckoutController extends Controller
                 'user_id' => $user->id,
                 'session_id' => session()->getId(),
                 'subtotal' => $subtotal,
+                'discount' => $discount,
                 'total' => $total,
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'pending',
@@ -187,16 +219,63 @@ class CheckoutController extends Controller
 
             // Create Order Items
             foreach($cart as $item) {
-                OrderItem::create([
+                // Calculate commission (assuming 10% commission rate, you can make this configurable)
+                $commissionRate = 10.00; // 10%
+                $itemTotal = $item['price'] * $item['quantity'];
+                $commissionAmount = ($itemTotal * $commissionRate) / 100;
+                $sellerAmount = $itemTotal - $commissionAmount;
+                
+                $orderItem = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
+                    'seller_id' => $item['seller_id'] ?? null, // Add seller_id to order items
                     'product_name' => $item['name'],
                     'price' => $item['price'],
                     'quantity' => $item['quantity'],
-                    'total' => $item['price'] * $item['quantity'],
+                    'total' => $itemTotal,
+                    'commission_rate' => $commissionRate,
+                    'commission_amount' => $commissionAmount,
+                    'seller_amount' => $sellerAmount,
                     'variant_id' => null,
-                    'variant_name' => $item['color_name'] ?? null,
+                    'variant_name' => implode(' | ', array_filter([
+                        isset($item['color_name']) ? 'Color: ' . $item['color_name'] : null,
+                        isset($item['size_name']) ? 'Size: ' . $item['size_name'] : null,
+                    ])) ?: null,
                 ]);
+
+                // Add to seller wallet if seller exists
+                if ($item['seller_id']) {
+                    $seller = \App\Models\Seller::find($item['seller_id']);
+                    if ($seller) {
+                        // Get or create wallet
+                        $wallet = $seller->wallet;
+                        if (!$wallet) {
+                            $wallet = \App\Models\SellerWallet::create([
+                                'seller_id' => $seller->id,
+                                'balance' => 0.00,
+                                'pending_balance' => 0.00,
+                                'total_earned' => 0.00,
+                                'total_withdrawn' => 0.00,
+                                'is_active' => true,
+                            ]);
+                        }
+
+                        // Add commission to wallet
+                        $wallet->addFunds(
+                            $sellerAmount,
+                            'order_commission',
+                            "Commission from order #{$order->order_number} - {$item['name']}",
+                            [
+                                'order_id' => $order->id,
+                                'order_item_id' => $orderItem->id,
+                                'product_id' => $item['product_id'],
+                                'commission_rate' => $commissionRate,
+                                'commission_amount' => $commissionAmount,
+                            ],
+                            $order->id
+                        );
+                    }
+                }
             }
 
             // If online payment, create Razorpay order
@@ -219,6 +298,15 @@ class CheckoutController extends Controller
                 // Store Razorpay order ID
                 $order->update(['transaction_id' => $razorpayOrder['id']]);
                 
+                // Increment coupon usage if applied
+                if ($appliedCoupon) {
+                    $coupon = \App\Models\Coupon::find($appliedCoupon['id']);
+                    if ($coupon) {
+                        $coupon->increment('used_count');
+                    }
+                    session()->forget('applied_coupon');
+                }
+                
                 DB::commit();
                 
                 // Return JSON for frontend to open Razorpay modal
@@ -236,6 +324,16 @@ class CheckoutController extends Controller
 
             // For COD, clear cart and redirect
             session()->forget('cart');
+            
+            // Increment coupon usage if applied
+            if ($appliedCoupon) {
+                $coupon = \App\Models\Coupon::find($appliedCoupon['id']);
+                if ($coupon) {
+                    $coupon->increment('used_count');
+                }
+                session()->forget('applied_coupon');
+            }
+            
             DB::commit();
 
             // Send order confirmation email to customer
@@ -328,5 +426,75 @@ class CheckoutController extends Controller
         $order = Order::findOrFail($id);
         if($order->user_id != Auth::id()) abort(403);
         return view('website.order_success', compact('order'));
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate([
+            'coupon_code' => 'required|string',
+            'subtotal' => 'required|numeric|min:0'
+        ]);
+
+        $couponCode = strtoupper(trim($request->coupon_code));
+        $subtotal = $request->subtotal;
+
+        // Find and validate coupon
+        $coupon = \App\Models\Coupon::where('code', $couponCode)
+            ->valid()
+            ->first();
+
+        if (!$coupon) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired coupon code'
+            ], 400);
+        }
+
+        // Check minimum purchase requirement
+        if ($coupon->min_purchase && $subtotal < $coupon->min_purchase) {
+            return response()->json([
+                'success' => false,
+                'message' => "Minimum purchase of Rs. " . number_format($coupon->min_purchase) . " required for this coupon"
+            ], 400);
+        }
+
+        // Calculate discount
+        $discountAmount = 0;
+        if ($coupon->discount_type === 'percentage') {
+            $discountAmount = ($subtotal * $coupon->discount_value) / 100;
+            
+            // Apply max discount limit if set
+            if ($coupon->max_discount && $discountAmount > $coupon->max_discount) {
+                $discountAmount = $coupon->max_discount;
+            }
+        } else {
+            // Fixed discount
+            $discountAmount = $coupon->discount_value;
+        }
+
+        // Ensure discount doesn't exceed subtotal
+        $discountAmount = min($discountAmount, $subtotal);
+
+        // Store coupon in session for checkout
+        session(['applied_coupon' => [
+            'id' => $coupon->id,
+            'code' => $coupon->code,
+            'discount_amount' => $discountAmount,
+            'discount_type' => $coupon->discount_type,
+            'discount_value' => $coupon->discount_value
+        ]]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Coupon applied successfully',
+            'coupon' => [
+                'id' => $coupon->id,
+                'code' => $coupon->code,
+                'discount_type' => $coupon->discount_type,
+                'discount_value' => $coupon->discount_value
+            ],
+            'discount_amount' => $discountAmount,
+            'new_total' => $subtotal - $discountAmount
+        ]);
     }
 }

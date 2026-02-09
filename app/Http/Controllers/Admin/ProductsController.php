@@ -950,13 +950,13 @@ class ProductsController extends Controller
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Step 5 completed successfully!',
-                    'next_step_url' => route('admin.products.create.step6'),
+                    'message' => 'Variants saved successfully!',
+                    'next_step_url' => route('admin.products.create.step3'),
                     'data' => $validated
                 ]);
             }
 
-            return redirect()->route('admin.products.create.step6');
+            return redirect()->route('admin.products.create.step3');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->expectsJson()) {
@@ -1007,13 +1007,13 @@ class ProductsController extends Controller
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Step 6 completed successfully!',
-                    'next_step_url' => route('admin.products.create.step7'),
+                    'message' => 'Step 5 (SEO) completed successfully!',
+                    'next_step_url' => route('admin.products.create.step6'),
                     'data' => $validated
                 ]);
             }
 
-            return redirect()->route('admin.products.create.step7');
+            return redirect()->route('admin.products.create.step6');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->expectsJson()) {

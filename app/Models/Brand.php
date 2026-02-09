@@ -10,6 +10,7 @@ class Brand extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'seller_id',
         'name',
         'description',
         'logo',

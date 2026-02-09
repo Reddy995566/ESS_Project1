@@ -9,10 +9,17 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::middleware('web')
+                ->prefix('seller')
+                ->group(base_path('routes/seller.php'));
+        }
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
+            'seller.auth' => \App\Http\Middleware\SellerAuth::class,
+            'extend.session' => \App\Http\Middleware\ExtendSessionLifetime::class,
         ]);
         
         // Load site settings from database on every request
@@ -20,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Add no-cache headers for HTML responses (prevents browser caching)
         $middleware->append(\App\Http\Middleware\NoCacheHeaders::class);
+        
+        // Extend session lifetime for authenticated users with remember token
+        $middleware->append(\App\Http\Middleware\ExtendSessionLifetime::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle ModelNotFoundException gracefully
