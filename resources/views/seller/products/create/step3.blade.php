@@ -165,9 +165,9 @@
                         </div>
                         <select name="collections[]" multiple class="hidden">
                             @foreach($collections as $collection)
-                                <option :value="{{ $collection->id }}"
-                                    :selected="selectedCollections.find(c => c.id === {{ $collection->id }})">
-                                    {{ $collection->name }}</option>
+                                <option value="{{ $collection->id }}">
+                                    {{ $collection->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -215,8 +215,9 @@
                         </div>
                         <select name="tags[]" multiple class="hidden">
                             @foreach($tags as $tag)
-                            <option :value="{{ $tag->id }}" :selected="selectedTags.find(t => t.id === {{ $tag->id }})">{{
-                                $tag->name }}</option>
+                            <option value="{{ $tag->id }}">
+                                {{ $tag->name }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -239,15 +240,15 @@
                     selectedText: '',
                     categories: [
                         @foreach($categories as $cat)
-                            { id: '{{ $cat->id }}', name: '{{ addslashes($cat->name) }}', displayName: '{{ addslashes($cat->name) }}' },
+                                                    { id: '{{ $cat->id }}', name: '{{ addslashes($cat->name) }}', displayName: '{{ addslashes($cat->name) }}' },
                             @foreach($cat->children as $child)
-                                    { id: '{{ $child->id }}', name: '{{ addslashes($child->name) }}', displayName: '&nbsp;&nbsp;&nbsp;→ {{ addslashes($child->name) }}' },
+                                                                    { id: '{{ $child->id }}', name: '{{ addslashes($child->name) }}', displayName: '&nbsp;&nbsp;&nbsp;→ {{ addslashes($child->name) }}' },
                                 @foreach($child->children as $grandchild)
                                     { id: '{{ $grandchild->id }}', name: '{{ addslashes($grandchild->name) }}', displayName: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→→ {{ addslashes($grandchild->name) }}' },
                                 @endforeach
                             @endforeach
                         @endforeach
-                ],
+                                ],
 
                     get filteredCategories() {
                         if (!this.search) return this.categories;
@@ -288,20 +289,20 @@
                     search: '',
                     selectedText: '',
                     fabrics: @json($fabrics),
-                    
+
                     get filteredFabrics() {
                         return this.fabrics.filter(fabric =>
                             fabric.name.toLowerCase().includes(this.search.toLowerCase())
                         );
                     },
-                    
+
                     selectFabric(fabric) {
                         this.selectedText = fabric.name;
                         this.$refs.hiddenSelect.value = fabric.id;
                         this.open = false;
                         this.search = '';
                     },
-                    
+
                     init() {
                         // Initialize selected fabric from existing data
                         const existingFabricId = '{{ old('fabric_id', $productData['fabric_id'] ?? '') }}';
@@ -387,9 +388,19 @@
 
                     updateSelectField() {
                         const selectElement = document.querySelector('select[name="collections[]"]');
-                        Array.from(selectElement.options).forEach(option => {
-                            option.selected = this.selectedCollections.find(c => c.id == option.value) !== undefined;
-                        });
+                        if (selectElement) {
+                            // Clear all selections first
+                            Array.from(selectElement.options).forEach(option => {
+                                option.selected = false;
+                            });
+                            // Then select the ones in our array
+                            this.selectedCollections.forEach(collection => {
+                                const option = selectElement.querySelector(`option[value="${collection.id}"]`);
+                                if (option) {
+                                    option.selected = true;
+                                }
+                            });
+                        }
                     },
 
                     init() {
@@ -397,7 +408,11 @@
                         const existingCollections = @json(old('collections', isset($productData['collections']) ? $productData['collections'] : []));
                         const existingIds = existingCollections.map(id => parseInt(id));
                         this.selectedCollections = this.collections.filter(c => existingIds.includes(parseInt(c.id)));
-                        this.updateSelectField();
+
+                        // Update the hidden select field after a short delay to ensure DOM is ready
+                        this.$nextTick(() => {
+                            this.updateSelectField();
+                        });
                     }
                 };
             }
@@ -435,9 +450,19 @@
 
                     updateSelectField() {
                         const selectElement = document.querySelector('select[name="tags[]"]');
-                        Array.from(selectElement.options).forEach(option => {
-                            option.selected = this.selectedTags.find(t => t.id == option.value) !== undefined;
-                        });
+                        if (selectElement) {
+                            // Clear all selections first
+                            Array.from(selectElement.options).forEach(option => {
+                                option.selected = false;
+                            });
+                            // Then select the ones in our array
+                            this.selectedTags.forEach(tag => {
+                                const option = selectElement.querySelector(`option[value="${tag.id}"]`);
+                                if (option) {
+                                    option.selected = true;
+                                }
+                            });
+                        }
                     },
 
                     init() {
@@ -445,7 +470,11 @@
                         const existingTags = @json(old('tags', isset($productData['tags']) ? $productData['tags'] : []));
                         const existingIds = existingTags.map(id => parseInt(id));
                         this.selectedTags = this.tags.filter(t => existingIds.includes(parseInt(t.id)));
-                        this.updateSelectField();
+
+                        // Update the hidden select field after a short delay to ensure DOM is ready
+                        this.$nextTick(() => {
+                            this.updateSelectField();
+                        });
                     }
                 };
             }

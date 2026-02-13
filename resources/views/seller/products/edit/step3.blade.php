@@ -114,8 +114,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-800 mb-2">SKU <span
                                 class="text-blue-500 text-xs">(Auto)</span></label>
-                        <input type="text" name="sku" id="productSku" readonly
-                            value="{{ old('sku', $product->sku ?? '') }}"
+                        <input type="text" name="sku" id="productSku" readonly value="{{ old('sku', $product->sku ?? '') }}"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
                             placeholder="PRD-XXXXXXXX">
                         <p class="text-xs text-blue-500 mt-1">✨ Auto-generated code</p>
@@ -167,16 +166,16 @@
                         </div>
                         <select name="collections[]" multiple class="hidden">
                             @foreach($collections as $collection)
-                                <option :value="{{ $collection->id }}"
-                                    :selected="selectedCollections.find(c => c.id === {{ $collection->id }})">
-                                    {{ $collection->name }}</option>
+                                <option value="{{ $collection->id }}">
+                                    {{ $collection->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                 </div>
 
                 <!-- Tags -->
-                <div x-data="tagsDropdown()" id="tagsDropdownComponent">
+                <div x-data="tagsDropdown()">
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Tags <span
                             class="text-gray-500 text-xs">(Multiple)</span></label>
                     <div class="relative w-full">
@@ -214,9 +213,11 @@
                             </template>
                             <div x-show="filteredTags.length === 0" class="px-4 py-2 text-gray-400">No results found.</div>
                         </div>
-                        <select name="tags[]" multiple class="hidden" id="tagsSelect">
+                        <select name="tags[]" multiple class="hidden">
                             @foreach($tags as $tag)
-                            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                <option value="{{ $tag->id }}">
+                                    {{ $tag->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -228,6 +229,14 @@
     </form>
 
     @push('scripts')
+        <script>
+            // Test alert to confirm JavaScript is loading
+            console.log('✅ Step 3 JavaScript loaded!');
+            window.addEventListener('DOMContentLoaded', function () {
+                console.log('✅ DOM loaded - Alpine.js should be working');
+            });
+        </script>
+
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
         <script>
@@ -239,15 +248,15 @@
                     selectedText: '',
                     categories: [
                         @foreach($categories as $cat)
-                            { id: '{{ $cat->id }}', name: '{{ addslashes($cat->name) }}', displayName: '{{ addslashes($cat->name) }}' },
+                                                                                                                                        { id: '{{ $cat->id }}', name: '{{ addslashes($cat->name) }}', displayName: '{{ addslashes($cat->name) }}' },
                             @foreach($cat->children as $child)
-                                    { id: '{{ $child->id }}', name: '{{ addslashes($child->name) }}', displayName: '&nbsp;&nbsp;&nbsp;→ {{ addslashes($child->name) }}' },
+                                                                                                                                                                                    { id: '{{ $child->id }}', name: '{{ addslashes($child->name) }}', displayName: '&nbsp;&nbsp;&nbsp;→ {{ addslashes($child->name) }}' },
                                 @foreach($child->children as $grandchild)
                                     { id: '{{ $grandchild->id }}', name: '{{ addslashes($grandchild->name) }}', displayName: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→→ {{ addslashes($grandchild->name) }}' },
                                 @endforeach
                             @endforeach
                         @endforeach
-                ],
+                                                                                        ],
 
                     get filteredCategories() {
                         if (!this.search) return this.categories;
@@ -288,20 +297,20 @@
                     search: '',
                     selectedText: '',
                     fabrics: @json($fabrics),
-                    
+
                     get filteredFabrics() {
                         return this.fabrics.filter(fabric =>
                             fabric.name.toLowerCase().includes(this.search.toLowerCase())
                         );
                     },
-                    
+
                     selectFabric(fabric) {
                         this.selectedText = fabric.name;
                         this.$refs.hiddenSelect.value = fabric.id;
                         this.open = false;
                         this.search = '';
                     },
-                    
+
                     init() {
                         // Initialize selected fabric from product model
                         const existingFabricId = '{{ old('fabric_id', $product->fabric_id ?? '') }}';
@@ -368,11 +377,13 @@
                     },
 
                     toggleCollection(collection) {
+                        console.log('🔄 Toggle collection:', collection.name);
                         if (this.isSelected(collection)) {
                             this.removeCollection(collection);
                         } else {
                             this.selectedCollections.push(collection);
                         }
+                        console.log('📝 Selected collections now:', this.selectedCollections.map(c => c.name));
                         this.updateSelectField();
                     },
 
@@ -387,21 +398,41 @@
 
                     updateSelectField() {
                         const selectElement = document.querySelector('select[name="collections[]"]');
-                        Array.from(selectElement.options).forEach(option => {
-                            option.selected = this.selectedCollections.find(c => c.id == option.value) !== undefined;
-                        });
-                        console.log('Collections select field updated:', this.selectedCollections.map(c => c.id));
+                        if (selectElement) {
+                            // Clear all selections first
+                            Array.from(selectElement.options).forEach(option => {
+                                option.selected = false;
+                            });
+                            // Then select the ones in our array
+                            this.selectedCollections.forEach(collection => {
+                                const option = selectElement.querySelector(`option[value="${collection.id}"]`);
+                                if (option) {
+                                    option.selected = true;
+                                }
+                            });
+                            console.log('Collections updated:', this.selectedCollections.map(c => c.id));
+                        }
                     },
 
                     init() {
-                        // Initialize selected collections from product model
-                        const existingCollections = @json(optional($product->collections)->pluck('id') ?? []);
+                        // Get existing collection IDs from product model
+                        // Note: We use collections() method because there is a 'collections' column in products table causing collision
+                        // We pluck 'collections.id' to avoid ambiguity column error
+                        const existingCollections = @json($product->collections()->pluck('collections.id')->toArray() ?? []);
+                        console.log('Existing collections from DB:', existingCollections);
+
                         const existingIds = existingCollections.map(id => parseInt(id));
-                        this.selectedCollections = this.collections.filter(c => existingIds.includes(parseInt(c.id)));
-                        this.updateSelectField();
-                        
-                        // Listen for form submission event to update select field
-                        window.addEventListener('beforeFormSubmit', () => {
+
+                        // Filter collections that match the existing IDs
+                        if (existingIds.length > 0) {
+                            this.selectedCollections = this.collections.filter(c => {
+                                const collectionId = parseInt(c.id);
+                                return existingIds.includes(collectionId);
+                            });
+                        }
+
+                        // Update the hidden select field after a short delay to ensure DOM is ready
+                        this.$nextTick(() => {
                             this.updateSelectField();
                         });
                     }
@@ -422,11 +453,13 @@
                     },
 
                     toggleTag(tag) {
+                        console.log('🔄 Toggle tag:', tag.name);
                         if (this.isSelected(tag)) {
                             this.removeTag(tag);
                         } else {
                             this.selectedTags.push(tag);
                         }
+                        console.log('📝 Selected tags now:', this.selectedTags.map(t => t.name));
                         this.updateSelectField();
                     },
 
@@ -440,24 +473,41 @@
                     },
 
                     updateSelectField() {
-                        const selectElement = document.getElementById('tagsSelect');
+                        const selectElement = document.querySelector('select[name="tags[]"]');
                         if (selectElement) {
+                            // Clear all selections first
                             Array.from(selectElement.options).forEach(option => {
-                                option.selected = this.selectedTags.find(t => t.id == option.value) !== undefined;
+                                option.selected = false;
                             });
-                            console.log('Tags select field updated:', this.selectedTags.map(t => t.id));
+                            // Then select the ones in our array
+                            this.selectedTags.forEach(tag => {
+                                const option = selectElement.querySelector(`option[value="${tag.id}"]`);
+                                if (option) {
+                                    option.selected = true;
+                                }
+                            });
+                            console.log('Tags updated:', this.selectedTags.map(t => t.id));
                         }
                     },
 
                     init() {
-                        // Initialize selected tags from product model
-                        const existingTags = @json(optional($product->tags)->pluck('id') ?? []);
+                        // Get existing tag IDs from product model
+                        // Note: We use tags() method because there is a 'tags' column in products table causing collision
+                        // We pluck 'tags.id' to avoid ambiguity column error
+                        const existingTags = @json($product->tags()->pluck('tags.id')->toArray() ?? []);
+                        console.log('Existing tags from DB:', existingTags);
+
                         const existingIds = existingTags.map(id => parseInt(id));
-                        this.selectedTags = this.tags.filter(t => existingIds.includes(parseInt(t.id)));
-                        this.updateSelectField();
-                        
-                        // Listen for form submission event to update select field
-                        window.addEventListener('beforeFormSubmit', () => {
+
+                        if (existingIds.length > 0) {
+                            this.selectedTags = this.tags.filter(t => {
+                                const tagId = parseInt(t.id);
+                                return existingIds.includes(tagId);
+                            });
+                        }
+
+                        // Update the hidden select field after a short delay to ensure DOM is ready
+                        this.$nextTick(() => {
                             this.updateSelectField();
                         });
                     }
@@ -523,6 +573,103 @@
                 const sku = `${nameCode}-${brandCode}-${numericPart}`;
                 skuField.value = sku;
             }
+
+            // ========================================
+            // UPDATE BUTTON HANDLER - STEP 3 SPECIFIC
+            // ========================================
+            window.addEventListener('DOMContentLoaded', function () {
+                const updateBtn = document.getElementById('updateBtn');
+                const stepForm = document.getElementById('stepForm');
+
+                if (updateBtn && stepForm) {
+                    console.log('✅ Update button found, attaching handler');
+
+                    // Remove any existing listeners
+                    const newUpdateBtn = updateBtn.cloneNode(true);
+                    updateBtn.parentNode.replaceChild(newUpdateBtn, updateBtn);
+
+                    newUpdateBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        console.log('🔵 Update button clicked!');
+
+                        // Debug: Check select fields before submission
+                        const collectionsSelect = document.querySelector('select[name="collections[]"]');
+                        const tagsSelect = document.querySelector('select[name="tags[]"]');
+
+                        console.log('📋 Collections select options:');
+                        if (collectionsSelect) {
+                            Array.from(collectionsSelect.options).forEach(opt => {
+                                console.log(`  Option ${opt.value}: ${opt.text} - Selected: ${opt.selected}`);
+                            });
+                        }
+
+                        console.log('📋 Tags select options:');
+                        if (tagsSelect) {
+                            Array.from(tagsSelect.options).forEach(opt => {
+                                console.log(`  Option ${opt.value}: ${opt.text} - Selected: ${opt.selected}`);
+                            });
+                        }
+
+                        // Show loading
+                        newUpdateBtn.disabled = true;
+                        const originalText = newUpdateBtn.innerHTML;
+                        newUpdateBtn.innerHTML = '<svg class="animate-spin h-5 w-5 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Updating...';
+
+                        // Wait for Alpine.js to update select fields
+                        setTimeout(() => {
+                            const formData = new FormData(stepForm);
+
+                            console.log('📦 === FORM DATA ===');
+                            for (let [key, value] of formData.entries()) {
+                                console.log(`  ${key}: ${value}`);
+                            }
+                            console.log('📦 === END ===');
+
+                            // Submit
+                            fetch(stepForm.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('✅ Server response:', data);
+
+                                    if (data.success) {
+                                        // Show success message
+                                        const notification = document.createElement('div');
+                                        notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-semibold z-50 bg-green-500';
+                                        notification.textContent = data.message || 'Updated successfully!';
+                                        document.body.appendChild(notification);
+
+                                        // Reload same page to show updated data
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 1000);
+                                    } else {
+                                        console.error('❌ Update failed:', data);
+                                        alert('❌ ' + (data.message || 'Update failed'));
+                                        newUpdateBtn.disabled = false;
+                                        newUpdateBtn.innerHTML = originalText;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('❌ Error:', error);
+                                    alert('❌ An error occurred');
+                                    newUpdateBtn.disabled = false;
+                                    newUpdateBtn.innerHTML = originalText;
+                                });
+                        }, 300);
+                    });
+                } else {
+                    console.error('❌ Update button or form not found!');
+                }
+            });
         </script>
     @endpush
 @endsection
