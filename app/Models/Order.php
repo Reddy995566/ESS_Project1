@@ -35,6 +35,8 @@ class Order extends Model
         'shipping',
         'tax',
         'discount',
+        'coupon_code',
+        'coupon_id',
         'total',
         'payment_method',
         'payment_status',
@@ -43,7 +45,10 @@ class Order extends Model
         'transaction_id',
         'paid_at',
         'shipped_at',
-        'delivered_at'
+        'delivered_at',
+        'cancellation_reason',
+        'cancelled_at',
+        'cancelled_by'
     ];
 
     protected $casts = [
@@ -55,6 +60,7 @@ class Order extends Model
         'paid_at' => 'datetime',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     public function user()

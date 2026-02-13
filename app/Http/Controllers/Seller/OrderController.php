@@ -226,4 +226,88 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+    public function cancel(Request $request, $id)
+    {
+        $seller = Auth::guard('seller')->user();
+        
+        $order = Order::whereHas('items', function($q) use ($seller) {
+            $q->where('seller_id', $seller->id);
+        })->findOrFail($id);
+
+        // Check if order can be cancelled
+        if (!in_array($order->status, ['pending', 'processing'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order cannot be cancelled at this stage.'
+            ], 400);
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
+        $order->status = 'cancelled';
+        $order->cancellation_reason = $request->reason;
+        $order->cancelled_at = now();
+        $order->cancelled_by = 'seller';
+        $order->save();
+
+        // Restore product stock for seller's items only
+        foreach ($order->items()->where('seller_id', $seller->id)->get() as $item) {
+            if ($item->variant_id) {
+                $variant = \App\Models\ProductVariant::find($item->variant_id);
+                if ($variant) {
+                    $variant->increment('stock', $item->quantity);
+                }
+            }
+        }
+
+        // Send cancellation email to customer
+        try {
+            \Mail::to($order->email)->send(new \App\Mail\OrderCancelledMail($order));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send order cancellation email: ' . $e->getMessage());
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order cancelled successfully.'
+            ]);
+        }
+
+        return back()->with('success', 'Order cancelled successfully.');
+    }
+
+    public function cancelled(Request $request)
+    {
+        $seller = Auth::guard('seller')->user();
+        
+        // Get cancelled orders that have items from this seller
+        $query = Order::whereHas('items', function($q) use ($seller) {
+            $q->where('seller_id', $seller->id);
+        })->with(['user', 'items' => function($q) use ($seller) {
+            $q->where('seller_id', $seller->id);
+        }])->where('status', 'cancelled');
+        
+        // Search by order number or customer
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'like', '%' . $search . '%')
+                  ->orWhere('first_name', 'like', '%' . $search . '%')
+                  ->orWhere('last_name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                               ->orWhere('email', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        $orders = $query->latest()->paginate(25);
+        
+        return view('seller.orders.cancelled', compact('orders'));
+    }
 }

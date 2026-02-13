@@ -41,12 +41,12 @@ class AnalyticsService
         $previousStart = $startDate->copy()->subDays($startDate->diffInDays($endDate));
         $previousEnd = $startDate->copy();
 
-        $query = OrderItem::whereBetween('created_at', [$startDate, $endDate]);
-        $previousQuery = OrderItem::whereBetween('created_at', [$previousStart, $previousEnd]);
+        $query = OrderItem::whereBetween('order_items.created_at', [$startDate, $endDate]);
+        $previousQuery = OrderItem::whereBetween('order_items.created_at', [$previousStart, $previousEnd]);
 
         if ($sellerId) {
-            $query->where('seller_id', $sellerId);
-            $previousQuery->where('seller_id', $sellerId);
+            $query->where('order_items.seller_id', $sellerId);
+            $previousQuery->where('order_items.seller_id', $sellerId);
         }
 
         // Current period metrics
@@ -105,10 +105,10 @@ class AnalyticsService
             DB::raw('COUNT(DISTINCT order_id) as orders'),
             DB::raw('SUM(quantity) as items')
         )
-        ->whereBetween('created_at', [$startDate, $endDate]);
+        ->whereBetween('order_items.created_at', [$startDate, $endDate]);
 
         if ($sellerId) {
-            $query->where('seller_id', $sellerId);
+            $query->where('order_items.seller_id', $sellerId);
         }
 
         $data = $query->groupBy('date')
@@ -222,10 +222,10 @@ class AnalyticsService
         $startDate = $startDate ?: Carbon::now()->subDays(30);
         $endDate = $endDate ?: Carbon::now();
 
-        $query = OrderItem::whereBetween('created_at', [$startDate, $endDate]);
+        $query = OrderItem::whereBetween('order_items.created_at', [$startDate, $endDate]);
 
         if ($sellerId) {
-            $query->where('seller_id', $sellerId);
+            $query->where('order_items.seller_id', $sellerId);
         }
 
         // Revenue by category
@@ -268,10 +268,10 @@ class AnalyticsService
         $startDate = $startDate ?: Carbon::now()->subDays(30);
         $endDate = $endDate ?: Carbon::now();
 
-        $query = OrderItem::whereBetween('created_at', [$startDate, $endDate]);
+        $query = OrderItem::whereBetween('order_items.created_at', [$startDate, $endDate]);
 
         if ($sellerId) {
-            $query->where('seller_id', $sellerId);
+            $query->where('order_items.seller_id', $sellerId);
         }
 
         $totalRevenue = $query->sum('seller_amount');

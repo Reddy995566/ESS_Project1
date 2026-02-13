@@ -40,8 +40,8 @@
         <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all border-2 border-red-200">
             <!-- Product Image -->
             <div class="h-48 bg-gray-200 relative">
-                @if($product->image)
-                    <img src="{{ $product->image }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                @if($product->getFirstImageUrl())
+                    <img src="{{ $product->getFirstImageUrl() }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                 @else
                     <div class="w-full h-full flex items-center justify-center">
                         <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -314,10 +314,14 @@
 
                                 <!-- Product -->
                                 <td class="px-4 py-4">
-                                    <a href="{{ route('product.show', $review->product->slug) }}" target="_blank"
-                                        class="text-sm font-bold text-blue-600 hover:text-blue-800 hover:underline">
-                                        {{ Str::limit($review->product->name, 40) }}
-                                    </a>
+                                    @if($review->product)
+                                        <a href="{{ route('product.show', $review->product->slug) }}" target="_blank"
+                                            class="text-sm font-bold text-blue-600 hover:text-blue-800 hover:underline">
+                                            {{ Str::limit($review->product->name, 40) }}
+                                        </a>
+                                    @else
+                                        <span class="text-sm text-gray-500 italic">Product Deleted</span>
+                                    @endif
                                 </td>
 
                                 <!-- Reviewer -->

@@ -107,43 +107,43 @@
                     <!-- Name Row -->
                     <div class="flex gap-3">
                         <div class="w-1/2">
-                            <input type="text" name="first_name" placeholder="First name" value="{{ old('first_name', Auth::user()->name) }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="first_name" placeholder="First name" value="{{ old('first_name', optional($lastOrder)->first_name ?? Auth::user()->name) }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="first_name"></span>
                         </div>
                         <div class="w-1/2">
-                            <input type="text" name="last_name" placeholder="Last name (optional)" value="{{ old('last_name') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="last_name" placeholder="Last name (optional)" value="{{ old('last_name', optional($lastOrder)->last_name ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="last_name"></span>
                         </div>
                     </div>
 
                     <!-- Address -->
                     <div class="relative">
-                        <input type="text" name="address" placeholder="Address" value="{{ old('address') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <input type="text" name="address" placeholder="Address" value="{{ old('address', optional($lastOrder)->address ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="address"></span>
                     </div>
 
                     <!-- Apartment -->
-                    <input type="text" name="apartment" placeholder="Apartment, suite, etc. (optional)" value="{{ old('apartment') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow">
+                    <input type="text" name="apartment" placeholder="Apartment, suite, etc. (optional)" value="{{ old('apartment', optional($lastOrder)->address_line_2 ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow">
 
                     <!-- Pincode, City, State -->
                     <div class="flex gap-3">
                         <div class="w-1/3">
-                            <input type="text" name="pincode" placeholder="PIN Code" value="{{ old('pincode') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="pincode" placeholder="PIN Code" value="{{ old('pincode', optional($lastOrder)->zipcode ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="pincode"></span>
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="city" placeholder="City" value="{{ old('city') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
+                            <input type="text" name="city" placeholder="City" value="{{ old('city', optional($lastOrder)->city ?? '') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="city"></span>
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="state" placeholder="State" value="{{ old('state') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
+                            <input type="text" name="state" placeholder="State" value="{{ old('state', optional($lastOrder)->state ?? '') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                             <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="state"></span>
                         </div>
                     </div>
 
                     <!-- Phone -->
                     <div class="relative">
-                        <input type="text" name="phone" placeholder="Phone" value="{{ old('phone', Auth::user()->mobile) }}" class="w-full h-12 pl-3 pr-10 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <input type="text" name="phone" placeholder="Phone" value="{{ old('phone', optional($lastOrder)->phone ?? Auth::user()->mobile) }}" class="w-full h-12 pl-3 pr-10 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         <span class="error-message text-red-600 text-xs mt-1 hidden" data-field="phone"></span>
                     </div>
                 </div>
@@ -183,37 +183,37 @@
                     <!-- Name Row -->
                     <div class="flex gap-3">
                         <div class="w-1/2">
-                            <input type="text" name="billing_first_name" placeholder="First name" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="billing_first_name" placeholder="First name" value="{{ old('billing_first_name', optional($lastOrder)->billing_first_name ?? optional($lastOrder)->first_name ?? Auth::user()->name) }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
                         <div class="w-1/2">
-                            <input type="text" name="billing_last_name" placeholder="Last name" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="billing_last_name" placeholder="Last name" value="{{ old('billing_last_name', optional($lastOrder)->billing_last_name ?? optional($lastOrder)->last_name ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
                     </div>
 
                      <!-- Address -->
                      <div class="relative">
-                        <input type="text" name="billing_address" placeholder="Address" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <input type="text" name="billing_address" placeholder="Address" value="{{ old('billing_address', optional($lastOrder)->billing_address ?? optional($lastOrder)->address ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                     </div>
 
                     <!-- Apartment -->
-                    <input type="text" name="billing_address_line_2" placeholder="Apartment, suite, etc. (optional)" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow">
+                    <input type="text" name="billing_address_line_2" placeholder="Apartment, suite, etc. (optional)" value="{{ old('billing_address_line_2', optional($lastOrder)->billing_address_line_2 ?? optional($lastOrder)->address_line_2 ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow">
 
                     <!-- Pincode, City, State -->
                     <div class="flex gap-3">
                         <div class="w-1/3">
-                            <input type="text" name="billing_pincode" placeholder="PIN Code" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                            <input type="text" name="billing_pincode" placeholder="PIN Code" value="{{ old('billing_pincode', optional($lastOrder)->billing_zipcode ?? optional($lastOrder)->zipcode ?? '') }}" class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="billing_city" placeholder="City" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
+                            <input type="text" name="billing_city" placeholder="City" value="{{ old('billing_city', optional($lastOrder)->billing_city ?? optional($lastOrder)->city ?? '') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                         </div>
                         <div class="w-1/3">
-                            <input type="text" name="billing_state" placeholder="State" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
+                            <input type="text" name="billing_state" placeholder="State" value="{{ old('billing_state', optional($lastOrder)->billing_state ?? optional($lastOrder)->state ?? '') }}" readonly class="w-full h-12 px-3 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-gray-100 shadow-sm transition-shadow text-gray-600 cursor-not-allowed">
                         </div>
                     </div>
 
                     <!-- Phone -->
                     <div class="relative">
-                        <input type="text" name="billing_phone" placeholder="Phone" class="w-full h-12 pl-3 pr-10 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
+                        <input type="text" name="billing_phone" placeholder="Phone" value="{{ old('billing_phone', optional($lastOrder)->billing_phone ?? optional($lastOrder)->phone ?? Auth::user()->mobile) }}" class="w-full h-12 pl-3 pr-10 border border-gray-300 rounded focus:ring-1 focus:ring-[#4b0f27] focus:border-[#4b0f27] outline-none placeholder-gray-500 text-sm bg-white shadow-sm transition-shadow text-gray-800">
                     </div>
                 </div>
             </div>
@@ -232,8 +232,11 @@
                          <div class="ml-3 w-full">
                              <div class="flex justify-between items-center w-full">
                                  <span class="text-sm font-medium text-[#333]">Razorpay Secure (UPI, Cards, Int'l Cards, Wallets)</span>
-                                 <div class="flex space-x-1">
-                                     <img src="https://cdn.shopify.com/shopifycloud/checkout_web/assets/016969563dbad11263d76e8be94dc745.svg" class="h-5">
+                                 <div class="flex items-center space-x-1 text-xs text-gray-500">
+                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                         <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                     </svg>
+                                     <span class="font-medium">Secure</span>
                                  </div>
                              </div>
                          </div>
@@ -279,15 +282,17 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-sm font-medium text-gray-800">{{ $item['name'] }}</h3>
-                        @if(isset($item['color_name']) || isset($item['size_name']))
+                        @if(isset($item['color_name']) || isset($item['size_abbr']) || isset($item['size_name']))
                         <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
                              @if(isset($item['color_name']))
                                 Color: {{ $item['color_name'] }}
                              @endif
-                             @if(isset($item['color_name']) && isset($item['size_name']))
+                             @if(isset($item['color_name']) && (isset($item['size_abbr']) || isset($item['size_name'])))
                                 |
                              @endif
-                             @if(isset($item['size_name']))
+                             @if(isset($item['size_abbr']))
+                                Size: {{ $item['size_abbr'] }}
+                             @elseif(isset($item['size_name']))
                                 Size: {{ $item['size_name'] }}
                              @endif
                         </p>
@@ -516,6 +521,16 @@
                     }
                 });
                 
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // Log the actual HTML response for debugging
+                    const htmlText = await response.text();
+                    console.error('Server returned HTML instead of JSON:');
+                    console.error(htmlText.substring(0, 500)); // First 500 chars
+                    throw new Error('Server returned non-JSON response. Please check server logs.');
+                }
+                
                 const data = await response.json();
                 
                 if(!response.ok) {
@@ -615,9 +630,10 @@
                 
             } catch(error) {
                 console.error('Checkout error:', error);
+                console.error('Error details:', error.message);
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm mb-4';
-                errorDiv.textContent = 'Something went wrong. Please try again.';
+                errorDiv.textContent = 'Something went wrong. Please try again. Check console for details.';
                 document.getElementById('checkoutForm').insertBefore(errorDiv, document.getElementById('checkoutForm').firstChild);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;
@@ -632,8 +648,9 @@
         // Initialize UI if coupon is already applied
         if (appliedCoupon && currentDiscount > 0) {
             document.getElementById('couponCode').value = appliedCoupon.code;
+            document.getElementById('couponCode').disabled = true;
             updatePriceDisplay();
-            showCouponMessage(`Coupon "${appliedCoupon.code}" applied! You saved Rs. ${currentDiscount}`, 'success');
+            showCouponMessage(`Coupon "${appliedCoupon.code}" applied! You saved Rs. ${currentDiscount.toFixed(2)}`, 'success');
             
             const applyBtn = document.getElementById('applyCouponBtn');
             applyBtn.textContent = 'Remove';
@@ -642,9 +659,17 @@
         }
 
         document.getElementById('applyCouponBtn').addEventListener('click', async function() {
+            const applyBtn = this;
+            
+            // Check if we're removing the coupon
+            if (applyBtn.textContent === 'Remove') {
+                removeCoupon();
+                return;
+            }
+            
+            // Otherwise, apply the coupon
             const couponCode = document.getElementById('couponCode').value.trim();
             const messageDiv = document.getElementById('couponMessage');
-            const applyBtn = this;
             
             if (!couponCode) {
                 showCouponMessage('Please enter a coupon code', 'error');
@@ -675,35 +700,28 @@
                 if (response.ok && data.success) {
                     // Apply discount
                     appliedCoupon = data.coupon;
-                    currentDiscount = data.discount_amount;
+                    currentDiscount = parseFloat(data.discount_amount);
                     
                     // Update UI
                     updatePriceDisplay();
-                    showCouponMessage(`Coupon "${couponCode}" applied! You saved Rs. ${data.discount_amount}`, 'success');
+                    showCouponMessage(`Coupon "${couponCode}" applied! You saved Rs. ${parseFloat(data.discount_amount).toFixed(2)}`, 'success');
                     
-                    // Change button to "Remove"
+                    // Disable input and change button to "Remove"
+                    document.getElementById('couponCode').disabled = true;
                     applyBtn.textContent = 'Remove';
                     applyBtn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
                     applyBtn.classList.add('bg-red-100', 'hover:bg-red-200', 'text-red-700');
                     
                 } else {
                     showCouponMessage(data.message || 'Invalid coupon code', 'error');
+                    applyBtn.textContent = 'Apply';
                 }
             } catch (error) {
                 console.error('Coupon error:', error);
                 showCouponMessage('Something went wrong. Please try again.', 'error');
+                applyBtn.textContent = 'Apply';
             } finally {
                 applyBtn.disabled = false;
-                if (applyBtn.textContent === 'Applying...') {
-                    applyBtn.textContent = 'Apply';
-                }
-            }
-        });
-
-        // Handle coupon removal
-        document.getElementById('applyCouponBtn').addEventListener('click', function() {
-            if (this.textContent === 'Remove') {
-                removeCoupon();
             }
         });
 
@@ -714,6 +732,7 @@
             // Reset UI
             updatePriceDisplay();
             document.getElementById('couponCode').value = '';
+            document.getElementById('couponCode').disabled = false;
             document.getElementById('couponMessage').classList.add('hidden');
             
             const applyBtn = document.getElementById('applyCouponBtn');
@@ -732,17 +751,17 @@
                 // Show discount row
                 discountRow.classList.remove('hidden');
                 discountLabel.textContent = appliedCoupon ? `Discount (${appliedCoupon.code})` : 'Discount';
-                discountAmount.textContent = `-Rs. ${Math.round(currentDiscount).toLocaleString()}`;
+                discountAmount.textContent = `-Rs. ${Number(currentDiscount).toLocaleString('en-IN')}`;
                 
-                // Update total
-                const newTotal = originalSubtotal - currentDiscount;
-                totalAmount.textContent = `Rs. ${Math.round(newTotal).toLocaleString()}`;
+                // Update total (ensure proper calculation)
+                const newTotal = Number(originalSubtotal) - Number(currentDiscount);
+                totalAmount.textContent = `Rs. ${Number(newTotal).toLocaleString('en-IN')}`;
             } else {
                 // Hide discount row
                 discountRow.classList.add('hidden');
                 
                 // Reset total
-                totalAmount.textContent = `Rs. ${originalSubtotal.toLocaleString()}`;
+                totalAmount.textContent = `Rs. ${Number(originalSubtotal).toLocaleString('en-IN')}`;
             }
         }
 

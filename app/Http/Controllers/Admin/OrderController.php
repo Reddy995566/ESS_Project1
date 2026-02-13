@@ -61,6 +61,7 @@ class OrderController extends Controller
         ]);
 
         $order = Order::findOrFail($id);
+        $oldStatus = $order->status;
         $order->status = $request->status;
         
         // Update timestamps based on status
@@ -69,9 +70,45 @@ class OrderController extends Controller
         }
         if ($request->status === 'delivered' && !$order->delivered_at) {
             $order->delivered_at = now();
+            
+            // Auto-mark COD orders as paid when delivered
+            if ($order->payment_method === 'cod' && $order->payment_status === 'pending') {
+                $order->payment_status = 'paid';
+                $order->paid_at = now();
+            }
+        }
+        
+        // Restore stock if order is being cancelled
+        if ($request->status === 'cancelled' && $oldStatus !== 'cancelled') {
+            foreach ($order->items as $item) {
+                if ($item->variant_id) {
+                    $variant = \App\Models\ProductVariant::find($item->variant_id);
+                    if ($variant) {
+                        $variant->increment('stock', $item->quantity);
+                    }
+                }
+            }
+            $order->cancelled_at = now();
+            $order->cancelled_by = 'admin';
         }
         
         $order->save();
+
+        // Send email notification if status changed
+        if ($oldStatus !== $request->status && $request->status !== 'cancelled') {
+            try {
+                \Mail::to($order->email)->send(new \App\Mail\OrderStatusUpdatedMail($order, $request->status));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send order status update email: ' . $e->getMessage());
+            }
+        } elseif ($request->status === 'cancelled' && $oldStatus !== 'cancelled') {
+            // Send cancellation email
+            try {
+                \Mail::to($order->email)->send(new \App\Mail\OrderCancelledMail($order));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send order cancellation email: ' . $e->getMessage());
+            }
+        }
 
         if ($request->ajax()) {
             return response()->json([
@@ -269,5 +306,77 @@ class OrderController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function cancel(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        // Check if order can be cancelled
+        if (!in_array($order->status, ['pending', 'processing', 'shipped'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order cannot be cancelled at this stage.'
+            ], 400);
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
+        $order->status = 'cancelled';
+        $order->cancellation_reason = $request->reason;
+        $order->cancelled_at = now();
+        $order->cancelled_by = 'admin';
+        $order->save();
+
+        // Restore product stock
+        foreach ($order->items as $item) {
+            if ($item->variant_id) {
+                $variant = \App\Models\ProductVariant::find($item->variant_id);
+                if ($variant) {
+                    $variant->increment('stock', $item->quantity);
+                }
+            }
+        }
+
+        // Send cancellation email to customer
+        try {
+            \Mail::to($order->email)->send(new \App\Mail\OrderCancelledMail($order));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send order cancellation email: ' . $e->getMessage());
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order cancelled successfully.'
+            ]);
+        }
+
+        return back()->with('success', 'Order cancelled successfully.');
+    }
+
+    public function cancelled(Request $request)
+    {
+        $query = Order::with(['user', 'items'])
+            ->where('status', 'cancelled')
+            ->latest();
+
+        // Search
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%");
+            });
+        }
+
+        $orders = $query->paginate(25);
+        
+        return view('admin.orders.cancelled', compact('orders'));
     }
 }

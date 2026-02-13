@@ -66,27 +66,12 @@
                             </svg>
                             Social Media
                         </button>
-                        <button onclick="switchTab('maintenance')" 
-                                class="tab-btn text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-1 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            Maintenance
-                        </button>
                         <button onclick="switchTab('seo')" 
                                 class="tab-btn text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-1 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                             SEO
-                        </button>
-                        <button onclick="switchTab('contact')" 
-                                class="tab-btn text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-1 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
-                            Contact Info
                         </button>
                         <button onclick="switchTab('policies')" 
                                 class="tab-btn text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-1 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center">
@@ -759,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function switchTab(tabName) {
-    const tabs = ['general-tab', 'imagekit-tab', 'payment-tab', 'shiprocket-tab', 'social-tab', 'maintenance-tab', 'seo-tab', 'policies-tab'];
+    const tabs = ['general-tab', 'imagekit-tab', 'payment-tab', 'shiprocket-tab', 'social-tab', 'seo-tab', 'policies-tab'];
     tabs.forEach(tabId => {
         const tab = document.getElementById(tabId);
         if (tab) tab.classList.add('hidden');
@@ -1085,7 +1070,8 @@ function setupAjaxForms() {
                 body: formData,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
                 }
             })
             .then(response => {
@@ -1104,10 +1090,10 @@ function setupAjaxForms() {
                 }
             })
             .catch(error => {
-                showToast('An error occurred while saving SEO settings', 'error');
+                showToast(error.message || 'An error occurred while saving SEO settings', 'error');
             })
             .finally(() => {
-                // Reset button
+                // Restore button state
                 button.disabled = false;
                 button.innerHTML = originalText;
             });

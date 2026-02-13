@@ -481,15 +481,6 @@ unset($__errorArgs, $__bag); ?>
                 const sku = `${nameCode}-${brandCode}-${numericPart}`;
                 skuField.value = sku;
             }
-            
-            // Handle form submission
-            document.getElementById('nextBtn')?.addEventListener('click', function() {
-                document.getElementById('stepForm').submit();
-            });
-
-            document.getElementById('prevBtn')?.addEventListener('click', function() {
-                window.location.href = '<?php echo e(route("seller.products.create.step2")); ?>';
-            });
         </script>
     <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>

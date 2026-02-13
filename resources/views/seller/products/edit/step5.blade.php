@@ -1,745 +1,416 @@
 @extends('seller.products.edit._layout')
 
+@section('step_title', 'Step 5: SEO Optimization')
+@section('step_description', 'Optimize for search engines and social media')
+
 @section('step_content')
 @php
-    use Illuminate\Support\Facades\DB;
-    
-    $currentStep = 2;
-    $prevStepRoute = '/seller/products/' . $product->id . '/edit?step=1';
-    $colors = App\Models\Color::where('is_active', true)->orderBy('name')->get();
-    $sizes = App\Models\Size::where('is_active', true)->orderBy('name')->get();
-    
-    // Use the same approach as admin - load from variants table
-    $product->load(['variants']);
-    
-    $variantColorIds = $product->variants->pluck('color_id')->filter()->unique()->values()->toArray();
-    $variantSizeIds = $product->variants->pluck('size_id')->filter()->unique()->values()->toArray();
-    
-    $variantImages = [];
-    foreach ($product->variants as $variant) {
-        if ($variant->color_id && $variant->images) {
-            $images = is_string($variant->images) ? json_decode($variant->images, true) : $variant->images;
-            if (is_array($images) && !empty($images)) {
-                if (!isset($variantImages[$variant->color_id])) {
-                    $variantImages[$variant->color_id] = [];
-                }
-                foreach ($images as $imageUrl) {
-                    $variantImages[$variant->color_id][] = [
-                        'url' => $imageUrl,
-                        'fileId' => null,
-                        'size' => 0,
-                        'width' => 360,
-                        'height' => 459
-                    ];
-                }
-            }
-        }
-    }
-    
-    $productData = [
-        'has_variants' => $product->variants()->exists(),
-        'variant_colors' => json_encode($variantColorIds),
-        'variant_sizes' => json_encode($variantSizeIds),
-        'variant_images' => json_encode($variantImages),
-    ];
+    $currentStep = 5;
+    $prevStepRoute = '/seller/products/' . $product->id . '/edit?step=4';
 @endphp
-
-
 
 <form id="stepForm" action="{{ route('seller.products.update', $product->id) }}" method="POST">
     @csrf
     @method('PUT')
-    <input type="hidden" name="step" value="2">
+    <input type="hidden" name="step" value="5">
+    @csrf
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-pink-50">
+        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-teal-50">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-r from-indigo-600 to-pink-600 rounded-lg flex items-center justify-center shadow-lg">
-                    <span class="text-white text-xl">🎨</span>
+                <div class="w-12 h-12 bg-gradient-to-r from-green-600 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
+                    <span class="text-white text-xl">🔍</span>
                 </div>
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">Product Variants</h2>
-                    <p class="text-gray-600 font-medium">Configure colors, sizes & variant-specific options</p>
+                    <h2 class="text-xl font-bold text-gray-900">SEO & Marketing</h2>
+                    <p class="text-gray-600 font-medium">Optimize for search engines & social media</p>
                 </div>
             </div>
         </div>
         
-        <div class="p-8 space-y-8">
-            <!-- Variant Type Selection -->
-            <div class="bg-gradient-to-r from-indigo-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Variant Configuration</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="hasColorVariants" class="h-5 w-5 text-purple-600 border-gray-300 rounded">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-2xl">🎨</span>
-                                <div>
-                                    <div class="font-semibold text-gray-900">Color Variants</div>
-                                    <div class="text-sm text-gray-600">Different colors with specific images</div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    <div>
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="hasSizeVariants" class="h-5 w-5 text-purple-600 border-gray-300 rounded">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-2xl">📏</span>
-                                <div>
-                                    <div class="font-semibold text-gray-900">Size Variants</div>
-                                    <div class="text-sm text-gray-600">Different sizes with stock/price</div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
+        <div class="p-8 space-y-6">
+            <!-- Search Engine Optimization -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                    <h3 class="text-lg font-bold text-gray-900">🔍 Search Engine Optimization</h3>
+                    <button type="button" onclick="autoGenerateSEO()" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center space-x-2">
+                        <span>✨</span>
+                        <span>Auto Generate SEO</span>
+                    </button>
                 </div>
-            </div>
-            <!-- Color Variants Section -->
-            <div id="colorVariantsSection" class="bg-white border-2 border-purple-200 rounded-xl p-6" style="display: none;">
-                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                    <span class="text-purple-600">🎨</span>
-                    <span>Color Variants</span>
-                </h3>
                 
-                <!-- Available Colors -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-800 mb-3">Select Colors</label>
-                    <div class="mb-4">
-                        <input type="text" id="colorSearch" placeholder="Search colors..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors">
+                <!-- Meta Title -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Meta Title <span class="text-gray-500 text-xs">(50-60 characters)</span></label>
+                    <input type="text" name="meta_title" maxlength="60" 
+                        value="{{ old('meta_title', $productData['meta_title'] ?? '') }}"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                        placeholder="Enter SEO title for search engines">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Appears in search results and browser tabs</span>
+                        <span id="metaTitleCount">0/60</span>
                     </div>
-                    <div class="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-4" id="colorsGrid">
-                        @foreach($colors as $color)
-                        <label class="cursor-pointer group">
-                            <input type="checkbox" name="selected_colors[]" value="{{ $color->id }}" class="hidden color-checkbox" data-color-id="{{ $color->id }}" data-color-name="{{ $color->name }}" data-color-hex="{{ $color->hex_code }}">
-                            <div class="relative">
-                                <div class="w-16 h-16 rounded-lg shadow-lg border-4 border-gray-300 transition-all duration-200 group-hover:scale-110 color-box" 
-                                     style="background-color: {{ $color->hex_code }};"
-                                     id="colorBox_{{ $color->id }}"></div>
-                                <div class="absolute -top-2 -right-2 hidden color-checkmark" style="z-index: 5;">
-                                    <div class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">✓</div>
-                                </div>
-                            </div>
-                            <div class="text-xs font-medium text-center mt-2 text-gray-700" id="colorName_{{ $color->id }}">{{ $color->name }}</div>
-                        </label>
-                        @endforeach
-                    </div>
+                    @error('meta_title')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <!-- Color-Specific Images Upload -->
-                <div id="colorImagesSection" style="display: none;">
-                    <h4 class="text-md font-bold text-gray-900 mb-4">📸 Upload Color-Specific Images</h4>
-                    <div id="colorImageContainers" class="space-y-6"></div>
+                <!-- Meta Description -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Meta Description <span class="text-gray-500 text-xs">(150-160 characters)</span></label>
+                    <textarea name="meta_description" maxlength="160" rows="3" 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                        placeholder="Brief description that appears in search results">{{ old('meta_description', $productData['meta_description'] ?? '') }}</textarea>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Shown in search results below the title</span>
+                        <span id="metaDescCount">0/160</span>
+                    </div>
+                    @error('meta_description')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
-            </div>
 
-            <!-- Size Variants Section -->
-            <div id="sizeVariantsSection" class="bg-white border-2 border-indigo-200 rounded-xl p-6" style="display: none;">
-                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                    <span class="text-indigo-600">📏</span>
-                    <span>Size Variants</span>
-                </h3>
+                <!-- Focus Keywords -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Focus Keywords</label>
+                    <input type="text" name="focus_keywords" 
+                        value="{{ old('focus_keywords', $productData['focus_keywords'] ?? '') }}"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                        placeholder="keyword1, keyword2, keyword3">
+                    <p class="text-xs text-gray-500 mt-1">Comma-separated keywords you want to rank for</p>
+                    @error('focus_keywords')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Canonical URL -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Canonical URL</label>
+                    <input type="url" name="canonical_url" 
+                        value="{{ old('canonical_url', $productData['canonical_url'] ?? '') }}"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                        placeholder="https://example.com/product-url">
+                    <p class="text-xs text-gray-500 mt-1">Preferred URL for this product (prevents duplicate content)</p>
+                    @error('canonical_url')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
                 
-                <!-- Available Sizes -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-800 mb-3">Select Sizes</label>
-                    <div class="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-3">
-                        @foreach($sizes as $size)
-                        <label class="cursor-pointer">
-                            <input type="checkbox" name="selected_sizes[]" value="{{ $size->id }}" class="hidden size-checkbox" data-size-id="{{ $size->id }}" data-size-name="{{ $size->name }}" data-size-abbr="{{ $size->abbreviation }}">
-                            <div class="relative">
-                                <div class="w-16 h-12 rounded-lg border-2 border-gray-300 transition-all duration-200 flex items-center justify-center font-bold text-lg bg-white text-gray-700 hover:border-indigo-300 size-box">
-                                    {{ $size->abbreviation ?? substr($size->name, 0, 2) }}
-                                </div>
-                                <div class="absolute -top-1 -right-1 hidden size-checkmark">
-                                    <div class="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">✓</div>
-                                </div>
+                <!-- Google Search Preview -->
+                <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-6">
+                    <h4 class="text-md font-bold text-gray-700 mb-4 flex items-center">
+                        <span class="text-lg mr-2">👁️</span>
+                        Google Search Preview
+                    </h4>
+                    <div class="bg-white p-4 rounded-lg border shadow-sm">
+                        <div class="space-y-1">
+                            <div id="previewTitle" class="text-blue-600 text-lg font-medium hover:underline cursor-pointer" style="line-height: 1.3;">
+                                Enter a meta title to see preview...
                             </div>
-                            <div class="text-xs font-medium text-center mt-1 text-gray-700">{{ $size->name }}</div>
-                        </label>
-                        @endforeach
+                            <div id="previewUrl" class="text-green-700 text-sm" style="line-height: 1.4;">
+                                https://yourstore.com/products/product-name
+                            </div>
+                            <div id="previewDescription" class="text-gray-600 text-sm" style="line-height: 1.4; max-width: 600px;">
+                                Enter a meta description to see how it appears in Google search results...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-500 flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        This is how your product will appear in Google search results
                     </div>
                 </div>
             </div>
 
-            <!-- Hidden inputs for variants -->
-            <input type="hidden" name="has_variants" id="hasVariantsInput" value="{{ old('has_variants', $productData['has_variants']) }}">
-            <input type="hidden" name="variant_colors" id="variantColorsInput" value="{{ old('variant_colors', json_encode($productData['variant_colors'] ?? [])) }}">
-            <input type="hidden" name="variant_sizes" id="variantSizesInput" value="{{ old('variant_sizes', json_encode($productData['variant_sizes'] ?? [])) }}">
-            <input type="hidden" name="variant_images" id="variantImagesInput" value="{{ old('variant_images', json_encode($productData['variant_images'] ?? [])) }}">
+            <!-- Social Media Optimization -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">📱 Social Media Optimization</h3>
+                
+                <!-- Open Graph Title -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Open Graph Title <span class="text-gray-500 text-xs">(Facebook, LinkedIn)</span></label>
+                    <input type="text" name="og_title" maxlength="60" 
+                        value="{{ old('og_title', $productData['og_title'] ?? '') }}"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                        placeholder="Title for social media shares">
+                    <p class="text-xs text-gray-500 mt-1">Title shown when shared on Facebook, LinkedIn</p>
+                    @error('og_title')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Open Graph Description -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Open Graph Description</label>
+                    <textarea name="og_description" maxlength="160" rows="3" 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                        placeholder="Description for social media shares">{{ old('og_description', $productData['og_description'] ?? '') }}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">Description shown when shared on social media</p>
+                    @error('og_description')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- SEO Tips -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h3 class="font-semibold text-yellow-800 mb-2">💡 SEO Best Practices</h3>
+                <ul class="text-sm text-yellow-700 space-y-1">
+                    <li>• Use your main keyword in the meta title</li>
+                    <li>• Write compelling meta descriptions that encourage clicks</li>
+                    <li>• Include relevant keywords naturally in descriptions</li>
+                    <li>• Make social media titles engaging and share-worthy</li>
+                    <li>• Keep URLs short, descriptive, and SEO-friendly</li>
+                </ul>
+            </div>
         </div>
     </div>
 </form>
-@push('styles')
-<style>
-/* SortableJS Custom Styles */
-.sortable-ghost { opacity: 0.5; transform: rotate(2deg); }
-.sortable-chosen { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); border: 2px solid #3b82f6 !important; }
-.sortable-drag { transform: rotate(5deg) scale(1.1); z-index: 1000; cursor: grabbing; }
-.cursor-move { cursor: move; }
-</style>
-@endpush
 
 @push('scripts')
-<!-- SortableJS for drag & drop -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-
 <script>
-// Simple vanilla JavaScript implementation
+// Auto Generate SEO Function - Enhanced
+function autoGenerateSEO() {
+    // Data from server (using product relationships)
+    const productName = @json($product->name ?? '');
+    const productDesc = @json($product->description ?? '');
+    const brandName = @json($product->brand->name ?? '');
+    const categoryName = @json($product->category->name ?? '');
+    const price = @json($product->price ?? '');
+    const productSlug = @json($product->slug ?? 'product');
+    
+    // Strip HTML and clean description
+    const tmpDiv = document.createElement("DIV");
+    tmpDiv.innerHTML = productDesc;
+    let cleanDesc = tmpDiv.textContent || tmpDiv.innerText || "";
+    cleanDesc = cleanDesc.replace(/\s+/g, ' ').trim();
+    
+    // Extract key features/benefits from description (first 2-3 sentences)
+    const sentences = cleanDesc.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const keyFeatures = sentences.slice(0, 2).join('. ').trim();
+    
+    // 1. Generate COMPELLING Meta Title (aim for 55-60 chars for optimal display)
+    let metaTitle = '';
+    
+    if (brandName && categoryName) {
+        // Format: "Product Name - Brand | Category Collection"
+        metaTitle = `${productName} - ${brandName} | ${categoryName}`;
+    } else if (brandName) {
+        // Format: "Product Name by Brand | Premium/Best Quality"
+        metaTitle = `${productName} by ${brandName} | Premium Quality`;
+    } else if (categoryName) {
+        // Format: "Product Name | Category - Shop Now"
+        metaTitle = `${productName} | ${categoryName} - Shop Now`;
+    } else {
+        // Format: "Product Name | Buy Online - Best Price"
+        metaTitle = `${productName} | Buy Online - Best Price`;
+    }
+    
+    // Ensure optimal length (50-60 characters)
+    if (metaTitle.length > 60) {
+        metaTitle = metaTitle.substring(0, 57) + '...';
+    } else if (metaTitle.length < 50 && price) {
+        // Add price hint if title is too short
+        const priceHint = ` - ₹${price}`;
+        if (metaTitle.length + priceHint.length <= 60) {
+            metaTitle += priceHint;
+        }
+    }
+    
+    // 2. Generate COMPELLING Meta Description (aim for 155-160 chars)
+    let metaDescription = '';
+    
+    if (keyFeatures && keyFeatures.length > 20) {
+        // Use actual features from description
+        metaDescription = keyFeatures;
+    } else if (cleanDesc.length > 30) {
+        // Use beginning of description
+        metaDescription = cleanDesc.substring(0, 120);
+    } else {
+        // Generate generic but appealing description
+        metaDescription = `Shop ${productName}`;
+        if (brandName) metaDescription += ` by ${brandName}`;
+        if (categoryName) metaDescription += ` in ${categoryName} category`;
+        metaDescription += `. Premium quality products with fast shipping and best prices`;
+    }
+    
+    // Add call-to-action if space permits
+    if (metaDescription.length < 140) {
+        const cta = " Order now for best deals!";
+        if (metaDescription.length + cta.length <= 160) {
+            metaDescription += cta;
+        }
+    }
+    
+    // Ensure optimal length (150-160 characters)
+    if (metaDescription.length > 160) {
+        metaDescription = metaDescription.substring(0, 157) + '...';
+    } else if (metaDescription.length < 150) {
+        // Pad with benefit statement
+        const padding = " Fast delivery. Easy returns.";
+        if (metaDescription.length + padding.length <= 160) {
+            metaDescription += padding;
+        }
+    }
+    
+    // 3. Generate RICH Keywords (varied and specific)
+    let keywords = [];
+    
+    // Add primary terms
+    keywords.push(productName);
+    if (brandName) {
+        keywords.push(brandName);
+        keywords.push(`${brandName} ${categoryName || 'products'}`);
+    }
+    if (categoryName) {
+        keywords.push(categoryName);
+        keywords.push(`best ${categoryName.toLowerCase()}`);
+    }
+    
+    // Extract meaningful words from product name (length > 3)
+    const nameWords = productName.split(/[\s,\/\-]+/).filter(word => 
+        word.length > 3 && !['with', 'from', 'for'].includes(word.toLowerCase())
+    );
+    nameWords.forEach(word => {
+        keywords.push(word);
+        if (categoryName) keywords.push(`${word} ${categoryName.toLowerCase()}`);
+    });
+    
+    // Add commercial intent keywords
+    if (brandName) keywords.push(`buy ${brandName.toLowerCase()} online`);
+    keywords.push(`${productName.toLowerCase()} online`);
+    keywords.push(`${productName.toLowerCase()} price`);
+    if (categoryName) keywords.push(`${categoryName.toLowerCase()} online shopping`);
+    
+    // Unique and comma separated (limit to top 15-20)
+    const uniqueKeywords = [...new Set(keywords)].slice(0, 18).join(', ');
+    
+    // 4. Generate Canonical URL (use product slug)
+    const canonicalUrl = `${window.location.origin}/products/${productSlug}`;
+    
+    // Populate ALL Fields
+    document.querySelector('input[name="meta_title"]').value = metaTitle;
+    document.querySelector('textarea[name="meta_description"]').value = metaDescription;
+    document.querySelector('input[name="focus_keywords"]').value = uniqueKeywords;
+    document.querySelector('input[name="canonical_url"]').value = canonicalUrl;
+    
+    // Social Media - Make it more engaging
+    let ogTitle = metaTitle;
+    let ogDescription = metaDescription;
+    
+    // Make OG title more social-friendly (add emoji or emphasis)
+    if (ogTitle.length < 55) {
+        ogTitle = `✨ ${ogTitle}`;
+    }
+    
+    document.querySelector('input[name="og_title"]').value = ogTitle;
+    document.querySelector('textarea[name="og_description"]').value = ogDescription;
+    
+    // Trigger input events to update counters and preview
+    document.querySelector('input[name="meta_title"]').dispatchEvent(new Event('input'));
+    document.querySelector('textarea[name="meta_description"]').dispatchEvent(new Event('input'));
+    document.querySelector('input[name="canonical_url"]').dispatchEvent(new Event('input'));
+    document.querySelector('input[name="og_title"]').dispatchEvent(new Event('input'));
+    
+    // Show success feedback
+    const button = document.querySelector('button[onclick="autoGenerateSEO()"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span>✅</span><span>Generated!</span>';
+    button.classList.add('animate-pulse');
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('animate-pulse');
+    }, 2000);
+}
+
+// Character count for meta fields & Real-time Google Preview
 document.addEventListener('DOMContentLoaded', function() {
-
-    // Color Search Functionality
-    const colorSearchInput = document.getElementById('colorSearch');
-    if (colorSearchInput) {
-        colorSearchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const colorLabels = document.querySelectorAll('#colorsGrid > label');
-
-            colorLabels.forEach(label => {
-                const input = label.querySelector('input.color-checkbox');
-                if (input) {
-                    const colorName = input.dataset.colorName.toLowerCase();
-                    if (colorName.includes(searchTerm)) {
-                        label.style.display = '';
-                    } else {
-                        label.style.display = 'none';
-                    }
-                }
-            });
-        });
-    }
-
-    let selectedColors = [];
-    let selectedSizes = [];
-    let colorImages = {}; // Structure: { colorId: [ {url, fileId, size, width, height, name, originalSize}, ... ] }
+    const metaTitle = document.querySelector('input[name="meta_title"]');
+    const metaDescription = document.querySelector('textarea[name="meta_description"]');
+    const canonicalUrl = document.querySelector('input[name="canonical_url"]');
+    const metaTitleCount = document.getElementById('metaTitleCount');
+    const metaDescCount = document.getElementById('metaDescCount');
     
-    // --- Initialization Logic ---
+    // Preview elements
+    const previewTitle = document.getElementById('previewTitle');
+    const previewUrl = document.getElementById('previewUrl');
+    const previewDescription = document.getElementById('previewDescription');
     
-    let loadedFromOld = false;
-    try {
-        const oldColorImages = document.getElementById('variantImagesInput').value;
-        if (oldColorImages && oldColorImages !== '{}' && oldColorImages !== '[]') {
-            colorImages = JSON.parse(oldColorImages);
-        }
+    // Get product name and slug from existing data
+    const productName = '{{ $productData["name"] ?? "Product Name" }}';
+    const productSlug = '{{ $productData["slug"] ?? "product-name" }}';
+
+    function updateCount(input, counter) {
+        const current = input.value.length;
+        const max = input.getAttribute('maxlength');
+        counter.textContent = `${current}/${max}`;
         
-        const oldSelectedColors = document.getElementById('variantColorsInput').value;
-        if (oldSelectedColors && oldSelectedColors !== '[]' && oldSelectedColors !== '') {
-            selectedColors = JSON.parse(oldSelectedColors);
-            // Only set loadedFromOld if this is actually from validation errors (old input)
-            // Check if we have Laravel's old() data by looking for validation errors
-            if (document.querySelector('.text-red-500')) {
-                loadedFromOld = true;
-            }
-        }
-        
-        const oldSelectedSizes = document.getElementById('variantSizesInput').value;
-        if (oldSelectedSizes && oldSelectedSizes !== '[]' && oldSelectedSizes !== '') {
-            selectedSizes = JSON.parse(oldSelectedSizes);
-        }
-    } catch(e) {
-        console.error('Error loading input data:', e);
-    }
-
-    console.log('loadedFromOld:', loadedFromOld);
-
-    // 2. Always load server data if we don't have validation errors (this handles both fresh loads and post-update refreshes)
-    if (!loadedFromOld) {
-        @if(isset($productData['variant_colors']) && $productData['variant_colors'])
-        try {
-            const existingColors = @json($productData['variant_colors']);
-            if (Array.isArray(existingColors) && existingColors.length > 0) {
-                selectedColors = existingColors.map(String);
-            }
-        } catch(e) {
-            console.error('Error loading server colors:', e);
-        }
-        @endif
-        
-        @if(isset($productData['variant_sizes']) && $productData['variant_sizes'])
-        try {
-            const existingSizes = @json($productData['variant_sizes']);
-            if (Array.isArray(existingSizes) && existingSizes.length > 0) {
-                selectedSizes = existingSizes.map(String);
-            }
-        } catch(e) {
-            console.error('Error loading server sizes:', e);
-        }
-        @endif
-        
-        @if(isset($productData['variant_images']) && $productData['variant_images'])
-        try {
-            const existingImages = @json($productData['variant_images']);
-            if (existingImages && typeof existingImages === 'object') {
-                // Normalize existing images if they are simple URLs
-                for (const [cId, imgs] of Object.entries(existingImages)) {
-                    if (Array.isArray(imgs)) {
-                        colorImages[cId] = imgs.map(img => {
-                             if(typeof img === 'string') {
-                                 return { url: img, width: 360, height: 459, size: 0, originalSize: 0, name: 'image' };
-                             }
-                             return img;
-                        });
-                    }
-                }
-            }
-        } catch(e) {
-            console.error('Error loading server images:', e);
-        }
-        @endif
-    }
-    
-    console.log('Final loaded data:', {
-        selectedColors: selectedColors,
-        selectedSizes: selectedSizes,
-        hasVariants: selectedColors.length > 0 || selectedSizes.length > 0
-    });
-    const hasColorCheckbox = document.getElementById('hasColorVariants');
-    const hasSizeCheckbox = document.getElementById('hasSizeVariants');
-    const colorSection = document.getElementById('colorVariantsSection');
-    const sizeSection = document.getElementById('sizeVariantsSection');
-    const colorImagesSection = document.getElementById('colorImagesSection');
-    const colorImageContainers = document.getElementById('colorImageContainers');
-    
-    // Initial UI State Setup
-    const hasVariantsInput = document.getElementById('hasVariantsInput');
-    const shouldCheckColor = selectedColors.length > 0 || (hasVariantsInput && hasVariantsInput.value === '1');
-
-    if (shouldCheckColor || selectedColors.length > 0) {
-        if(hasColorCheckbox) {
-            hasColorCheckbox.checked = true;
-            colorSection.style.display = 'block';
-        }
-    }
-    if (selectedSizes.length > 0) {
-        if(hasSizeCheckbox) {
-            hasSizeCheckbox.checked = true;
-            sizeSection.style.display = 'block';
-        }
-    }
-
-    // Apply Checkbox Selection State from Loaded Data
-    selectedColors.forEach(colorId => {
-        const checkbox = document.querySelector(`.color-checkbox[data-color-id="${colorId}"]`);
-        if (checkbox) {
-            checkbox.checked = true;
-            updateCheckboxUI(checkbox, true);
-        }
-    });
-
-    selectedSizes.forEach(sizeId => {
-        const checkbox = document.querySelector(`.size-checkbox[data-size-id="${sizeId}"]`);
-        if (checkbox) {
-            checkbox.checked = true;
-            const parent = checkbox.parentElement;
-            const sizeBox = parent.querySelector('.size-box');
-            const checkmark = parent.querySelector('.size-checkmark');
-            sizeBox.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
-            sizeBox.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
-            checkmark.classList.remove('hidden');
-        }
-    });
-
-    // Toggle Color Variants
-    if(hasColorCheckbox) {
-        hasColorCheckbox.addEventListener('change', function() {
-            colorSection.style.display = this.checked ? 'block' : 'none';
-            if (!this.checked) {
-                selectedColors = [];
-                colorImages = {};
-                resetColorCheckboxes();
-                colorImagesSection.style.display = 'none';
-            }
-            updateHiddenInputs();
-        });
-    }
-    
-    // Toggle Size Variants (if exists)
-    if(hasSizeCheckbox) {
-        hasSizeCheckbox.addEventListener('change', function() {
-            if(sizeSection) sizeSection.style.display = this.checked ? 'block' : 'none';
-            if (!this.checked) {
-                selectedSizes = [];
-                resetSizeCheckboxes();
-            }
-            updateHiddenInputs();
-        });
-    }
-    
-    // Handle Color Selection
-    document.querySelectorAll('.color-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const colorId = this.dataset.colorId;
-            updateCheckboxUI(this, this.checked);
-
-            if (this.checked) {
-                if (!selectedColors.includes(colorId)) {
-                    selectedColors.push(colorId);
-                }
-                if (!colorImages[colorId]) colorImages[colorId] = [];
+        // Color coding for optimal lengths
+        if (input.name === 'meta_title') {
+            if (current >= 50 && current <= 60) {
+                counter.className = 'text-green-600 font-semibold';
+            } else if (current > 60) {
+                counter.className = 'text-red-600 font-semibold';
             } else {
-                selectedColors = selectedColors.filter(id => id !== colorId);
-                delete colorImages[colorId];
+                counter.className = 'text-gray-500';
             }
-            
-            updateColorImagesUI();
-            updateHiddenInputs();
-        });
-    });
-
-    function updateCheckboxUI(checkbox, isChecked) {
-        const parent = checkbox.parentElement;
-        const box = parent.querySelector('.color-box');
-        const checkmark = parent.querySelector('.color-checkmark');
-        
-        if(isChecked) {
-            box.classList.add('border-purple-500', 'ring-4', 'ring-purple-200');
-            checkmark.classList.remove('hidden');
-        } else {
-            box.classList.remove('border-purple-500', 'ring-4', 'ring-purple-200');
-            checkmark.classList.add('hidden');
-        }
-    }
-    // Handle Size Selection
-    document.querySelectorAll('.size-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const parent = this.parentElement;
-            const sizeBox = parent.querySelector('.size-box');
-            const checkmark = parent.querySelector('.size-checkmark');
-            
-            if (this.checked) {
-                if (!selectedSizes.includes(this.value)) {
-                    selectedSizes.push(this.value);
-                }
-                sizeBox.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
-                sizeBox.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
-                checkmark.classList.remove('hidden');
+        } else if (input.name === 'meta_description') {
+            if (current >= 150 && current <= 160) {
+                counter.className = 'text-green-600 font-semibold';
+            } else if (current > 160) {
+                counter.className = 'text-red-600 font-semibold';
             } else {
-                selectedSizes = selectedSizes.filter(id => id !== this.value);
-                sizeBox.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
-                sizeBox.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
-                checkmark.classList.add('hidden');
+                counter.className = 'text-gray-500';
             }
-            
-            updateHiddenInputs();
-        });
-    });
+        }
+    }
     
-    function updateColorImagesUI() {
-        if (selectedColors.length > 0) {
-            colorImagesSection.style.display = 'block';
-            renderColorContainers();
+    function updateGooglePreview() {
+        // Update title
+        const title = metaTitle.value.trim() || productName + ' | Your Store Name';
+        previewTitle.textContent = title.length > 60 ? title.substring(0, 57) + '...' : title;
+        
+        // Update URL
+        const baseUrl = canonicalUrl.value.trim() || `https://yourstore.com/products/${productSlug}`;
+        previewUrl.textContent = baseUrl;
+        
+        // Update description
+        const description = metaDescription.value.trim() || 'Enter a meta description to see how it appears in Google search results. This text helps users understand what your product is about.';
+        previewDescription.textContent = description.length > 160 ? description.substring(0, 157) + '...' : description;
+        
+        // Update character count colors based on preview
+        if (title.length > 60) {
+            previewTitle.className = 'text-blue-600 text-lg font-medium hover:underline cursor-pointer truncate';
         } else {
-            colorImagesSection.style.display = 'none';
-            colorImageContainers.innerHTML = '';
+            previewTitle.className = 'text-blue-600 text-lg font-medium hover:underline cursor-pointer';
         }
     }
     
-    function renderColorContainers() {
-        colorImageContainers.innerHTML = '';
-        
-        selectedColors.forEach(colorId => {
-            const checkbox = document.querySelector(`.color-checkbox[data-color-id="${colorId}"]`);
-            if(!checkbox) return;
-
-            const colorName = checkbox.dataset.colorName;
-            const colorHex = checkbox.dataset.colorHex;
-            const images = colorImages[colorId] || [];
-            
-            const div = document.createElement('div');
-            div.className = 'bg-gray-50 rounded-xl p-6 border-2 border-gray-200';
-            div.id = `container_${colorId}`;
-            
-            // Header
-            div.innerHTML = `
-                <div class="flex items-center justify-between mb-4">
-                    <h5 class="text-lg font-bold text-gray-900 flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full shadow-md" style="background-color: ${colorHex}"></div>
-                        <span>${colorName}</span>
-                    </h5>
-                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded" id="count_${colorId}">${images.length} images</span>
-                </div>
-                
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-all cursor-pointer image-upload-area" 
-                     onclick="document.getElementById('file_${colorId}').click()"
-                     ondragover="event.preventDefault(); this.classList.add('border-blue-500', 'bg-blue-50')"
-                     ondragleave="this.classList.remove('border-blue-500', 'bg-blue-50')"
-                     ondrop="handleDrop(event, '${colorId}', '${colorName}')">
-                     
-                    <input type="file" id="file_${colorId}" accept="image/*" multiple class="hidden">
-                    
-                    <div class="space-y-4">
-                        <div class="mx-auto w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
-                            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-lg font-semibold text-gray-700">Click or Drag & Drop to upload</p>
-                            <p class="text-sm text-gray-500">for ${colorName}</p>
-                            <p class="text-xs text-gray-400 mt-2">Max 6 images • Original Quality</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Loading State inside this container (hidden by default) -->
-                <div id="loading_${colorId}" class="hidden mt-4 text-center py-4">
-                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                     <p class="text-sm text-blue-600 mt-2">Uploading...</p>
-                </div>
-
-                <div id="grid_${colorId}" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 ${images.length === 0 ? 'hidden' : ''}"></div>
-            `;
-            
-            colorImageContainers.appendChild(div);
-            
-            // Initialize Sortable for this grid
-            const gridEl = document.getElementById(`grid_${colorId}`);
-            if(gridEl) {
-                new Sortable(gridEl, {
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    chosenClass: 'sortable-chosen',
-                    dragClass: 'sortable-drag',
-                    onEnd: function(evt) {
-                        const oldIdx = evt.oldIndex;
-                        const newIdx = evt.newIndex;
-                        
-                        if (oldIdx !== newIdx && colorImages[colorId]) {
-                            // Reorder array
-                            const movedItem = colorImages[colorId].splice(oldIdx, 1)[0];
-                            colorImages[colorId].splice(newIdx, 0, movedItem);
-                            
-                            // Re-render to ensure "Main" badge is correct
-                            renderImages(colorId);
-                            updateHiddenInputs();
-                        }
-                    }
-                });
-            }
-            
-            // File input listener
-            document.getElementById(`file_${colorId}`).addEventListener('change', function(e) {
-                handleUpload(e.target.files, colorId, colorName);
-                e.target.value = ''; // Reset
-            });
-            
-            // Initial render of images if any
-            renderImages(colorId);
+    // Initialize counts and preview
+    if (metaTitle && metaTitleCount) {
+        updateCount(metaTitle, metaTitleCount);
+        metaTitle.addEventListener('input', () => {
+            updateCount(metaTitle, metaTitleCount);
+            updateGooglePreview();
         });
     }
-    // Expose handleDrop to window for inline onclick/ondrop to work smoothly
-    window.handleDrop = function(e, colorId, colorName) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
-        
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            handleUpload(e.dataTransfer.files, colorId, colorName);
-        }
-    };
-    
-    async function handleUpload(fileList, colorId, colorName) {
-        const files = Array.from(fileList);
-        const currentImages = colorImages[colorId] || [];
-        
-        if (currentImages.length + files.length > 6) {
-            alert(`Maximum 6 images per color. You can upload ${6 - currentImages.length} more.`);
-            return;
-        }
-        
-        // Show loading
-        const loadingEl = document.getElementById(`loading_${colorId}`);
-        if(loadingEl) loadingEl.classList.remove('hidden');
 
-        // Process uploads sequentially or parallel. Parallel is faster.
-        const uploadPromises = files.map(async (file) => {
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('folder', 'products/variants');
-            
-            try {
-                const response = await fetch('{{ route("seller.upload.image") }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Normalize result to match our structure
-                     return {
-                        url: result.url,
-                        fileId: result.file_id || result.fileId || 'unknown',
-                        size: result.size || file.size, // Actual size
-                        originalSize: file.size || 0,
-                        width: result.width || 360,
-                        height: result.height || 459,
-                        name: result.name || file.name || 'image'
-                    };
-                } else {
-                    console.error('Upload failed for file:', file.name, result.message);
-                    return null;
-                }
-            } catch (err) {
-                console.error('Upload error:', err);
-                return null;
-            }
-        });
-        
-        const uploaded = await Promise.all(uploadPromises);
-        const validUploads = uploaded.filter(u => u !== null);
-        
-        if (validUploads.length > 0) {
-            if (!colorImages[colorId]) colorImages[colorId] = [];
-            colorImages[colorId] = [...colorImages[colorId], ...validUploads];
-        } else {
-            alert('Failed to upload images. Please check console or try again.');
-        }
-
-        // Hide loading and render
-        if(loadingEl) loadingEl.classList.add('hidden');
-        renderImages(colorId);
-        updateHiddenInputs();
-    }
-    
-    function renderImages(colorId) {
-        const grid = document.getElementById(`grid_${colorId}`);
-        const countSpan = document.getElementById(`count_${colorId}`);
-        if (!grid) return;
-        
-        const images = colorImages[colorId] || [];
-        
-        if(countSpan) countSpan.textContent = `${images.length} images`;
-        
-        if (images.length === 0) {
-            grid.classList.add('hidden');
-            grid.innerHTML = '';
-            return;
-        }
-        
-        grid.classList.remove('hidden');
-        
-        grid.innerHTML = images.map((img, idx) => `
-            <div class="relative group border-2 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all ${idx === 0 ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200'} cursor-move">
-                <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
-                    <img src="${img.url}" class="w-full h-full object-cover">
-                    ${idx === 0 ? '<div class="absolute top-1 left-1 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Main</div>' : ''}
-                    <div class="absolute top-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">
-                        ${img.width}×${img.height}
-                    </div>
-                </div>
-                
-                <div class="p-2 bg-white border-t border-gray-100">
-                    <div class="flex justify-between items-center text-[10px] text-gray-500 mb-1">
-                        <span>${formatFileSize(img.size)}</span>
-                    </div>
-                    <button type="button" onclick="removeImage('${colorId}', ${idx})" class="w-full py-1 text-center text-xs text-red-500 hover:text-white hover:bg-red-500 rounded transition-colors flex items-center justify-center space-x-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        <span>Remove</span>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-    // Make remove global
-    window.removeImage = function(colorId, idx) {
-        if (colorImages[colorId]) {
-            colorImages[colorId].splice(idx, 1);
-            renderImages(colorId);
-            updateHiddenInputs();
-        }
-    };
-    
-    function updateHiddenInputs() {
-        document.getElementById('hasVariantsInput').value = (hasColorCheckbox.checked || (hasSizeCheckbox && hasSizeCheckbox.checked)) ? '1' : '0';
-        document.getElementById('variantColorsInput').value = JSON.stringify(selectedColors);
-        document.getElementById('variantSizesInput').value = JSON.stringify(selectedSizes);
-        document.getElementById('variantImagesInput').value = JSON.stringify(colorImages);
-    }
-    
-    function resetColorCheckboxes() {
-        document.querySelectorAll('.color-checkbox').forEach(cb => {
-            cb.checked = false;
-            updateCheckboxUI(cb, false);
+    if (metaDescription && metaDescCount) {
+        updateCount(metaDescription, metaDescCount);
+        metaDescription.addEventListener('input', () => {
+            updateCount(metaDescription, metaDescCount);
+            updateGooglePreview();
         });
     }
     
-    function resetSizeCheckboxes() {
-        document.querySelectorAll('.size-checkbox').forEach(cb => {
-            cb.checked = false;
-            const parent = cb.parentElement;
-            const box = parent.querySelector('.size-box');
-            box.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
-            box.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
-            parent.querySelector('.size-checkmark').classList.add('hidden');
-        });
+    if (canonicalUrl) {
+        canonicalUrl.addEventListener('input', updateGooglePreview);
     }
     
-    function formatFileSize(bytes) {
-        if (!bytes || isNaN(bytes) || bytes <= 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + (sizes[i] || 'GB');
-    }
-    
-    // Initial Render
-    if(selectedColors.length > 0) {
-        updateColorImagesUI();
-    }
-    
-    // Update hidden inputs with loaded data
-    updateHiddenInputs();
-    
-    // Override the navigateToNextStep function for step 2 to save data first
-    window.navigateToNextStep = async function() {
-        // Make sure hidden inputs are updated before submission
-        updateHiddenInputs();
-        
-        const stepForm = document.getElementById('stepForm');
-        const formData = new FormData(stepForm);
-        
-        try {
-            const response = await fetch(stepForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
-            }
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showNotification('Step 2 updated successfully!', 'success');
-                // Refresh the page to show updated data from database
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                showNotification('Error: ' + (result.message || 'Failed to save step'), 'error');
-            }
-        } catch (error) {
-            showNotification('An error occurred: ' + error.message, 'error');
-        }
-    };
-    
-    // Handle updateBtn click for layout compatibility
-    document.getElementById('updateBtn')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        navigateToNextStep();
-    });
-    
-    document.getElementById('prevBtn')?.addEventListener('click', function() {
-        window.location.href = '/seller/products/{{ $product->id }}/edit?step=1';
-    });
+    // Initial preview update
+    updateGooglePreview();
 });
 </script>
 @endpush

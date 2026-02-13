@@ -103,6 +103,16 @@ class SellerPayoutController extends Controller
                 json_encode(['payout_id' => $payout->id, 'amount' => $payout->amount])
             );
 
+            // Send email notification
+            try {
+                \Mail::to($payout->seller->user->email)->send(new \App\Mail\PayoutApprovedMail($payout));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send payout approved email', [
+                    'payout_id' => $payout->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
             DB::commit();
 
             \Log::info('Payout approved successfully', ['payout_id' => $payout->id]);
@@ -154,6 +164,24 @@ class SellerPayoutController extends Controller
                 'processed_at' => now(),
                 'notes' => $payout->notes . "\n\nRejected by admin on " . now()->format('Y-m-d H:i:s') . "\nReason: " . $request->rejection_reason
             ]);
+
+            // Send notification to seller
+            $payout->seller->sendNotification(
+                'payout_rejected',
+                'Payout Rejected',
+                'Your payout request of ₹' . number_format($payout->amount, 2) . ' has been rejected. Reason: ' . $request->rejection_reason,
+                json_encode(['payout_id' => $payout->id, 'amount' => $payout->amount, 'reason' => $request->rejection_reason])
+            );
+
+            // Send email notification
+            try {
+                \Mail::to($payout->seller->user->email)->send(new \App\Mail\PayoutRejectedMail($payout, $request->rejection_reason));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send payout rejected email', [
+                    'payout_id' => $payout->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             DB::commit();
 
@@ -216,6 +244,16 @@ class SellerPayoutController extends Controller
                 'Your payout of ₹' . number_format($payout->amount, 2) . ' has been successfully transferred to your bank account. Transaction ID: ' . $request->transaction_id,
                 json_encode(['payout_id' => $payout->id, 'amount' => $payout->amount, 'transaction_id' => $request->transaction_id])
             );
+
+            // Send email notification
+            try {
+                \Mail::to($payout->seller->user->email)->send(new \App\Mail\PayoutCompletedMail($payout));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send payout completed email', [
+                    'payout_id' => $payout->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             DB::commit();
 

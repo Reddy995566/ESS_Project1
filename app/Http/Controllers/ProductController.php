@@ -12,7 +12,7 @@ class ProductController extends Controller
     {
         $product = Product::where('slug', $slug)
             ->activeAndApproved()
-            ->with(['colors', 'sizes']) // Load colors and sizes relationships
+            ->with(['colors', 'sizes', 'variants.color', 'variants.size']) // Load variants with relationships
             ->withCount('approvedReviews')
             ->firstOrFail();
 
@@ -21,9 +21,31 @@ class ProductController extends Controller
             RecentlyViewed::trackView(auth()->id(), $product->id);
         }
 
+        // Check if user has purchased this product (for review eligibility)
+        $hasPurchased = false;
+        if (auth()->check()) {
+            $hasPurchased = \DB::table('orders')
+                ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                ->where('orders.user_id', auth()->id())
+                ->where('order_items.product_id', $product->id)
+                ->whereIn('orders.status', ['pending', 'processing', 'shipped', 'delivered'])
+                ->exists();
+        }
+
         // Get selected color and size from query params
         $selectedColorId = request()->query('color');
         $selectedSizeId = request()->query('size');
+
+        // Prepare variant stock data for JavaScript
+        $variantStockData = [];
+        foreach ($product->variants as $variant) {
+            $key = $variant->color_id . '_' . $variant->size_id;
+            $variantStockData[$key] = [
+                'stock' => $variant->stock,
+                'sku' => $variant->sku,
+                'price' => $variant->price,
+            ];
+        }
 
         // Get similar products from the same category
         $similarProducts = Product::where('category_id', $product->category_id)
@@ -49,7 +71,7 @@ class ProductController extends Controller
         // You can implement this based on your orders/sales tracking
         $recentPurchases = 0; // TODO: Implement based on your orders table
         
-        return view('website.product-details', compact('product', 'similarProducts', 'recentlyViewed', 'recentPurchases', 'selectedColorId', 'selectedSizeId'));
+        return view('website.product-details', compact('product', 'similarProducts', 'recentlyViewed', 'recentPurchases', 'selectedColorId', 'selectedSizeId', 'hasPurchased', 'variantStockData'));
 
     }
 

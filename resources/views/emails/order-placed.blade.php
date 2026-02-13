@@ -332,23 +332,15 @@
             <div class="section-title">Order Items</div>
             @foreach($order->items as $item)
             <div class="product-item">
-                @php
-                    $productImage = null;
-                    if($item->product) {
-                        $displayImages = $item->product->display_images;
-                        $productImage = !empty($displayImages) ? $displayImages[0] : null;
-                    }
-                @endphp
-                @if($productImage)
-                <img src="{{ $productImage }}" alt="{{ $item->product_name }}" class="product-image">
+                @if($item->image)
+                <img src="{{ $item->image }}" alt="{{ $item->product_name }}" class="product-image">
+                @elseif($item->product && $item->product->image_url)
+                <img src="{{ $item->product->image_url }}" alt="{{ $item->product_name }}" class="product-image">
                 @endif
                 <div class="product-details">
                     <div class="product-name">{{ $item->product_name }}</div>
                     <div class="product-meta">
-                        @if($item->variant)
-                            Color: {{ $item->variant->color->name ?? 'N/A' }} | 
-                            Size: {{ $item->variant->size->name ?? 'N/A' }}
-                        @elseif($item->variant_name)
+                        @if($item->variant_name)
                             {{ $item->variant_name }}
                         @endif
                         <br>Quantity: {{ $item->quantity }}
@@ -366,7 +358,7 @@
                 </div>
                 @if(isset($order->discount) && $order->discount > 0)
                 <div class="total-row">
-                    <span>Discount:</span>
+                    <span>Discount @if($order->coupon_code)({{ $order->coupon_code }})@endif:</span>
                     <span>-₹{{ number_format($order->discount, 2) }}</span>
                 </div>
                 @endif

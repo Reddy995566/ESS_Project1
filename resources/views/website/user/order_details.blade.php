@@ -28,10 +28,15 @@
                         'cancelled' => 'bg-red-100 text-red-800',
                     ];
                     $statusClass = $statusColors[$order->status] ?? 'bg-gray-100 text-gray-800';
+                    $canCancel = in_array($order->status, ['pending', 'processing']);
                 @endphp
                 <div class="flex items-center gap-3">
                     <span class="px-4 py-1.5 {{ $statusClass }} font-medium rounded-full capitalize">{{ $order->status }}</span>
-                    {{-- <button class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 bg-white">Download Invoice</button> --}}
+                    @if($canCancel)
+                        <button onclick="showCancelModal()" class="px-4 py-2 text-sm border border-red-500 text-red-600 rounded hover:bg-red-50 bg-white transition-all">
+                            Cancel Order
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -45,7 +50,7 @@
                             @foreach($order->items as $item)
                             <div class="flex gap-4">
                                 <div class="w-20 h-24 flex-shrink-0 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                                    <img src="{{ $item->product->image_url ?? 'https://via.placeholder.com/100' }}" alt="{{ $item->product_name }}" class="w-full h-full object-cover" loading="lazy">
+                                    <img src="{{ $item->image ?? $item->product->image_url ?? 'https://via.placeholder.com/100' }}" alt="{{ $item->product_name }}" class="w-full h-full object-cover" loading="lazy">
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex justify-between items-start">
@@ -145,7 +150,7 @@
                                 </div>
                                 @if($order->discount > 0)
                                 <div class="flex justify-between text-green-600">
-                                    <span>Discount</span>
+                                    <span>Discount @if($order->coupon_code)({{ $order->coupon_code }})@endif</span>
                                     <span>- Rs. {{ number_format($order->discount) }}</span>
                                 </div>
                                 @endif
@@ -168,4 +173,92 @@
         </div>
     </div>
 </div>
+
+<!-- Cancel Order Modal -->
+<div id="cancelModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeCancelModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Cancel Order</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500 mb-4">Are you sure you want to cancel this order? This action cannot be undone.</p>
+                            <form id="cancelForm">
+                                @csrf
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Reason for cancellation</label>
+                                <textarea id="cancelReason" name="reason" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3D0C1F] focus:border-[#3D0C1F]" placeholder="Please tell us why you're cancelling this order..."></textarea>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                <button type="button" onclick="cancelOrder()" id="confirmCancelBtn" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    Cancel Order
+                </button>
+                <button type="button" onclick="closeCancelModal()" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3D0C1F] sm:mt-0 sm:w-auto sm:text-sm">
+                    Keep Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showCancelModal() {
+    document.getElementById('cancelModal').classList.remove('hidden');
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').classList.add('hidden');
+    document.getElementById('cancelReason').value = '';
+}
+
+function cancelOrder() {
+    const reason = document.getElementById('cancelReason').value.trim();
+    
+    if (!reason) {
+        alert('Please provide a reason for cancellation');
+        return;
+    }
+    
+    const btn = document.getElementById('confirmCancelBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+    
+    fetch('{{ route('user.orders.cancel', $order->id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Order cancelled successfully');
+            window.location.reload();
+        } else {
+            alert(data.message || 'Failed to cancel order');
+            btn.disabled = false;
+            btn.textContent = 'Cancel Order';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Cancel Order';
+    });
+}
+</script>
 @endsection

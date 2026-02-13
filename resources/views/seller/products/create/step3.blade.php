@@ -509,15 +509,6 @@
                 const sku = `${nameCode}-${brandCode}-${numericPart}`;
                 skuField.value = sku;
             }
-            
-            // Handle form submission
-            document.getElementById('nextBtn')?.addEventListener('click', function() {
-                document.getElementById('stepForm').submit();
-            });
-
-            document.getElementById('prevBtn')?.addEventListener('click', function() {
-                window.location.href = '{{ route("seller.products.create.step2") }}';
-            });
         </script>
     @endpush
 @endsection

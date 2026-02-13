@@ -23,6 +23,24 @@
             FREE Shipping Across India
         </div>
     </div>
+    
+    <!-- Stock Error Message (Hidden by default) -->
+    <div id="cartDrawerStockError" class="hidden mx-5 mb-3 p-3 bg-red-50 border border-red-300 rounded-lg">
+        <div class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-xs font-semibold text-red-800">Stock Limit</p>
+                <p id="cartDrawerStockErrorText" class="text-xs text-red-700 mt-0.5"></p>
+            </div>
+            <button onclick="hideCartDrawerStockError()" class="text-red-600 hover:text-red-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 
     <!-- Drawer Body -->
     <div class="flex-1 overflow-y-auto px-5 scrollbar-hide">
@@ -86,14 +104,20 @@
                 <span id="cartSubtotalSkeleton" class="h-6 w-24 bg-gray-200 rounded animate-pulse hidden"></span>
             </span>
         </div>
-        <a href="{{ route('checkout') }}" id="checkoutBtn"
-            class="w-full py-3.5 text-white font-medium text-lg rounded-[4px] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" style="background-color: var(--color-btn-primary);">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Checkout
-        </a>
+        <div class="space-y-2">
+            <a href="{{ route('cart') }}" id="viewCartBtn"
+                class="w-full py-3 text-center font-medium text-base rounded-[4px] transition-all border-2 block disabled:opacity-50 disabled:cursor-not-allowed" style="border-color: var(--color-btn-primary); color: var(--color-btn-primary);">
+                View Cart
+            </a>
+            <a href="{{ route('checkout') }}" id="checkoutBtn"
+                class="w-full py-3.5 text-white font-medium text-lg rounded-[4px] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" style="background-color: var(--color-btn-primary);">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Checkout
+            </a>
+        </div>
     </div>
 </div>
 
@@ -168,24 +192,35 @@
 
         const container = document.getElementById('cartItemsContainer');
         const checkoutBtn = document.getElementById('checkoutBtn');
+        const viewCartBtn = document.getElementById('viewCartBtn');
         container.innerHTML = '';
 
         if (!data.cart_items || data.cart_items.length === 0) {
             container.innerHTML = '<div class="text-center py-10 text-gray-500">Your cart is empty</div>';
-            // Disable checkout button
+            // Disable buttons
             if (checkoutBtn) {
                 checkoutBtn.style.opacity = '0.5';
                 checkoutBtn.style.cursor = 'not-allowed';
                 checkoutBtn.style.pointerEvents = 'none';
             }
+            if (viewCartBtn) {
+                viewCartBtn.style.opacity = '0.5';
+                viewCartBtn.style.cursor = 'not-allowed';
+                viewCartBtn.style.pointerEvents = 'none';
+            }
             return;
         }
 
-        // Enable checkout button
+        // Enable buttons
         if (checkoutBtn) {
             checkoutBtn.style.opacity = '1';
             checkoutBtn.style.cursor = 'pointer';
             checkoutBtn.style.pointerEvents = 'auto';
+        }
+        if (viewCartBtn) {
+            viewCartBtn.style.opacity = '1';
+            viewCartBtn.style.cursor = 'pointer';
+            viewCartBtn.style.pointerEvents = 'auto';
         }
 
         // Generate HTML using cart_items which now includes 'key'
@@ -202,10 +237,10 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="text-sm font-medium pr-2 leading-snug line-clamp-2" style="color: var(--color-text-primary);">${item.name}</h3>
-                            ${item.color_name || item.size_name ? `<p class="text-xs mt-1" style="color: var(--color-text-muted);">
+                            ${item.color_name || item.size_abbr || item.size_name ? `<p class="text-xs mt-1" style="color: var(--color-text-muted);">
                                 ${item.color_name ? `Color: ${item.color_name}` : ''}
-                                ${item.color_name && item.size_name ? ' | ' : ''}
-                                ${item.size_name ? `Size: ${item.size_name}` : ''}
+                                ${item.color_name && (item.size_abbr || item.size_name) ? ' | ' : ''}
+                                ${item.size_abbr ? `Size: ${item.size_abbr}` : (item.size_name ? `Size: ${item.size_name}` : '')}
                             </p>` : ''}
                         </div>
                         <button onclick="removeCartItem('${key}')" class="text-gray-400 hover:text-red-600 transition-colors p-1">
@@ -245,7 +280,14 @@
                 body: JSON.stringify({ key: key })
             });
             const data = await response.json();
-            if (data.success) updateCartDrawerUI(data);
+            if (data.success) {
+                updateCartDrawerUI(data);
+                
+                // Update cart count badge in header
+                if (typeof window.updateCartCount === 'function') {
+                    window.updateCartCount();
+                }
+            }
         } catch (e) {
             console.error(e);
         }
@@ -278,12 +320,46 @@
             if (priceSkeleton) priceSkeleton.classList.add('hidden');
             if (priceText) priceText.classList.remove('hidden');
 
-            if (data.success) updateCartDrawerUI(data);
+            if (data.success) {
+                updateCartDrawerUI(data);
+                
+                // Update cart count badge in header
+                if (typeof window.updateCartCount === 'function') {
+                    window.updateCartCount();
+                }
+                hideCartDrawerStockError(); // Hide error on success
+            } else {
+                // Show inline error message
+                showCartDrawerStockError(data.message || 'Failed to update quantity');
+            }
         } catch (e) {
             console.error(e);
             // Fallback hide
             if (priceSkeleton) priceSkeleton.classList.add('hidden');
             if (priceText) priceText.classList.remove('hidden');
+            showCartDrawerStockError('Failed to update quantity. Please try again.');
+        }
+    }
+    
+    function showCartDrawerStockError(message) {
+        const errorDiv = document.getElementById('cartDrawerStockError');
+        const errorText = document.getElementById('cartDrawerStockErrorText');
+        
+        if (errorDiv && errorText) {
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+    }
+    
+    function hideCartDrawerStockError() {
+        const errorDiv = document.getElementById('cartDrawerStockError');
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
         }
     }
 </script>

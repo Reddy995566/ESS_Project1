@@ -767,6 +767,11 @@
                     if (action === 'buy_now') {
                         window.location.href = '{{ route("checkout") }}';
                     } else {
+                        // Update cart count badge
+                        if (typeof window.updateCartCount === 'function') {
+                            window.updateCartCount();
+                        }
+                        
                         // Open Cart Drawer
                         if (typeof fetchCart === 'function') {
                             await fetchCart(); // Refresh drawer content

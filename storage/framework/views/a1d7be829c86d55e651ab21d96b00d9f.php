@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('step_title', 'Step 1: Basic Information'); ?>
 <?php $__env->startSection('step_description', 'Enter essential product details'); ?>
 
@@ -13,9 +11,9 @@
     <?php echo csrf_field(); ?>
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
                     <span class="text-white text-xl">📝</span>
                 </div>
                 <div>
@@ -33,7 +31,7 @@
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Product Name <span class="text-red-500">*</span></label>
                     <input type="text" name="name" id="productName" required 
                         value="<?php echo e(old('name', $productData['name'] ?? '')); ?>"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                         placeholder="Enter product name"
                         oninput="updateSlug()">
                     <?php $__errorArgs = ['name'];
@@ -50,12 +48,12 @@ unset($__errorArgs, $__bag); ?>
 
                 <!-- URL Slug -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-800 mb-2">URL Slug <span class="text-indigo-500 text-xs">(Auto-generated)</span></label>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">URL Slug <span class="text-blue-500 text-xs">(Auto-generated)</span></label>
                     <input type="text" name="slug" id="productSlug" readonly
                         value="<?php echo e(old('slug', $productData['slug'] ?? '')); ?>"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
                         placeholder="will-be-generated-from-name">
-                    <p class="text-xs text-indigo-500 mt-1">✨ Automatically generated from product name</p>
+                    <p class="text-xs text-blue-500 mt-1">✨ Automatically generated from product name</p>
                     <?php $__errorArgs = ['slug'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -250,14 +248,15 @@ function updateSlug() {
     const name = document.getElementById('productName').value;
     const slug = name
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '')
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except letters, numbers, spaces, hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
         .trim();
     
     document.getElementById('productSlug').value = slug || 'product-slug';
     
+    // Store product name and slug in session storage for SKU generation and SEO preview
     sessionStorage.setItem('productName', name);
     sessionStorage.setItem('productSlug', slug || 'product-slug');
 }
@@ -272,18 +271,13 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // Form submission handler
 document.getElementById('stepForm').addEventListener('submit', function(e) {
+    // Update hidden fields before submission
     document.getElementById('detailedDescriptionHidden').value = detailedDescriptionQuill.root.innerHTML;
     document.getElementById('washingInstructionsHidden').value = washingInstructionsQuill.root.innerHTML;
     document.getElementById('shippingInformationHidden').value = shippingInformationQuill.root.innerHTML;
     document.getElementById('returnsRefundsHidden').value = returnsRefundsQuill.root.innerHTML;
 });
-
-// Handle next button click
-document.getElementById('nextBtn')?.addEventListener('click', function() {
-    document.getElementById('stepForm').submit();
-});
 </script>
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('seller.products.create._layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/seller/products/create/step1.blade.php ENDPATH**/ ?>

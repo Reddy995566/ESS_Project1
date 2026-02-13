@@ -58,7 +58,7 @@
         @endif
 
         <!-- Statistics Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <!-- Total Orders -->
             <div class="bg-blue-600 rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300">
                 <div class="flex items-center justify-between mb-4">
@@ -104,6 +104,22 @@
                 <div class="text-white">
                     <p class="text-4xl font-black mb-1">{{ $completedOrders ?? 0 }}</p>
                     <p class="text-emerald-100 text-sm font-medium">Completed Orders</p>
+                </div>
+            </div>
+
+            <!-- Cancelled Orders -->
+            <div class="bg-red-600 rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center justify-center w-12 h-12 bg-white bg-opacity-20 rounded-xl backdrop-blur-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="px-3 py-1 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-xs font-bold text-white">Cancelled</span>
+                </div>
+                <div class="text-white">
+                    <p class="text-4xl font-black mb-1">{{ \App\Models\Order::where('status', 'cancelled')->count() }}</p>
+                    <p class="text-red-100 text-sm font-medium">Cancelled Orders</p>
                 </div>
             </div>
 
@@ -323,6 +339,9 @@
                                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r {{ $statusColors[$order->status] ?? 'from-gray-100 to-gray-200 text-gray-700 border-gray-300' }} border">
                                     {{ $statusIcons[$order->status] ?? '' }} {{ ucfirst($order->status) }}
                                 </span>
+                                @if($order->status === 'cancelled' && $order->cancelled_by)
+                                    <p class="text-xs text-gray-500 mt-1">by {{ ucfirst($order->cancelled_by) }}</p>
+                                @endif
                             </td>
 
                             <!-- Date -->

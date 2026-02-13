@@ -421,4 +421,27 @@ class Product extends Model
             return 'In Stock';
         }
     }
+
+    /**
+     * Get total stock from all variants
+     * If no variants, return product-level stock
+     */
+    public function getTotalStockAttribute()
+    {
+        // If product has variants, sum their stock
+        if ($this->variants()->exists()) {
+            return $this->variants()->sum('stock');
+        }
+        
+        // Otherwise return product-level stock
+        return $this->stock ?? 0;
+    }
+
+    /**
+     * Get total available stock (alias for total_stock)
+     */
+    public function getAvailableStockAttribute()
+    {
+        return $this->total_stock;
+    }
 }

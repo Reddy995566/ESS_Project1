@@ -515,21 +515,11 @@
                 if (data.success) {
                     showToastNotification(data.message, 'success');
                     closeModal();
-
-                    const methodField = document.getElementById('methodField').value;
-                    if (methodField === 'POST') {
-                        updateStatsOnCreate(data.color);
-                        addColorRow(data.color);
-                    } else {
-                        const oldRow = document.querySelector(`#colorsTable tbody tr[data-id="${data.color.id}"]`);
-                        if (oldRow) {
-                            const oldData = {
-                                isActive: oldRow.dataset.status === '1'
-                            };
-                            updateStatsOnEdit(data.color, oldData);
-                            updateColorRow(data.color);
-                        }
-                    }
+                    
+                    // Reload page after 1 second to show updated data
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 } else {
                     if (data.errors) {
                         let allErrors = [];

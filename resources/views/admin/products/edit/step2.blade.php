@@ -1,657 +1,839 @@
 @extends('admin.products.edit._layout')
 
-@section('step_title', 'Step 2: Media Management')
-@section('step_description', 'Update product images and media')
+@section('step_title', 'Step 2: Product Variants')
+@section('step_description', 'Add color, size, and stock variants for your product')
 
 @section('step_content')
 @php
     $currentStep = 2;
     $prevStepRoute = route('admin.products.edit.step1', $product->id);
-    
-    // Process images to handle different formats - convert to create format
-    $processedAdditionalImages = [];
-    if (isset($productData['images']) && is_array($productData['images'])) {
-        foreach ($productData['images'] as $image) {
-            if (is_array($image)) {
-                $url = $image['url'] ?? $image['path'] ?? '';
-                if ($url) {
-                    $processedAdditionalImages[] = [
-                        'url' => $url,
-                        'fileId' => $image['fileId'] ?? 'existing',
-                        'size' => $image['size'] ?? 0,
-                        'originalSize' => $image['originalSize'] ?? $image['size'] ?? 0,
-                        'width' => $image['width'] ?? 360,
-                        'height' => $image['height'] ?? 459,
-                        'name' => $image['name'] ?? 'image'
-                    ];
-                }
-            } elseif (is_string($image) && $image) {
-                $processedAdditionalImages[] = [
-                    'url' => $image,
-                    'fileId' => 'existing',
-                    'size' => 0,
-                    'originalSize' => 0,
-                    'width' => 360,
-                    'height' => 459,
-                    'name' => 'image'
-                ];
-            }
-        }
-    }
 @endphp
 
-<form id="stepForm" action="{{ route('admin.products.edit.step2.process', $product->id) }}" method="POST">
+<form id="stepForm" action="{{ route('admin.products.edit.step2.process', $product->id) }}" method="POST" enctype="multipart/form-data">
     @csrf
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-red-50">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-r from-orange-600 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
-                    <span class="text-white text-xl">📷</span>
+        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center shadow-lg">
+                        <span class="text-white text-xl">🎨</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Product Variants</h2>
+                        <p class="text-gray-600 font-medium">Add color, size, stock, and images for each variant</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900">Media Management</h2>
-                    <p class="text-gray-600 font-medium">Update product images and media files</p>
-                </div>
+                <button type="button" id="addVariantBtn" class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Add Variant</span>
+                </button>
             </div>
         </div>
         
-        <div class="p-8 space-y-8">
-            <!-- Additional Images -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-800 mb-3">Additional Images <span class="text-gray-500 text-sm">(Optional - up to 8 images)</span></label>
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-orange-500 transition-all cursor-pointer image-upload-area" id="additionalImagesUpload">
-                    <input type="file" id="additionalImagesInput" accept="image/*" multiple class="hidden">
-                    <div id="additionalImagesPlaceholder" class="space-y-4">
-                        <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-lg font-semibold text-gray-700">Click to upload additional images</p>
-                            <p class="text-sm text-gray-500">Select multiple images at once</p>
-                            <p class="text-xs text-gray-400">PNG, JPG, GIF up to 10MB each</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Additional Images Preview Grid -->
-                <div id="additionalImagesGrid" class="hidden mt-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-sm font-semibold text-gray-800">Uploaded Images (<span id="imageCount">0</span>)</h4>
-                        <p class="text-xs text-gray-500">Drag to reorder • First image will be featured</p>
-                    </div>
-                    <div id="sortableImages" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <!-- Images will be populated here -->
-                    </div>
-                </div>
-                
-                <input type="hidden" name="additional_images" id="additionalImagesData" value="{{ old('additional_images', json_encode($processedAdditionalImages)) }}">
-                @error('additional_images')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
+        <div class="p-8">
+            <!-- Variants Container -->
+            <div id="variantsContainer" class="space-y-6">
+                <!-- Variants will be appended here -->
             </div>
-
-            <!-- Upload Tips -->
-            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <h3 class="font-semibold text-orange-800 mb-2">📋 Media Guidelines</h3>
-                <ul class="text-sm text-orange-700 space-y-1">
-                    <li>• <strong>Images:</strong> Uploaded in original quality (Maximum 10MB)</li>
-                    <li>• <strong>Videos:</strong> Upload product demonstrations, 360° views, or usage videos</li>
-                    <li>• First additional image becomes the featured image</li>
-                    <li>• Drag & drop to reorder images</li>
-                    <li>• Show product from multiple angles for better conversions</li>
-                    <li>• <strong>Supported:</strong> Images (JPG, PNG, GIF, WebP), Videos (MP4, WebM, MOV)</li>
-                </ul>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">No Variants Added</h3>
+                <p class="text-gray-500 mb-4">Click "Add Variant" to create your first product variant</p>
             </div>
+            
+            <!-- Hidden Inputs for Form Submission -->
+            <input type="hidden" name="variants_data" id="variantsDataInput">
         </div>
     </div>
 </form>
 
 @push('scripts')
-<!-- SortableJS for drag & drop -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-
 <script>
-let additionalImages = [];
-let sortable = null;
+// Global state
+let variants = [];
+let variantIdCounter = 1;
 
-// Load existing images and videos if any
-document.addEventListener('DOMContentLoaded', function() {
-    // Load existing main image
-    const existingMainImage = document.getElementById('mainImageUrl').value;
-    if (existingMainImage) {
-        // For existing images, we don't have full image info, so just show the preview
-        showMainImagePreview(existingMainImage);
-    }
+// Available colors and sizes from server
+const availableColors = @json($colors);
+const availableSizes = @json($sizes);
+
+// DOM Elements
+const variantsContainer = document.getElementById('variantsContainer');
+const emptyState = document.getElementById('emptyState');
+const addVariantBtn = document.getElementById('addVariantBtn');
+const variantsDataInput = document.getElementById('variantsDataInput');
+
+// Add Variant Button Click
+addVariantBtn.addEventListener('click', function() {
+    addVariant();
+});
+
+// Add Variant Function
+function addVariant(data = null) {
+    const variantId = variantIdCounter++;
     
-    // Load existing additional images
-    const existingAdditionalImages = document.getElementById('additionalImagesData').value;
-    if (existingAdditionalImages && existingAdditionalImages !== '[]') {
-        try {
-            const parsed = JSON.parse(existingAdditionalImages);
-            // Ensure each image has required properties with defaults
-            additionalImages = parsed.map(img => ({
-                url: img.url || '',
-                fileId: img.fileId || 'unknown',
-                size: img.size || 0,
-                originalSize: img.originalSize || img.size || 0,
-                width: img.width || 360,
-                height: img.height || 459,
-                name: img.name || 'image'
-            }));
-            updateAdditionalImagesGrid();
-        } catch (e) {
-            additionalImages = [];
-        }
-    }
+    const variant = {
+        id: variantId,
+        color_id: data?.color_id || '',
+        size_ids: data?.size_ids || [],
+        size_stocks: data?.size_stocks || {}, // Object to store stock per size
+        images: data?.images || [],
+        is_default: data?.is_default || false
+    };
     
-    // Load existing video
-    const existingVideo = document.getElementById('videoUrl').value;
-    if (existingVideo) {
-        showVideoPreview(existingVideo);
-    }
+    variants.push(variant);
+    renderVariant(variant);
+    updateEmptyState();
+    updateHiddenInput();
+}
+
+// Render Variant Row
+function renderVariant(variant) {
+    const variantDiv = document.createElement('div');
+    variantDiv.id = `variant_${variant.id}`;
+    variantDiv.className = 'bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200 shadow-sm hover:shadow-md transition-all';
     
-    // Initialize video upload
-    initializeVideoUpload();
-});
-
-// Main image upload
-document.getElementById('mainImageUpload').addEventListener('click', function() {
-    document.getElementById('mainImageInput').click();
-});
-
-document.getElementById('mainImageInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        uploadMainImage(file);
-    }
-});
-
-// Additional images upload
-document.getElementById('additionalImagesUpload').addEventListener('click', function() {
-    document.getElementById('additionalImagesInput').click();
-});
-
-document.getElementById('additionalImagesInput').addEventListener('change', function(e) {
-    const files = Array.from(e.target.files);
-    if (files.length > 0) {
-        // Check maximum images limit (8 total)
-        if (additionalImages.length + files.length > 8) {
-            showNotification(`Maximum 8 images allowed. You can upload ${8 - additionalImages.length} more.`, 'error');
-            return;
-        }
-        uploadAdditionalImages(files);
-    }
-});
-
-async function uploadMainImage(file) {
-    showMainImageLoading();
-    
-    try {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('folder', 'products');
+    variantDiv.innerHTML = `
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center space-x-3">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center space-x-2">
+                    <span class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">${variants.length}</span>
+                    <span>Variant #${variant.id}</span>
+                </h3>
+                <button type="button" 
+                        id="defaultBtn_${variant.id}"
+                        onclick="setDefaultVariant(${variant.id})"
+                        class="default-star-btn p-2 rounded-lg transition ${variant.is_default ? 'text-yellow-500 bg-yellow-50' : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'}"
+                        title="${variant.is_default ? 'Default variant' : 'Set as default'}">
+                    <svg class="w-6 h-6" fill="${variant.is_default ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                    </svg>
+                </button>
+            </div>
+            <button type="button" onclick="removeVariant(${variant.id})" class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        </div>
         
-        const response = await fetch('{{ route("admin.upload.image") }}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        });
-        
-        const result = await response.json();
-        
-        // Debug log the ImageKit response
-        if (result.success) {
-            // Add estimated size if not provided
-            if (!result.size && file && file.size) {
-                result.size = file.size;
-                result.original_size = file.size;
-            }
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <!-- Color Searchable Dropdown -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-2">Color <span class="text-red-500">*</span></label>
+                <div class="relative" id="colorDropdown_${variant.id}">
+                    <input type="text" 
+                           id="colorSearch_${variant.id}"
+                           placeholder="Search color..." 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                           onfocus="showColorDropdown(${variant.id})"
+                           oninput="filterColors(${variant.id}, this.value)">
+                    <div id="colorList_${variant.id}" class="hidden absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        ${availableColors.map(color => `
+                            <div class="px-4 py-2 hover:bg-purple-100 cursor-pointer flex items-center space-x-2" 
+                                 data-color-id="${color.id}" 
+                                 data-color-name="${color.name}"
+                                 onclick="selectColor(${variant.id}, ${color.id}, '${color.name.replace(/'/g, "\\'")}')">
+                                <div class="w-6 h-6 rounded border-2 border-gray-300" style="background-color: ${color.hex_code || '#ccc'}"></div>
+                                <span>${color.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" id="colorValue_${variant.id}" value="${variant.color_id}">
+                </div>
+            </div>
             
-            document.getElementById('mainImageUrl').value = result.url;
-            showMainImagePreview(result.url, result);
-            const sizeText = result.size ? ` (${formatFileSize(result.size)})` : '';
-            showNotification(`Main image uploaded successfully!${sizeText}`, 'success');
-        } else {
-            throw new Error(result.message || 'Upload failed');
+            <!-- Size Multi-Select Dropdown -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-2">Sizes <span class="text-gray-500 text-xs">(Select Multiple)</span></label>
+                <div class="relative" id="sizeDropdown_${variant.id}">
+                    <div id="sizeDisplay_${variant.id}" 
+                         class="w-full min-h-[48px] px-4 py-2 border-2 border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500 transition-all cursor-pointer bg-white"
+                         onclick="toggleSizeDropdown(${variant.id})">
+                        <div id="selectedSizes_${variant.id}" class="flex flex-wrap gap-2">
+                            <span class="text-gray-400 text-sm">Click to select sizes...</span>
+                        </div>
+                    </div>
+                    <div id="sizeList_${variant.id}" class="hidden absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        <div class="p-2 border-b border-gray-200">
+                            <input type="text" 
+                                   id="sizeSearch_${variant.id}"
+                                   placeholder="Search sizes..." 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   oninput="filterSizes(${variant.id}, this.value)"
+                                   onclick="event.stopPropagation()">
+                        </div>
+                        ${availableSizes.map(size => `
+                            <div class="px-4 py-2 hover:bg-blue-100 cursor-pointer flex items-center space-x-2" 
+                                 data-size-id="${size.id}" 
+                                 data-size-name="${size.abbreviation || size.name}"
+                                 onclick="toggleSizeSelection(${variant.id}, ${size.id}, '${(size.abbreviation || size.name).replace(/'/g, "\\'")}', event)">
+                                <input type="checkbox" 
+                                       id="sizeCheck_${variant.id}_${size.id}"
+                                       class="w-4 h-4 text-purple-600 rounded"
+                                       onclick="event.stopPropagation()">
+                                <span>${size.abbreviation || size.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" id="sizeValue_${variant.id}" value="">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Size-wise Stock Quantities -->
+        <div id="sizeStockContainer_${variant.id}" class="mb-4">
+            ${renderSizeStockInputs(variant)}
+        </div>
+        
+        <!-- Images Section -->
+        <div class="bg-white rounded-lg p-4 border border-gray-200">
+            <div class="flex items-center justify-between mb-3">
+                <label class="text-sm font-semibold text-gray-800">Variant Images <span class="text-gray-500 text-xs">(Optional)</span></label>
+                <button type="button" onclick="triggerImageUpload(${variant.id})" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Add Images</span>
+                </button>
+                <input type="file" 
+                       id="imageInput_${variant.id}" 
+                       accept="image/*" 
+                       multiple 
+                       onchange="handleImageUpload(${variant.id}, this.files)"
+                       class="hidden">
+            </div>
+            
+            <!-- Images Grid -->
+            <div id="imagesGrid_${variant.id}" class="grid grid-cols-4 gap-3 mt-3">
+                ${renderVariantImages(variant)}
+            </div>
+            
+            <div id="imagesEmpty_${variant.id}" class="${variant.images.length > 0 ? 'hidden' : ''} text-center py-6 text-gray-400 text-sm">
+                No images uploaded yet
+            </div>
+        </div>
+    `;
+    
+    variantsContainer.appendChild(variantDiv);
+    
+    // Set initial values for searchable dropdowns
+    if (variant.color_id) {
+        const selectedColor = availableColors.find(c => c.id == variant.color_id);
+        if (selectedColor) {
+            document.getElementById(`colorSearch_${variant.id}`).value = selectedColor.name;
         }
-    } catch (error) {
-        showNotification('Failed to upload main image: ' + error.message, 'error');
-        hideMainImageLoading();
+    }
+    
+    // Set initial size selections (with small delay to ensure DOM is ready)
+    if (variant.size_ids && variant.size_ids.length > 0) {
+        setTimeout(() => {
+            variant.size_ids.forEach(sizeId => {
+                const checkbox = document.getElementById(`sizeCheck_${variant.id}_${sizeId}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                } else {
+                    // Checkbox not found
+                }
+            });
+            updateSizeDisplay(variant.id);
+        }, 100);
+    }
+    
+    // Initialize sortable for images if any exist
+    if (variant.images && variant.images.length > 0) {
+        initializeSortable(variant.id);
     }
 }
 
-async function uploadAdditionalImages(files) {
-    // Show upload progress
-    showAdditionalImagesLoading(files.length);
+// Render Variant Images
+function renderVariantImages(variant) {
+    if (!variant.images || variant.images.length === 0) return '';
     
-    const uploadPromises = files.map(async (file, index) => {
+    return variant.images.map((img, idx) => `
+        <div class="relative group border-2 rounded-lg overflow-hidden ${idx === 0 ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'} cursor-move" data-image-index="${idx}">
+            <div class="aspect-square bg-gray-100">
+                <img src="${img.url}" class="w-full h-full object-cover" draggable="false">
+                ${idx === 0 ? '<div class="absolute top-1 left-1 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded font-bold">MAIN</div>' : ''}
+                <div class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg class="w-5 h-5 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                    </svg>
+                </div>
+            </div>
+            <button type="button" 
+                    onclick="removeVariantImage(${variant.id}, ${idx})"
+                    class="absolute bottom-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+// Render Size Stock Inputs
+function renderSizeStockInputs(variant) {
+    if (!variant.size_ids || variant.size_ids.length === 0) {
+        return '<div class="text-center py-4 text-gray-400 text-sm">Select sizes to add stock quantities</div>';
+    }
+    
+    return `
+        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <label class="block text-sm font-semibold text-gray-800 mb-3">Stock Quantity per Size <span class="text-red-500">*</span></label>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                ${variant.size_ids.map(sizeId => {
+                    const size = availableSizes.find(s => s.id == sizeId);
+                    if (!size) return '';
+                    const stockValue = variant.size_stocks[sizeId] || 0;
+                    return `
+                        <div class="bg-white rounded-lg p-3 border border-gray-300">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">${size.abbreviation || size.name}</label>
+                            <input type="number" 
+                                   value="${stockValue}" 
+                                   onchange="updateSizeStock(${variant.id}, ${sizeId}, this.value)"
+                                   min="0" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                   placeholder="Qty">
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// Searchable Dropdown Functions
+window.showColorDropdown = function(variantId) {
+    const list = document.getElementById(`colorList_${variantId}`);
+    list.classList.remove('hidden');
+    
+    // Close other dropdowns
+    document.querySelectorAll('[id^="colorList_"]').forEach(el => {
+        if (el.id !== `colorList_${variantId}`) el.classList.add('hidden');
+    });
+    document.querySelectorAll('[id^="sizeList_"]').forEach(el => {
+        el.classList.add('hidden');
+    });
+};
+
+window.toggleSizeDropdown = function(variantId) {
+    const list = document.getElementById(`sizeList_${variantId}`);
+    const isHidden = list.classList.contains('hidden');
+    
+    // Close all dropdowns first
+    document.querySelectorAll('[id^="colorList_"]').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('[id^="sizeList_"]').forEach(el => el.classList.add('hidden'));
+    
+    // Toggle current dropdown
+    if (isHidden) {
+        list.classList.remove('hidden');
+    }
+};
+
+window.filterColors = function(variantId, searchText) {
+    const list = document.getElementById(`colorList_${variantId}`);
+    const items = list.querySelectorAll('[data-color-id]');
+    const search = searchText.toLowerCase();
+    
+    items.forEach(item => {
+        const name = item.getAttribute('data-color-name').toLowerCase();
+        if (name.includes(search)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+};
+
+window.filterSizes = function(variantId, searchText) {
+    const list = document.getElementById(`sizeList_${variantId}`);
+    const items = list.querySelectorAll('[data-size-id]');
+    const search = searchText.toLowerCase();
+    
+    items.forEach(item => {
+        const name = item.getAttribute('data-size-name').toLowerCase();
+        if (name.includes(search)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+};
+
+window.selectColor = function(variantId, colorId, colorName) {
+    document.getElementById(`colorSearch_${variantId}`).value = colorName;
+    document.getElementById(`colorValue_${variantId}`).value = colorId;
+    document.getElementById(`colorList_${variantId}`).classList.add('hidden');
+    updateVariantField(variantId, 'color_id', colorId);
+};
+
+window.toggleSizeSelection = function(variantId, sizeId, sizeName, event) {
+    event.stopPropagation();
+    
+    const variant = variants.find(v => v.id === variantId);
+    if (!variant) return;
+    
+    // Initialize size_ids array if not exists
+    if (!variant.size_ids) {
+        variant.size_ids = [];
+    }
+    
+    // Initialize size_stocks object if not exists
+    if (!variant.size_stocks) {
+        variant.size_stocks = {};
+    }
+    
+    const checkbox = document.getElementById(`sizeCheck_${variantId}_${sizeId}`);
+    const index = variant.size_ids.indexOf(sizeId);
+    
+    if (index > -1) {
+        // Remove size
+        variant.size_ids.splice(index, 1);
+        delete variant.size_stocks[sizeId]; // Remove stock for this size
+        checkbox.checked = false;
+    } else {
+        // Add size
+        variant.size_ids.push(sizeId);
+        variant.size_stocks[sizeId] = 0; // Initialize stock to 0
+        checkbox.checked = true;
+    }
+    
+    updateSizeDisplay(variantId);
+    refreshSizeStockInputs(variantId);
+    updateHiddenInput();
+};
+
+function updateSizeDisplay(variantId) {
+    const variant = variants.find(v => v.id === variantId);
+    if (!variant) return;
+    
+    const display = document.getElementById(`selectedSizes_${variantId}`);
+    
+    if (!variant.size_ids || variant.size_ids.length === 0) {
+        display.innerHTML = '<span class="text-gray-400 text-sm">Click to select sizes...</span>';
+        return;
+    }
+    
+    const selectedSizeNames = variant.size_ids.map(sizeId => {
+        const size = availableSizes.find(s => s.id == sizeId);
+        return size ? (size.abbreviation || size.name) : '';
+    }).filter(name => name);
+    
+    display.innerHTML = selectedSizeNames.map(name => `
+        <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+            ${name}
+        </span>
+    `).join('');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('[id^="colorDropdown_"]') && !e.target.closest('[id^="sizeDropdown_"]')) {
+        document.querySelectorAll('[id^="colorList_"]').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('[id^="sizeList_"]').forEach(el => el.classList.add('hidden'));
+    }
+});
+
+// Update Variant Field
+window.updateVariantField = function(variantId, field, value) {
+    const variant = variants.find(v => v.id === variantId);
+    if (variant) {
+        variant[field] = value;
+        updateHiddenInput();
+    }
+};
+
+// Set Default Variant
+window.setDefaultVariant = function(variantId) {
+    // Unset all defaults
+    variants.forEach(v => {
+        v.is_default = false;
+    });
+    
+    // Set this variant as default
+    const variant = variants.find(v => v.id === variantId);
+    if (variant) {
+        variant.is_default = true;
+    }
+    
+    // Update all star buttons
+    document.querySelectorAll('.default-star-btn').forEach(btn => {
+        const btnVariantId = parseInt(btn.id.replace('defaultBtn_', ''));
+        const isDefault = btnVariantId === variantId;
+        
+        if (isDefault) {
+            btn.classList.add('text-yellow-500', 'bg-yellow-50');
+            btn.classList.remove('text-gray-400');
+            btn.title = 'Default variant';
+            btn.querySelector('svg').setAttribute('fill', 'currentColor');
+        } else {
+            btn.classList.remove('text-yellow-500', 'bg-yellow-50');
+            btn.classList.add('text-gray-400');
+            btn.title = 'Set as default';
+            btn.querySelector('svg').setAttribute('fill', 'none');
+        }
+    });
+    
+    updateHiddenInput();
+};
+
+// Remove Variant
+window.removeVariant = function(variantId) {
+    if (!confirm('Are you sure you want to remove this variant?')) return;
+    
+    variants = variants.filter(v => v.id !== variantId);
+    document.getElementById(`variant_${variantId}`).remove();
+    updateEmptyState();
+    updateHiddenInput();
+    
+    // Renumber remaining variants
+    document.querySelectorAll('[id^="variant_"]').forEach((el, idx) => {
+        const numberSpan = el.querySelector('.w-8.h-8');
+        if (numberSpan) numberSpan.textContent = idx + 1;
+    });
+};
+
+// Trigger Image Upload
+window.triggerImageUpload = function(variantId) {
+    document.getElementById(`imageInput_${variantId}`).click();
+};
+
+// Handle Image Upload
+window.handleImageUpload = async function(variantId, files) {
+    if (!files || files.length === 0) return;
+    
+    const variant = variants.find(v => v.id === variantId);
+    if (!variant) return;
+    
+    const grid = document.getElementById(`imagesGrid_${variantId}`);
+    const empty = document.getElementById(`imagesEmpty_${variantId}`);
+    
+    // Show animated loading with progress
+    empty.classList.add('hidden');
+    grid.innerHTML = `
+        <div class="col-span-4 flex flex-col items-center justify-center py-8 space-y-4">
+            <div class="relative">
+                <div class="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-center">
+                <p class="text-gray-700 font-semibold">Uploading Images...</p>
+                <p class="text-sm text-gray-500" id="uploadProgress_${variantId}">0 of ${files.length} uploaded</p>
+            </div>
+            <div class="w-64 bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div id="progressBar_${variantId}" class="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    `;
+    
+    // Upload images with progress tracking
+    let uploadedCount = 0;
+    const uploadPromises = Array.from(files).map(async (file) => {
         const formData = new FormData();
         formData.append('image', file);
-        formData.append('folder', 'products');
         
         try {
             const response = await fetch('{{ route("admin.upload.image") }}', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
             });
             
             const result = await response.json();
             
-            // Debug log for additional images
+            // Update progress
+            uploadedCount++;
+            const progressPercent = (uploadedCount / files.length) * 100;
+            const progressBar = document.getElementById(`progressBar_${variantId}`);
+            const progressText = document.getElementById(`uploadProgress_${variantId}`);
+            if (progressBar) progressBar.style.width = progressPercent + '%';
+            if (progressText) progressText.textContent = `${uploadedCount} of ${files.length} uploaded`;
+            
             if (result.success) {
-                // Use actual size
-                const estimatedSize = result.size || file.size;
-                const originalSize = result.original_size || result.originalSize || file.size || 0;
-                
                 return {
                     url: result.url,
-                    fileId: result.file_id || result.fileId || 'unknown',
-                    size: estimatedSize,
-                    originalSize: originalSize,
-                    width: result.width || 360,
-                    height: result.height || 459,
-                    name: result.name || file.name || 'image'
+                    fileId: result.file_id || 'unknown',
+                    size: result.size || file.size,
+                    name: result.name || file.name
                 };
-            } else {
-                throw new Error(result.message || 'Upload failed');
             }
-        } catch (error) {
-            showNotification('Failed to upload image: ' + error.message, 'error');
+            return null;
+        } catch (err) {
+            console.error('Upload error:', err);
+            uploadedCount++;
+            const progressPercent = (uploadedCount / files.length) * 100;
+            const progressBar = document.getElementById(`progressBar_${variantId}`);
+            const progressText = document.getElementById(`uploadProgress_${variantId}`);
+            if (progressBar) progressBar.style.width = progressPercent + '%';
+            if (progressText) progressText.textContent = `${uploadedCount} of ${files.length} uploaded`;
             return null;
         }
     });
     
-    const uploadedImages = await Promise.all(uploadPromises);
-    const validImages = uploadedImages.filter(img => img !== null);
+    const uploaded = await Promise.all(uploadPromises);
+    const validUploads = uploaded.filter(u => u !== null);
     
-    if (validImages.length > 0) {
-        additionalImages = [...additionalImages, ...validImages];
-        updateAdditionalImagesGrid();
-        updateAdditionalImagesInput();
-        const totalSize = validImages.reduce((sum, img) => sum + (img.size || 0), 0);
-        const sizeText = totalSize > 0 ? ` Total compressed: ${formatFileSize(totalSize)}` : ' All optimized via ImageKit!';
-        showNotification(`Successfully uploaded ${validImages.length} image(s)!${sizeText}`, 'success');
-    }
-}
-
-function showMainImagePreview(imageUrl, imageInfo = null) {
-    document.getElementById('mainImagePreviewImg').src = imageUrl;
-    document.getElementById('mainImagePlaceholder').classList.add('hidden');
-    document.getElementById('mainImagePreview').classList.remove('hidden');
-    
-    // Add image info display
-    if (imageInfo) {
-        const preview = document.getElementById('mainImagePreview');
-        let infoElement = preview.querySelector('.image-info');
-        if (!infoElement) {
-            infoElement = document.createElement('div');
-            infoElement.className = 'image-info mt-2 text-xs text-gray-600 text-center';
-            preview.appendChild(infoElement);
-        }
-        infoElement.innerHTML = `
-            <div class="flex justify-center space-x-4">
-                <span>📐 ${imageInfo.width || 'Original'}x${imageInfo.height || 'Original'}px</span>
-                <span>📦 ${imageInfo.size ? formatFileSize(imageInfo.size) : 'Original Size'}</span>
+    if (validUploads.length > 0) {
+        variant.images = [...variant.images, ...validUploads];
+        
+        // Show success animation briefly
+        grid.innerHTML = `
+            <div class="col-span-4 flex flex-col items-center justify-center py-8 space-y-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <p class="text-green-600 font-semibold">✓ Upload Complete!</p>
+                <p class="text-sm text-gray-500">${validUploads.length} image(s) uploaded successfully</p>
             </div>
         `;
+        
+        // Wait a moment then show images
+        setTimeout(() => {
+            refreshVariantImages(variantId);
+            updateHiddenInput();
+        }, 800);
+    } else {
+        // Show error
+        grid.innerHTML = `
+            <div class="col-span-4 flex flex-col items-center justify-center py-8 space-y-4">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </div>
+                <p class="text-red-600 font-semibold">Upload Failed</p>
+                <p class="text-sm text-gray-500">Please try again</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            refreshVariantImages(variantId);
+        }, 2000);
+    }
+};
+
+// Remove Variant Image
+window.removeVariantImage = function(variantId, imageIdx) {
+    const variant = variants.find(v => v.id === variantId);
+    if (variant && variant.images) {
+        variant.images.splice(imageIdx, 1);
+        refreshVariantImages(variantId);
+        updateHiddenInput();
+    }
+};
+
+// Refresh Variant Images Display
+function refreshVariantImages(variantId) {
+    const variant = variants.find(v => v.id === variantId);
+    if (!variant) return;
+    
+    const grid = document.getElementById(`imagesGrid_${variantId}`);
+    const empty = document.getElementById(`imagesEmpty_${variantId}`);
+    
+    if (variant.images.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+    } else {
+        grid.innerHTML = renderVariantImages(variant);
+        empty.classList.add('hidden');
+        
+        // Initialize Sortable for drag and drop
+        initializeSortable(variantId);
     }
 }
 
-function removeMainImage() {
-    document.getElementById('mainImageUrl').value = '';
-    document.getElementById('mainImagePlaceholder').classList.remove('hidden');
-    document.getElementById('mainImagePreview').classList.add('hidden');
-}
-
-function showMainImageLoading() {
-    const placeholder = document.getElementById('mainImagePlaceholder');
-    placeholder.innerHTML = `
-        <div class="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center animate-pulse">
-            <svg class="w-8 h-8 text-orange-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-        </div>
-        <div class="text-center">
-            <p class="text-lg font-semibold text-orange-600">Uploading to ImageKit...</p>
-            <p class="text-xs text-gray-500 mt-1">Uploading original image...</p>
-        </div>
-    `;
-}
-
-function hideMainImageLoading() {
-    const placeholder = document.getElementById('mainImagePlaceholder');
-    placeholder.innerHTML = `
-        <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-        </div>
-        <div>
-            <p class="text-lg font-semibold text-gray-700">Click to upload main image</p>
-            <p class="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
-        </div>
-    `;
-}
-
-function updateAdditionalImagesGrid() {
-    const grid = document.getElementById('additionalImagesGrid');
-    const placeholder = document.getElementById('additionalImagesPlaceholder');
-    const sortableContainer = document.getElementById('sortableImages');
-    const imageCount = document.getElementById('imageCount');
-    
-    if (additionalImages.length === 0) {
-        grid.classList.add('hidden');
-        placeholder.classList.remove('hidden');
+// Initialize Sortable for image reordering
+function initializeSortable(variantId) {
+    const grid = document.getElementById(`imagesGrid_${variantId}`);
+    if (!grid) {
+        console.error('Grid not found for variant:', variantId);
         return;
     }
     
-    grid.classList.remove('hidden');
-    placeholder.classList.add('hidden');
-    imageCount.textContent = additionalImages.length;
-    
-    sortableContainer.innerHTML = additionalImages.map((image, index) => `
-        <div class="image-item relative group border-2 rounded-lg overflow-hidden transition-all hover:border-orange-500 ${
-            index === 0 ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200'
-        }" data-index="${index}">
-            <div class="relative">
-                <img src="${image.url}" class="w-full h-32 object-cover cursor-move">
-                ${index === 0 ? '<div class="absolute top-1 left-1 bg-orange-500 text-white text-xs px-2 py-1 rounded">Featured</div>' : ''}
-                <div class="absolute top-1 right-1 bg-black bg-opacity-60 text-white text-xs px-1.5 py-0.5 rounded">
-                    ${image.width || 360}×${image.height || 459}
-                </div>
-            </div>
-            <div class="p-2 bg-white">
-                <div class="text-xs text-gray-600 flex justify-between items-center">
-                    <span>📦 ${image.size && image.size > 0 ? formatFileSize(image.size) : 'Original Size'}</span>
-                </div>
-                <div class="mt-1 flex justify-between items-center">
-                    <span class="text-xs text-gray-500 cursor-move">🔄 Drag to reorder</span>
-                    <button type="button" onclick="removeAdditionalImage(${index})" class="text-red-500 hover:text-red-700 p-1">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-    
-    // Initialize or update sortable
-    if (sortable) {
-        sortable.destroy();
+    if (typeof Sortable === 'undefined') {
+        console.error('Sortable library not loaded');
+        return;
     }
     
-    sortable = Sortable.create(sortableContainer, {
-        animation: 150,
+    // Destroy existing sortable instance if any
+    if (grid.sortableInstance) {
+        grid.sortableInstance.destroy();
+    }
+    
+    // Create new sortable instance
+    grid.sortableInstance = new Sortable(grid, {
+        animation: 200,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
+        forceFallback: true,
+        fallbackClass: 'sortable-fallback',
+        fallbackOnBody: true,
+        swapThreshold: 0.65,
+        onStart: function(evt) {
+            evt.item.style.cursor = 'grabbing';
+        },
         onEnd: function(evt) {
-            // Reorder the additionalImages array
-            const item = additionalImages.splice(evt.oldIndex, 1)[0];
-            additionalImages.splice(evt.newIndex, 0, item);
+            evt.item.style.cursor = 'grab';
             
-            // Update the grid to reflect new order
-            updateAdditionalImagesGrid();
-            updateAdditionalImagesInput();
+            const variant = variants.find(v => v.id === variantId);
+            if (!variant || !variant.images) return;
             
-            showNotification('Images reordered successfully!', 'success');
+            // Reorder images array
+            const movedImage = variant.images.splice(evt.oldIndex, 1)[0];
+            variant.images.splice(evt.newIndex, 0, movedImage);
+            
+            // Refresh display to update MAIN badge
+            setTimeout(() => {
+                refreshVariantImages(variantId);
+                updateHiddenInput();
+            }, 50);
         }
     });
-}
-
-function removeAdditionalImage(index) {
-    additionalImages.splice(index, 1);
-    updateAdditionalImagesGrid();
-    updateAdditionalImagesInput();
-}
-
-function updateAdditionalImagesInput() {
-    document.getElementById('additionalImagesData').value = JSON.stringify(additionalImages);
-}
-
-// Drag and drop functionality
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    document.getElementById('mainImageUpload').addEventListener(eventName, preventDefaults, false);
-    document.getElementById('additionalImagesUpload').addEventListener(eventName, preventDefaults, false);
-});
-
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-['dragenter', 'dragover'].forEach(eventName => {
-    document.getElementById('mainImageUpload').addEventListener(eventName, highlight, false);
-    document.getElementById('additionalImagesUpload').addEventListener(eventName, highlight, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    document.getElementById('mainImageUpload').addEventListener(eventName, unhighlight, false);
-    document.getElementById('additionalImagesUpload').addEventListener(eventName, unhighlight, false);
-});
-
-function highlight(e) {
-    e.currentTarget.classList.add('dragover');
-}
-
-function unhighlight(e) {
-    e.currentTarget.classList.remove('dragover');
-}
-
-document.getElementById('mainImageUpload').addEventListener('drop', handleMainImageDrop, false);
-document.getElementById('additionalImagesUpload').addEventListener('drop', handleAdditionalImagesDrop, false);
-
-function handleMainImageDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
     
-    if (files.length > 0) {
-        uploadMainImage(files[0]);
+    console.log('Sortable initialized for variant:', variantId);
+}
+
+// Update Empty State
+function updateEmptyState() {
+    if (variants.length === 0) {
+        emptyState.classList.remove('hidden');
+        variantsContainer.classList.add('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        variantsContainer.classList.remove('hidden');
     }
 }
 
-function handleAdditionalImagesDrop(e) {
-    const dt = e.dataTransfer;
-    const files = Array.from(dt.files);
+// Update Hidden Input
+function updateHiddenInput() {
+    variantsDataInput.value = JSON.stringify(variants);
+}
+
+// Update Size Stock
+window.updateSizeStock = function(variantId, sizeId, stock) {
+    const variant = variants.find(v => v.id === variantId);
+    if (variant) {
+        if (!variant.size_stocks) {
+            variant.size_stocks = {};
+        }
+        variant.size_stocks[sizeId] = parseInt(stock) || 0;
+        updateHiddenInput();
+    }
+};
+
+// Refresh Size Stock Inputs
+function refreshSizeStockInputs(variantId) {
+    const variant = variants.find(v => v.id === variantId);
+    if (!variant) return;
     
-    if (files.length > 0) {
-        // Check maximum images limit (8 total)
-        if (additionalImages.length + files.length > 8) {
-            showNotification(`Maximum 8 images allowed. You can upload ${8 - additionalImages.length} more.`, 'error');
+    const container = document.getElementById(`sizeStockContainer_${variantId}`);
+    if (container) {
+        container.innerHTML = renderSizeStockInputs(variant);
+    }
+}
+
+// Initialize - Load existing variants
+document.addEventListener('DOMContentLoaded', function() {
+    // Load existing variants from product - group by color and images
+    @if($product->variants && $product->variants->count() > 0)
+        @php
+            // Group variants by color_id and images
+            $groupedVariants = [];
+            foreach ($product->variants as $v) {
+                $images = [];
+                if ($v->images && is_string($v->images)) {
+                    $images = json_decode($v->images, true) ?? [];
+                }
+                $imagesKey = json_encode($images);
+                $key = $v->color_id . '_' . $imagesKey;
+                
+                if (!isset($groupedVariants[$key])) {
+                    $groupedVariants[$key] = [
+                        'color_id' => $v->color_id,
+                        'size_ids' => [],
+                        'size_stocks' => [], // Changed to array for PHP, will be converted to object in JS
+                        'images' => $images,
+                        'is_default' => $v->is_default ?? false
+                    ];
+                }
+                
+                if ($v->size_id) {
+                    $groupedVariants[$key]['size_ids'][] = $v->size_id;
+                    $groupedVariants[$key]['size_stocks'][$v->size_id] = $v->stock ?? 0;
+                }
+            }
+            
+            $existingVariantsData = array_values($groupedVariants);
+        @endphp
+        const existingVariants = @json($existingVariantsData);
+        
+        existingVariants.forEach(v => addVariant(v));
+    @else
+        // No existing variants
+    @endif
+    
+    updateEmptyState();
+});
+
+// Form Submit Handler
+document.getElementById('nextBtn')?.addEventListener('click', function() {
+    if (variants.length === 0) {
+        alert('Please add at least one variant');
+        return;
+    }
+    
+    // Validate variants
+    let isValid = true;
+    
+    variants.forEach((v, index) => {
+        if (!v.color_id) {
+            alert('Please select a color for all variants');
+            isValid = false;
             return;
         }
-        uploadAdditionalImages(files);
-    }
-}
-
-// Show loading for additional images
-function showAdditionalImagesLoading(fileCount) {
-    const placeholder = document.getElementById('additionalImagesPlaceholder');
-    placeholder.innerHTML = `
-        <div class="space-y-4">
-            <div class="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center animate-pulse">
-                <svg class="w-8 h-8 text-orange-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-            </div>
-            <div class="text-center">
-                <p class="text-lg font-semibold text-orange-600">Uploading ${fileCount} image(s)...</p>
-                <p class="text-xs text-gray-500 mt-1">Uploading original images...</p>
-            </div>
-        </div>
-    `;
-}
-
-// Utility function to format file sizes
-function formatFileSize(bytes) {
-    // Handle null, undefined, NaN values
-    if (!bytes || isNaN(bytes) || bytes <= 0) return '0 B';
-    
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    // Ensure we don't exceed array bounds
-    const sizeIndex = Math.min(i, sizes.length - 1);
-    const formattedSize = parseFloat((bytes / Math.pow(k, sizeIndex)).toFixed(1));
-    
-    return formattedSize + ' ' + sizes[sizeIndex];
-}
-
-// Video upload functionality
-function initializeVideoUpload() {
-    document.getElementById('videoUpload').addEventListener('click', function() {
-        document.getElementById('videoInput').click();
-    });
-    
-    document.getElementById('videoInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            uploadVideo(file);
+        if (!v.size_ids || v.size_ids.length === 0) {
+            alert('Please select at least one size for all variants');
+            isValid = false;
+            return;
+        }
+        
+        // Validate that all sizes have stock quantities
+        if (!v.size_stocks) {
+            alert('Please enter stock quantities for all sizes');
+            isValid = false;
+            return;
+        }
+        
+        for (let sizeId of v.size_ids) {
+            if (v.size_stocks[sizeId] === undefined || v.size_stocks[sizeId] === null || v.size_stocks[sizeId] < 0) {
+                alert('Please enter valid stock quantity for all sizes');
+                isValid = false;
+                return;
+            }
         }
     });
-}
-
-async function uploadVideo(file) {
-    // Validate file type
-    const allowedTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/quicktime'];
-    if (!allowedTypes.includes(file.type)) {
-        showNotification('Only MP4, WebM, and MOV video files are supported', 'error');
-        return;
+    
+    if (isValid) {
+        document.getElementById('stepForm').submit();
     }
-    
-    // Check file size (100MB limit)
-    if (file.size > 100 * 1024 * 1024) {
-        showNotification('Video file must be less than 100MB', 'error');
-        return;
-    }
-    
-    showVideoLoading();
-    
-    try {
-        const formData = new FormData();
-        formData.append('video', file);
-        formData.append('folder', 'products/videos');
-        
-        // Note: This would need a separate video upload endpoint
-        // For now, we'll store locally and show preview
-        const videoUrl = URL.createObjectURL(file);
-        document.getElementById('videoUrl').value = videoUrl;
-        
-        showVideoPreview(videoUrl, {
-            size: file.size,
-            name: file.name,
-            type: file.type
-        });
-        
-        showNotification(`Video uploaded successfully! (${formatFileSize(file.size)})`, 'success');
-        
-    } catch (error) {
-        showNotification('Failed to upload video: ' + error.message, 'error');
-        hideVideoLoading();
-    }
-}
-
-function showVideoLoading() {
-    const placeholder = document.getElementById('videoPlaceholder');
-    placeholder.innerHTML = `
-        <div class="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center animate-pulse">
-            <svg class="w-8 h-8 text-orange-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-        </div>
-        <div class="text-center">
-            <p class="text-lg font-semibold text-orange-600">Uploading video...</p>
-            <p class="text-xs text-gray-500 mt-1">This may take a while for large files</p>
-        </div>
-    `;
-}
-
-function hideVideoLoading() {
-    const placeholder = document.getElementById('videoPlaceholder');
-    placeholder.innerHTML = `
-        <div class="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-            <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v16a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h4zm2 3a4 4 0 108 0 4 4 0 00-8 0zm4-2a2 2 0 110 4 2 2 0 010-4z"></path>
-            </svg>
-        </div>
-        <div>
-            <p class="text-lg font-semibold text-gray-700">Click to upload product video</p>
-            <p class="text-sm text-gray-500">MP4, WebM, MOV up to 100MB</p>
-        </div>
-    `;
-}
-
-function showVideoPreview(videoUrl, videoInfo = null) {
-    const videoPlayer = document.getElementById('videoPreviewPlayer');
-    videoPlayer.src = videoUrl;
-    
-    document.getElementById('videoPlaceholder').parentElement.classList.add('hidden');
-    document.getElementById('videoPreview').classList.remove('hidden');
-    
-    if (videoInfo) {
-        document.getElementById('videoSize').textContent = `Size: ${formatFileSize(videoInfo.size)}`;
-        
-        // Get video duration when metadata loads
-        videoPlayer.addEventListener('loadedmetadata', function() {
-            const duration = Math.round(videoPlayer.duration);
-            const minutes = Math.floor(duration / 60);
-            const seconds = duration % 60;
-            document.getElementById('videoDuration').textContent = `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        });
-    }
-}
-
-function removeVideo() {
-    document.getElementById('videoUrl').value = '';
-    document.getElementById('videoPlaceholder').parentElement.classList.remove('hidden');
-    document.getElementById('videoPreview').classList.add('hidden');
-    document.getElementById('videoInput').value = '';
-    showNotification('Video removed successfully', 'info');
-}
-
-// Notification system
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    const colors = {
-        success: 'bg-green-100 border-green-500 text-green-700',
-        error: 'bg-red-100 border-red-500 text-red-700',
-        warning: 'bg-yellow-100 border-yellow-500 text-yellow-700',
-        info: 'bg-blue-100 border-blue-500 text-blue-700'
-    };
-    
-    notification.className = `fixed top-4 right-4 p-4 rounded-lg border-l-4 shadow-lg z-50 max-w-sm ${colors[type] || colors.info}`;
-    notification.innerHTML = `
-        <div class="flex items-center justify-between">
-            <span class="text-sm font-medium">${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-current opacity-70 hover:opacity-100">
-                ×
-            </button>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
-        }
-    }, 5000);
-}
+});
 </script>
 @endpush
+
 @endsection

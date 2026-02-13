@@ -243,8 +243,109 @@
                             Pay Online & Get Extra ₹100 Off
                         </div>
 
+                        <!-- Color Selection (MOVED HERE) -->
+                        @php
+                            $productColors = $product->colors()->get();
+                        @endphp
+                        @if($productColors->count() > 0)
+                            <div class="mt-4" id="colorSection">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Color</h3>
+                                </div>
+                                <div class="flex flex-wrap gap-3" id="colorGrid">
+                                    @foreach($productColors as $color)
+                                        @php
+                                            $isSelected = ($color->id == $galleryInitialColorId);
+                                        @endphp
+                                        <button 
+                                            onclick="switchColor({{ $color->id }}, '{{ addslashes($color->name) }}', this)" 
+                                            data-color-id="{{ $color->id }}"
+                                            data-color-name="{{ $color->name }}"
+                                            class="color-option group relative flex flex-col items-center gap-2 transition-all {{ $isSelected ? 'selected' : '' }}">
+                                            <!-- Color Circle -->
+                                            <div class="relative">
+                                                <div class="w-12 h-12 rounded-full border-3 transition-all {{ $isSelected ? 'border-[#4b0f27] ring-2 ring-[#4b0f27] ring-offset-2' : 'border-gray-300 hover:border-gray-400' }}" 
+                                                     style="background-color: {{ $color->hex_code ?? '#ccc' }};">
+                                                </div>
+                                                <!-- Selected Check Mark -->
+                                                @if($isSelected)
+                                                <div class="absolute -top-1 -right-1 w-5 h-5 bg-[#4b0f27] rounded-full flex items-center justify-center">
+                                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                </div>
+                                                @endif
+                                            </div>
+                                            <!-- Color Name -->
+                                            <span class="text-xs font-medium text-gray-700 text-center max-w-[60px] truncate">{{ $color->name }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Size Selection (MOVED HERE) -->
+                        @php
+                            $productSizes = $product->sizes()->orderBy('sort_order')->get();
+                            
+                            // Auto-select if only one size and not already selected
+                            if (!$selectedSizeId && $productSizes->count() === 1) {
+                                $selectedSizeId = $productSizes->first()->id;
+                            }
+                        @endphp
+                        @if($productSizes->count() > 0)
+                            <div class="mt-4" id="sizesSection">
+                                <div class="mb-3">
+                                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Size</h3>
+                                </div>
+                                <div class="flex flex-wrap gap-2" id="sizesGrid">
+                                    @foreach($productSizes as $size)
+                                        @php
+                                            $isSelected = ($size->id == $selectedSizeId);
+                                        @endphp
+                                        <button 
+                                            onclick="selectSize({{ $size->id }}, '{{ addslashes($size->name) }}', this)" 
+                                            data-size-id="{{ $size->id }}"
+                                            data-size-name="{{ $size->name }}"
+                                            class="size-option min-w-[60px] px-4 py-3 border-2 rounded-xl text-sm font-bold transition-all {{ $isSelected ? 'border-[#4b0f27] bg-[#4b0f27] text-white shadow-md' : 'border-gray-300 bg-white text-gray-700 hover:border-[#4b0f27] hover:bg-[#4b0f27]/5' }}">
+                                            {{ $size->abbreviation ?? $size->name }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Stock Status Display -->
+                        <div id="stockStatusSection" class="mt-4 p-3 rounded-lg border-2 transition-all" style="display: none;">
+                            <div class="flex items-center gap-2">
+                                <svg id="stockIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span id="stockStatusText" class="text-sm font-bold uppercase tracking-wide"></span>
+                            </div>
+                            <p id="stockMessage" class="text-xs text-gray-600 mt-1"></p>
+                        </div>
+
                         <!-- Quantity & Buttons Section -->
                         <div class="mt-6 flex flex-col gap-3">
+                            <!-- Stock Limit Message (Hidden by default) -->
+                            <div id="stockLimitMessage" class="hidden p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-semibold text-yellow-800">Stock Limit Reached</p>
+                                        <p id="stockLimitText" class="text-xs text-yellow-700 mt-1"></p>
+                                    </div>
+                                    <button onclick="hideStockLimitMessage()" class="text-yellow-600 hover:text-yellow-800">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <!-- Row 1: Quantity + Add to Cart -->
                             <div class="flex gap-4 h-11">
                                 <!-- Quantity -->
@@ -267,7 +368,7 @@
                             </div>
 
                             <!-- Row 2: Buy Now Button -->
-                            <button onclick="processBuyNow()"
+                            <button id="buyNowBtn" onclick="processBuyNow()"
                                 class="h-11 w-full rounded bg-[#495530] text-sm font-semibold text-white transition hover:bg-[#384225] uppercase tracking-wider shadow-sm">
                                 Buy it now
                             </button>
@@ -327,74 +428,6 @@
                                 </div>
                             </div>
                         </div>
-                        @php
-                            $productColors = $product->colors()->get();
-                        @endphp
-                        @if($productColors->count() > 1)
-                            <div class="mt-4" id="moreColorsSection">
-                                <h3 class="mb-3 text-sm font-semibold text-gray-800">More Colors</h3>
-                                <div class="grid grid-cols-4 gap-2" id="moreColorsGrid">
-                                    @foreach($productColors as $color)
-                                        @php
-                                            $cImages = $groupedVariantImages[$color->id] ?? [];
-                                            $cImage = $cImages[0] ?? null;
-                                            // Use the same $galleryInitialColorId that was set in the gallery section
-                                            $isSelected = ($color->id == $galleryInitialColorId);
-                                        @endphp
-                                        <div onclick="switchColor({{ $color->id }}, '{{ addslashes($color->name) }}', this)" data-color-id="{{ $color->id }}"
-                                            class="cursor-pointer group flex flex-col items-center color-swatch more-color-item"
-                                            style="{{ $isSelected ? 'display: none;' : 'display: flex;' }}">
-                                            <div
-                                                class="aspect-[3/4] w-full overflow-hidden rounded border border-transparent transition group-hover:border-gray-400">
-                                                @if($cImage)
-                                                    <img src="{{ $cImage }}" class="h-full w-full object-cover">
-                                                @else
-                                                    <div class="h-full w-full"
-                                                        style="background-color: {{ $color->hex_code ?? '#ccc' }}"></div>
-                                                @endif
-                                            </div>
-                                            <span class="mt-1 text-[10px] text-gray-600">{{ $color->name }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Size Selection -->
-                        @php
-                            $productSizes = $product->sizes()->orderBy('sort_order')->get();
-                            
-                            // Auto-select if only one size and not already selected
-                            if (!$selectedSizeId && $productSizes->count() === 1) {
-                                $selectedSizeId = $productSizes->first()->id;
-                            }
-                        @endphp
-                        @if($productSizes->count() > 0)
-                            <div class="mt-4" id="sizesSection">
-                                <h3 class="mb-3 text-sm font-semibold text-gray-800">Select Size</h3>
-                                <div class="flex flex-wrap gap-2" id="sizesGrid">
-                                    @foreach($productSizes as $size)
-                                        @php
-                                            $isSelected = ($size->id == $selectedSizeId);
-                                        @endphp
-                                        <button 
-                                            onclick="selectSize({{ $size->id }}, '{{ addslashes($size->name) }}', this)" 
-                                            data-size-id="{{ $size->id }}"
-                                            data-size-name="{{ $size->name }}"
-                                            class="size-option px-4 py-2 border-2 rounded-lg text-sm font-semibold transition-all {{ $isSelected ? 'border-[#4b0f27] bg-[#4b0f27] text-white' : 'border-gray-300 text-gray-700 hover:border-[#4b0f27]' }}">
-                                            {{ $size->abbreviation ?? $size->name }}
-                                        </button>
-                                    @endforeach
-                                </div>
-                                <p class="mt-2 text-xs text-gray-500" id="selectedSizeText">
-                                    @if($selectedSizeId)
-                                        Selected: {{ $productSizes->where('id', $selectedSizeId)->first()->name ?? '' }}
-                                    @else
-                                        Please select a size
-                                    @endif
-                                </p>
-                            </div>
-                        @endif
 
                         <!-- Accordions (No JS, using details/summary) -->
                         <!-- Accordion Sections (Animated) -->
@@ -756,6 +789,24 @@
                     <form id="reviewForm" class="space-y-4 md:space-y-6">
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
 
+                        <!-- Error Display (Hidden by default) -->
+                        <div id="reviewFormErrors" class="hidden p-4 bg-red-50 border border-red-300 rounded-lg">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-red-800 mb-1">Please fix the following errors:</p>
+                                    <ul id="reviewErrorList" class="text-sm text-red-700 list-disc list-inside space-y-1"></ul>
+                                </div>
+                                <button type="button" onclick="hideReviewErrors()" class="text-red-600 hover:text-red-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Rating Stars -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating *</label>
@@ -829,6 +880,23 @@
                             </div>
                         </div>
 
+                        <!-- Success Display (Hidden by default) -->
+                        <div id="reviewFormSuccess" class="hidden p-4 bg-green-50 border border-green-300 rounded-lg">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <p id="reviewSuccessMessage" class="text-sm font-semibold text-green-800"></p>
+                                </div>
+                                <button type="button" onclick="hideReviewSuccess()" class="text-green-600 hover:text-green-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Submit Buttons -->
                         <div class="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2">
                             <button type="button" onclick="closeReviewForm()"
@@ -846,10 +914,32 @@
 
             <!-- Write Review Button (Shows when form is hidden) -->
             <div id="writeReviewBtn" class="mb-6 md:mb-8">
-                <button onclick="openReviewForm()"
-                    class="w-full sm:w-auto bg-[#4b0f27] text-white px-6 md:px-8 py-2.5 md:py-3 rounded-lg font-semibold hover:bg-[#3d0c1f] transition-colors uppercase tracking-wide text-sm shadow-md">
-                    ✍️ Write a Review
-                </button>
+                @auth
+                    @if($hasPurchased)
+                        <button onclick="openReviewForm()"
+                            class="w-full sm:w-auto bg-[#4b0f27] text-white px-6 md:px-8 py-2.5 md:py-3 rounded-lg font-semibold hover:bg-[#3d0c1f] transition-colors uppercase tracking-wide text-sm shadow-md">
+                            ✍️ Write a Review
+                        </button>
+                    @else
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="font-semibold mb-1">Only Verified Buyers Can Write Reviews</p>
+                                    <p class="text-xs">Purchase and receive this product to share your experience.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @else
+                    <button onclick="openReviewForm()"
+                        class="w-full sm:w-auto bg-[#4b0f27] text-white px-6 md:px-8 py-2.5 md:py-3 rounded-lg font-semibold hover:bg-[#3d0c1f] transition-colors uppercase tracking-wide text-sm shadow-md">
+                        ✍️ Write a Review
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2">Please login to write a review</p>
+                @endauth
             </div>
 
             <!-- Reviews List -->
@@ -1127,6 +1217,7 @@
     // Make these global
     window.allGalleryImages = @json($initialImages);
     window.variantImages = @json($groupedVariantImages);
+    window.variantStockData = @json($variantStockData);
 
     // Auto-select first color if available (or from URL param)
     // Use the same $galleryInitialColorId that was set in the gallery section
@@ -1164,7 +1255,44 @@
         let val = parseInt(input.value) || 1;
         val += change;
         if (val < 1) val = 1;
+        
+        // Check stock limit if color and size are selected
+        if (window.selectedColorId && window.selectedSizeId) {
+            const variantKey = window.selectedColorId + '_' + window.selectedSizeId;
+            const variantData = window.variantStockData[variantKey];
+            
+            if (variantData && variantData.stock > 0) {
+                if (val > variantData.stock) {
+                    val = variantData.stock;
+                    // Show inline message instead of alert
+                    showStockLimitMessage(variantData.stock);
+                }
+            }
+        }
+        
         input.value = val;
+    }
+    
+    function showStockLimitMessage(stock) {
+        const messageDiv = document.getElementById('stockLimitMessage');
+        const messageText = document.getElementById('stockLimitText');
+        
+        if (messageDiv && messageText) {
+            messageText.textContent = `Only ${stock} ${stock === 1 ? 'item' : 'items'} available in stock`;
+            messageDiv.classList.remove('hidden');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+    }
+    
+    function hideStockLimitMessage() {
+        const messageDiv = document.getElementById('stockLimitMessage');
+        if (messageDiv) {
+            messageDiv.classList.add('hidden');
+        }
     }
 
     async function addToCart() {
@@ -1238,6 +1366,11 @@
                 if (typeof updateCartDrawerUI === 'function') {
                     updateCartDrawerUI(result);
                 }
+                
+                // Update cart count badge
+                if (typeof window.updateCartCount === 'function') {
+                    window.updateCartCount();
+                }
 
                 // Open Drawer
                 const drawer = document.getElementById('cartDrawer');
@@ -1264,59 +1397,306 @@
 
         if (images && images.length > 0) {
             updateGallery(images);
+        }
 
-            // Highlight active color in color swatches (if any)
-            document.querySelectorAll('.color-swatch > div').forEach(el => {
-                el.classList.remove('border-[#4b0f27]');
-                el.classList.add('border-transparent');
-            });
-            if (element) {
-                const box = element.querySelector('div');
-                if (box) {
-                    box.classList.remove('border-transparent');
-                    box.classList.add('border-[#4b0f27]');
+        // Update all color options
+        document.querySelectorAll('.color-option').forEach(btn => {
+            const btnColorId = parseInt(btn.getAttribute('data-color-id'));
+            const circle = btn.querySelector('div > div');
+            const checkMark = btn.querySelector('.absolute');
+            
+            if (btnColorId === colorId) {
+                // Selected state
+                btn.classList.add('selected');
+                if (circle) {
+                    circle.classList.remove('border-gray-300', 'hover:border-gray-400');
+                    circle.classList.add('border-[#4b0f27]', 'ring-2', 'ring-[#4b0f27]', 'ring-offset-2');
+                }
+                // Add check mark if not exists
+                if (!checkMark && circle) {
+                    const checkMarkHTML = `
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-[#4b0f27] rounded-full flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    `;
+                    circle.parentElement.insertAdjacentHTML('beforeend', checkMarkHTML);
+                }
+            } else {
+                // Unselected state
+                btn.classList.remove('selected');
+                if (circle) {
+                    circle.classList.add('border-gray-300', 'hover:border-gray-400');
+                    circle.classList.remove('border-[#4b0f27]', 'ring-2', 'ring-[#4b0f27]', 'ring-offset-2');
+                }
+                // Remove check mark
+                if (checkMark) {
+                    checkMark.remove();
+                }
+            }
+        });
+
+        // Update selected color name display
+        const selectedColorNameEl = document.getElementById('selectedColorName');
+        if (selectedColorNameEl) {
+            selectedColorNameEl.textContent = colorName;
+        }
+
+        // Filter sizes based on selected color - show only available sizes
+        filterSizesByColor(colorId);
+
+        // Update stock status
+        updateStockStatus();
+        
+        // Enable/disable buttons based on selection
+        updateButtonStates();
+    }
+
+    // Filter sizes to show only those available for selected color
+    function filterSizesByColor(colorId) {
+        const sizeButtons = document.querySelectorAll('.size-option');
+        let hasAvailableSize = false;
+        
+        sizeButtons.forEach(btn => {
+            const sizeId = parseInt(btn.getAttribute('data-size-id'));
+            const variantKey = colorId + '_' + sizeId;
+            const variantData = window.variantStockData[variantKey];
+            
+            // Show size only if variant exists for this color+size combination
+            if (variantData) {
+                btn.style.display = '';
+                hasAvailableSize = true;
+                
+                // Add stock indicator if out of stock
+                if (variantData.stock <= 0) {
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.disabled = true;
+                    // Add "Out of Stock" badge if not already present
+                    if (!btn.querySelector('.stock-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'stock-badge absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1 rounded';
+                        badge.textContent = 'Out';
+                        btn.style.position = 'relative';
+                        btn.appendChild(badge);
+                    }
+                } else {
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.disabled = false;
+                    // Remove "Out of Stock" badge if present
+                    const badge = btn.querySelector('.stock-badge');
+                    if (badge) badge.remove();
+                }
+            } else {
+                // Hide size if no variant exists for this color
+                btn.style.display = 'none';
+            }
+        });
+        
+        // Reset size selection if current selected size is not available for new color
+        if (window.selectedSizeId) {
+            const selectedSizeBtn = document.querySelector(`.size-option[data-size-id="${window.selectedSizeId}"]`);
+            if (!selectedSizeBtn || selectedSizeBtn.style.display === 'none') {
+                window.selectedSizeId = null;
+                window.selectedSizeName = null;
+                
+                // Update selected size text
+                const selectedSizeText = document.getElementById('selectedSizeText');
+                if (selectedSizeText) {
+                    selectedSizeText.textContent = 'Please select a size';
                 }
             }
         }
-        
-        // Always update More Colors section - hide selected color, show others
-        updateMoreColorsSection(colorId);
     }
     
     function selectSize(sizeId, sizeName, element) {
         window.selectedSizeId = sizeId;
         window.selectedSizeName = sizeName;
         
-        // Update active state
+        // Update active state for all size buttons
         document.querySelectorAll('.size-option').forEach(btn => {
-            btn.classList.remove('border-[#4b0f27]', 'bg-[#4b0f27]', 'text-white');
-            btn.classList.add('border-gray-300', 'text-gray-700');
+            btn.classList.remove('border-[#4b0f27]', 'bg-[#4b0f27]', 'text-white', 'shadow-md');
+            btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
         });
         
-        element.classList.remove('border-gray-300', 'text-gray-700');
-        element.classList.add('border-[#4b0f27]', 'bg-[#4b0f27]', 'text-white');
+        // Add active state to selected button
+        element.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+        element.classList.add('border-[#4b0f27]', 'bg-[#4b0f27]', 'text-white', 'shadow-md');
+
+        // Update stock status
+        updateStockStatus();
         
-        // Update selected size text
-        const selectedSizeText = document.getElementById('selectedSizeText');
-        if (selectedSizeText) {
-            selectedSizeText.textContent = 'Selected: ' + sizeName;
-        }
+        // Enable/disable buttons based on selection
+        updateButtonStates();
     }
     
-    function updateMoreColorsSection(selectedColorId) {
-        const moreColorItems = document.querySelectorAll('.more-color-item');
+    // Enable/disable quantity and buy now buttons based on color/size selection
+    function updateButtonStates() {
+        const qtyMinusBtn = document.querySelector('button[onclick="updateQty(-1)"]');
+        const qtyPlusBtn = document.querySelector('button[onclick="updateQty(1)"]');
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        const buyNowBtn = document.getElementById('buyNowBtn');
         
-        moreColorItems.forEach(item => {
-            const colorId = parseInt(item.getAttribute('data-color-id'));
-            
-            if (colorId === selectedColorId) {
-                // Hide the selected color
-                item.style.display = 'none';
-            } else {
-                // Show other colors
-                item.style.display = 'flex';
+        // Check if both color and size are selected
+        const isSelectionComplete = window.selectedColorId && window.selectedSizeId;
+        
+        if (isSelectionComplete) {
+            // Enable all buttons
+            if (qtyMinusBtn) {
+                qtyMinusBtn.disabled = false;
+                qtyMinusBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
-        });
+            if (qtyPlusBtn) {
+                qtyPlusBtn.disabled = false;
+                qtyPlusBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (addToCartBtn) {
+                addToCartBtn.disabled = false;
+                addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (buyNowBtn) {
+                buyNowBtn.disabled = false;
+                buyNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        } else {
+            // Disable all buttons
+            if (qtyMinusBtn) {
+                qtyMinusBtn.disabled = true;
+                qtyMinusBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (qtyPlusBtn) {
+                qtyPlusBtn.disabled = true;
+                qtyPlusBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (addToCartBtn) {
+                addToCartBtn.disabled = true;
+                addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (buyNowBtn) {
+                buyNowBtn.disabled = true;
+                buyNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    }
+
+    // Update stock status based on selected color and size
+    function updateStockStatus() {
+        const stockSection = document.getElementById('stockStatusSection');
+        const stockIcon = document.getElementById('stockIcon');
+        const stockText = document.getElementById('stockStatusText');
+        const stockMessage = document.getElementById('stockMessage');
+        const addToCartBtn = document.getElementById('addToCartBtn');
+
+        // Check if both color and size are selected
+        if (!window.selectedColorId || !window.selectedSizeId) {
+            stockSection.style.display = 'none';
+            return;
+        }
+
+        stockSection.style.display = 'block';
+
+        // Get variant stock data
+        const variantKey = window.selectedColorId + '_' + window.selectedSizeId;
+        const variantData = window.variantStockData[variantKey];
+
+        if (!variantData) {
+            // Variant not found
+            stockSection.classList.remove('border-green-300', 'bg-green-50', 'border-yellow-300', 'bg-yellow-50');
+            stockSection.classList.add('border-red-300', 'bg-red-50');
+            stockIcon.classList.remove('text-green-600', 'text-yellow-600');
+            stockIcon.classList.add('text-red-600');
+            stockIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+            stockText.textContent = 'Not Available';
+            stockText.classList.remove('text-green-700', 'text-yellow-700');
+            stockText.classList.add('text-red-700');
+            stockMessage.textContent = 'This combination is not available.';
+            stockMessage.classList.remove('text-green-600', 'text-yellow-600');
+            stockMessage.classList.add('text-red-600');
+            
+            // Disable add to cart and buy now
+            addToCartBtn.disabled = true;
+            addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            const buyNowBtn = document.getElementById('buyNowBtn');
+            if (buyNowBtn) {
+                buyNowBtn.disabled = true;
+                buyNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            return;
+        }
+
+        const stock = variantData.stock;
+
+        if (stock <= 0) {
+            // Out of stock
+            stockSection.classList.remove('border-green-300', 'bg-green-50', 'border-yellow-300', 'bg-yellow-50');
+            stockSection.classList.add('border-red-300', 'bg-red-50');
+            stockIcon.classList.remove('text-green-600', 'text-yellow-600');
+            stockIcon.classList.add('text-red-600');
+            stockIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+            stockText.textContent = 'Out of Stock';
+            stockText.classList.remove('text-green-700', 'text-yellow-700');
+            stockText.classList.add('text-red-700');
+            stockMessage.textContent = 'This item is currently unavailable.';
+            stockMessage.classList.remove('text-green-600', 'text-yellow-600');
+            stockMessage.classList.add('text-red-600');
+            
+            // Disable add to cart and buy now
+            addToCartBtn.disabled = true;
+            addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            const buyNowBtn = document.getElementById('buyNowBtn');
+            if (buyNowBtn) {
+                buyNowBtn.disabled = true;
+                buyNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        } else if (stock <= 5) {
+            // Low stock
+            stockSection.classList.remove('border-green-300', 'bg-green-50', 'border-red-300', 'bg-red-50');
+            stockSection.classList.add('border-yellow-300', 'bg-yellow-50');
+            stockIcon.classList.remove('text-green-600', 'text-red-600');
+            stockIcon.classList.add('text-yellow-600');
+            stockIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>';
+            stockText.textContent = 'Low Stock';
+            stockText.classList.remove('text-green-700', 'text-red-700');
+            stockText.classList.add('text-yellow-700');
+            stockMessage.textContent = `Only ${stock} items left in stock!`;
+            stockMessage.classList.remove('text-green-600', 'text-red-600');
+            stockMessage.classList.add('text-yellow-600');
+            
+            // Enable add to cart and buy now
+            addToCartBtn.disabled = false;
+            addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            const buyNowBtn = document.getElementById('buyNowBtn');
+            if (buyNowBtn) {
+                buyNowBtn.disabled = false;
+                buyNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        } else {
+            // In stock
+            stockSection.classList.remove('border-red-300', 'bg-red-50', 'border-yellow-300', 'bg-yellow-50');
+            stockSection.classList.add('border-green-300', 'bg-green-50');
+            stockIcon.classList.remove('text-red-600', 'text-yellow-600');
+            stockIcon.classList.add('text-green-600');
+            stockIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+            stockText.textContent = 'In Stock';
+            stockText.classList.remove('text-red-700', 'text-yellow-700');
+            stockText.classList.add('text-green-700');
+            stockMessage.textContent = `${stock} items available`;
+            stockMessage.classList.remove('text-red-600', 'text-yellow-600');
+            stockMessage.classList.add('text-green-600');
+            
+            // Enable add to cart and buy now
+            addToCartBtn.disabled = false;
+            addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            const buyNowBtn = document.getElementById('buyNowBtn');
+            if (buyNowBtn) {
+                buyNowBtn.disabled = false;
+                buyNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
     }
 
     // On Load: Highlight default color if selected and auto-select if only one color/size
@@ -1344,6 +1724,11 @@
             }
         }
         
+        // Filter sizes based on initially selected color
+        if (window.selectedColorId) {
+            filterSizesByColor(window.selectedColorId);
+        }
+        
         // If size is already selected (auto-selected or from URL), highlight it visually
         if (window.selectedSizeId) {
             const selectedSizeButton = document.querySelector(`.size-option[data-size-id="${window.selectedSizeId}"]`);
@@ -1361,15 +1746,20 @@
             }
         }
         
+        // Update stock status on page load if both color and size are selected
+        if (window.selectedColorId && window.selectedSizeId) {
+            updateStockStatus();
+        }
+        
+        // Initialize button states (disable if color/size not selected)
+        updateButtonStates();
+        
         if (selectedColorId) {
             const swatch = document.querySelector(`.color-swatch[onclick*="switchColor(${selectedColorId}"] > div`);
             if (swatch) {
                 swatch.classList.remove('border-transparent');
                 swatch.classList.add('border-[#4b0f27]');
             }
-            
-            // Hide the initially selected color from More Colors section
-            updateMoreColorsSection(selectedColorId);
         }
     });
 
@@ -1798,6 +2188,21 @@
 
         // Open review form (inline)
         function openReviewForm() {
+            @guest
+                // If user is not logged in
+                alert('Please login to write a review.');
+                window.location.href = '{{ route("login") }}';
+                return;
+            @endguest
+
+            @auth
+                // Check if user has purchased this product
+                @if(!$hasPurchased)
+                    alert('Only verified buyers can write reviews. You must purchase and receive this product first.');
+                    return;
+                @endif
+            @endauth
+
             const formContainer = document.getElementById('reviewFormContainer');
             const writeBtn = document.getElementById('writeReviewBtn');
 
@@ -1825,6 +2230,10 @@
             updateStarDisplay();
             document.getElementById('imagePreviews').classList.add('hidden');
             document.getElementById('imagePreviews').innerHTML = '';
+            
+            // Hide any messages
+            hideReviewErrors();
+            hideReviewSuccess();
         }
 
         // Set rating
@@ -1919,9 +2328,12 @@
             e.preventDefault();
 
             if (selectedRating === 0) {
-                alert('Please select a rating');
+                showReviewErrors(['Please select a rating']);
                 return;
             }
+
+            // Hide previous errors
+            hideReviewErrors();
 
             const formData = new FormData(this);
             formData.set('rating', selectedRating);
@@ -1948,20 +2360,95 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert(data.message);
-                    closeReviewForm();
-                    loadReviews(); // Reload reviews
+                    // Show success message inline
+                    showReviewSuccess(data.message);
+                    
+                    // Reset form
+                    document.getElementById('reviewForm').reset();
+                    selectedRating = 0;
+                    uploadedImages = [];
+                    updateStarDisplay();
+                    document.getElementById('imagePreviews').classList.add('hidden');
+                    document.getElementById('imagePreviews').innerHTML = '';
+                    
+                    // Reload reviews after a short delay
+                    setTimeout(() => {
+                        loadReviews();
+                    }, 2000);
                 } else {
-                    alert(data.message || 'Failed to submit review');
+                    // Show validation errors inline
+                    if (data.errors) {
+                        const errorMessages = [];
+                        for (const field in data.errors) {
+                            errorMessages.push(...data.errors[field]);
+                        }
+                        showReviewErrors(errorMessages);
+                    } else {
+                        showReviewErrors([data.message || 'Failed to submit review']);
+                    }
                 }
             } catch (error) {
                 console.error('Submit error:', error);
-                alert('Failed to submit review. Please try again.');
+                showReviewErrors(['Failed to submit review. Please try again.']);
             } finally {
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
         });
+        
+        // Show review form errors
+        function showReviewErrors(errors) {
+            const errorDiv = document.getElementById('reviewFormErrors');
+            const errorList = document.getElementById('reviewErrorList');
+            
+            if (errorDiv && errorList) {
+                errorList.innerHTML = '';
+                errors.forEach(error => {
+                    const li = document.createElement('li');
+                    li.textContent = error;
+                    errorList.appendChild(li);
+                });
+                errorDiv.classList.remove('hidden');
+                
+                // Scroll to error
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+        
+        // Hide review form errors
+        function hideReviewErrors() {
+            const errorDiv = document.getElementById('reviewFormErrors');
+            if (errorDiv) {
+                errorDiv.classList.add('hidden');
+            }
+        }
+
+        // Show review form success message
+        function showReviewSuccess(message) {
+            const successDiv = document.getElementById('reviewFormSuccess');
+            const successMessage = document.getElementById('reviewSuccessMessage');
+            
+            if (successDiv && successMessage) {
+                successMessage.textContent = message;
+                successDiv.classList.remove('hidden');
+                
+                // Scroll to success message
+                successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                // Auto-hide after 8 seconds
+                setTimeout(() => {
+                    hideReviewSuccess();
+                }, 8000);
+            }
+        }
+        
+        // Hide review form success message
+        function hideReviewSuccess() {
+            const successDiv = document.getElementById('reviewFormSuccess');
+            if (successDiv) {
+                successDiv.classList.add('hidden');
+            }
+        }
 
         // Helper function to escape HTML
         function escapeHtml(text) {
@@ -2000,6 +2487,11 @@
                     // Update Cart Drawer
                     if (typeof updateCartDrawerUI === 'function') {
                         updateCartDrawerUI(result);
+                    }
+                    
+                    // Update cart count badge
+                    if (typeof window.updateCartCount === 'function') {
+                        window.updateCartCount();
                     }
 
                     // Open Cart Drawer

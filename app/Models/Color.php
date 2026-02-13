@@ -41,4 +41,9 @@ class Color extends Model
     {
         return $this->belongsToMany(Product::class, 'product_color', 'color_id', 'product_id')->withTimestamps();
     }
+
+    public function productVariants()
+    {
+        return $this->hasMany(ProductVariant::class, 'color_id');
+    }
 }

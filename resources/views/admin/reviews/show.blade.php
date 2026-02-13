@@ -298,24 +298,36 @@
                         </h2>
                     </div>
                     <div class="p-6">
-                        @if($review->product->image_url)
-                            <img src="{{ $review->product->image_url }}" alt="{{ $review->product->name }}"
-                                class="w-full h-48 object-cover rounded-lg mb-4 border-2 border-gray-200">
+                        @if($review->product)
+                            @if($review->product->image_url)
+                                <img src="{{ $review->product->image_url }}" alt="{{ $review->product->name }}"
+                                    class="w-full h-48 object-cover rounded-lg mb-4 border-2 border-gray-200">
+                            @endif
+                            <h3 class="text-base font-bold text-gray-900 mb-2">{{ $review->product->name }}</h3>
+                            <p class="text-sm text-gray-600 mb-3">SKU: {{ $review->product->sku }}</p>
+                            <p class="text-lg font-black text-green-600 mb-4">₹{{ number_format($review->product->price, 2) }}
+                            </p>
+                            <div class="space-y-2">
+                                <a href="{{ route('product.show', $review->product->slug) }}" target="_blank"
+                                    class="block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 text-center transition-all">
+                                    View Product
+                                </a>
+                                <a href="{{ route('admin.products.show', $review->product->id) }}"
+                                    class="block w-full px-4 py-2.5 bg-white text-gray-700 text-sm font-semibold rounded-lg border-2 border-gray-300 hover:bg-gray-50 text-center transition-all">
+                                    Edit Product
+                                </a>
+                            </div>
+                        @else
+                            <div class="text-center py-8">
+                                <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-base font-bold text-gray-900 mb-2">Product Not Available</h3>
+                                <p class="text-sm text-gray-500">The product associated with this review has been deleted.</p>
+                            </div>
                         @endif
-                        <h3 class="text-base font-bold text-gray-900 mb-2">{{ $review->product->name }}</h3>
-                        <p class="text-sm text-gray-600 mb-3">SKU: {{ $review->product->sku }}</p>
-                        <p class="text-lg font-black text-green-600 mb-4">₹{{ number_format($review->product->price, 2) }}
-                        </p>
-                        <div class="space-y-2">
-                            <a href="{{ route('product.show', $review->product->slug) }}" target="_blank"
-                                class="block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 text-center transition-all">
-                                View Product
-                            </a>
-                            <a href="{{ route('admin.products.show', $review->product->id) }}"
-                                class="block w-full px-4 py-2.5 bg-white text-gray-700 text-sm font-semibold rounded-lg border-2 border-gray-300 hover:bg-gray-50 text-center transition-all">
-                                Edit Product
-                            </a>
-                        </div>
                     </div>
                 </div>
 

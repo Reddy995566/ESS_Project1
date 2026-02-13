@@ -238,7 +238,50 @@
                         <h2 class="text-lg font-bold text-gray-900">Notes</h2>
                     </div>
                     <div class="p-6">
-                        <div class="text-sm text-gray-700 whitespace-pre-line">{{ $payout->notes }}</div>
+                        @php
+                            // Parse notes - check if first line is JSON (bank details)
+                            $notesLines = explode("\n", $payout->notes);
+                            $bankDetails = null;
+                            $otherNotes = [];
+                            
+                            foreach ($notesLines as $line) {
+                                $line = trim($line);
+                                if (empty($line)) continue;
+                                
+                                // Try to decode as JSON
+                                $decoded = json_decode($line, true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                    $bankDetails = $decoded;
+                                } else {
+                                    $otherNotes[] = $line;
+                                }
+                            }
+                        @endphp
+                        
+                        @if($bankDetails)
+                        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h3 class="text-sm font-bold text-blue-900 mb-2">Bank Account Details</h3>
+                            <div class="space-y-1 text-sm text-blue-800">
+                                @if(isset($bankDetails['account_holder']))
+                                    <p><span class="font-semibold">Account Holder:</span> {{ $bankDetails['account_holder'] }}</p>
+                                @endif
+                                @if(isset($bankDetails['bank_account']))
+                                    <p><span class="font-semibold">Account Number:</span> {{ $bankDetails['bank_account'] }}</p>
+                                @endif
+                                @if(isset($bankDetails['ifsc_code']))
+                                    <p><span class="font-semibold">IFSC Code:</span> {{ $bankDetails['ifsc_code'] }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+                        
+                        @if(count($otherNotes) > 0)
+                        <div class="text-sm text-gray-700 space-y-2">
+                            @foreach($otherNotes as $note)
+                                <p class="leading-relaxed">{{ $note }}</p>
+                            @endforeach
+                        </div>
+                        @endif
                     </div>
                 </div>
                 @endif
@@ -249,6 +292,6 @@
     @include('admin.seller-payouts.modals')
 @endsection
 
-@section('scripts')
+@push('scripts')
     @include('admin.seller-payouts.scripts')
-@endsection
+@endpush

@@ -38,12 +38,12 @@
         $activeMenu = 'returns';
     } elseif (str_contains($routeName, 'payout')) {
         $activeMenu = 'payouts';
-    } elseif (str_contains($routeName, 'analytics')) {
-        $activeMenu = 'analytics';
+    // } elseif (str_contains($routeName, 'analytics')) {
+    //     $activeMenu = 'analytics';
     } elseif (str_contains($routeName, 'notification')) {
         $activeMenu = 'notifications';
-    } elseif (str_contains($routeName, 'documents')) {
-        $activeMenu = 'documents';
+    // } elseif (str_contains($routeName, 'documents')) {
+    //     $activeMenu = 'documents';
     } elseif (str_contains($routeName, 'setting')) {
         $activeMenu = 'settings';
     } elseif (str_contains($routeName, 'profile')) {
@@ -231,6 +231,18 @@
                 </a>
             </li>
 
+            <!-- Cancelled Orders -->
+            <li>
+                <a href="{{ route('seller.orders.cancelled') }}"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('seller.orders.cancelled') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-white' }} transition-all duration-150">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm font-medium">Cancelled Orders</span>
+                </a>
+            </li>
+
             <!-- Wallet -->
             <li>
                 <a href="{{ route('seller.wallet.index') }}"
@@ -271,7 +283,7 @@
             </li>
 
             <!-- Analytics -->
-            <li>
+            {{-- <li>
                 <a href="{{ route('seller.analytics') }}"
                     class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ $activeMenu === 'analytics' ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-white' }} transition-all duration-150">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +292,7 @@
                     </svg>
                     <span class="text-sm font-medium">Analytics</span>
                 </a>
-            </li>
+            </li> --}}
 
             <!-- Notifications -->
             <li>
@@ -303,7 +315,7 @@
             </li>
 
             <!-- Document Verification -->
-            <li>
+            {{-- <li>
                 <a href="{{ route('seller.documents.index') }}"
                     class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ str_contains($routeName, 'documents') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-white' }} transition-all duration-150">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +337,7 @@
                         </span>
                     @endif
                 </a>
-            </li>
+            </li> --}}
 
             <!-- Settings -->
             <li>

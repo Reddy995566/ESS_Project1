@@ -729,11 +729,19 @@
             <td class="px-4 py-4 text-center">
                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">#${color.id}</span>
             </td>
-            
+            <td class="px-4 py-4 text-center">
+                <div class="flex justify-center">
+                    <div class="w-10 h-10 rounded-lg shadow-md border-2 border-gray-300 group-hover:border-purple-400 transition-all" style="background-color: ${escapeHtml(color.hex_code)};"></div>
+                </div>
+            </td>
             <td class="px-4 py-4">
                 <p class="text-sm font-bold text-gray-900 group-hover:text-purple-700">${escapeHtml(color.name)}</p>
             </td>
-            
+            <td class="px-4 py-4 text-center">
+                <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border border-purple-300">
+                    ${escapeHtml(color.hex_code)}
+                </span>
+            </td>
             <td class="px-4 py-4 text-center">
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" class="sr-only peer status-toggle" data-id="${color.id}" data-field="is_active" ${color.is_active ? 'checked' : ''}>

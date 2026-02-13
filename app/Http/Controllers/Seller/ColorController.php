@@ -108,12 +108,24 @@ class ColorController extends Controller
     {
         $seller = Auth::guard('seller')->user();
         
-        $validated = $request->validate([
-            'name' => $this->getSellerNameValidation('colors', $color->id),
+        // Get incoming name to compare
+        $incomingName = $request->input('name');
+        
+        // Prepare validation rules
+        $rules = [
             'hex_code' => 'required|string|regex:/^#[0-9A-F]{6}$/i',
             'sort_order' => 'required|integer|min:0',
             'is_active' => 'nullable|boolean',
-        ]);
+        ];
+        
+        // Only check name uniqueness if it's actually changing
+        if ($incomingName !== $color->name) {
+            $rules['name'] = $this->getSellerNameValidation('colors', $color->id);
+        } else {
+            $rules['name'] = 'required|string|max:255';
+        }
+        
+        $validated = $request->validate($rules);
 
         $validated['is_active'] = $request->has('is_active');
 

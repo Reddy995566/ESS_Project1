@@ -27,6 +27,24 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         try {
+            // Check if user is logged in
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You must be logged in to write a review.'
+                ], 401);
+            }
+
+            // Check if user has purchased this product
+            $hasPurchased = $this->checkVerifiedPurchase($request->product_id, auth()->user()->email);
+            
+            if (!$hasPurchased) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only verified buyers can write reviews. You must purchase and receive this product first.'
+                ], 403);
+            }
+
             // Validation
             $validator = Validator::make($request->all(), [
                 'product_id' => 'required|exists:products,id',
@@ -34,7 +52,7 @@ class ReviewController extends Controller
                 'email' => 'required|email|max:255',
                 'rating' => 'required|integer|min:1|max:5',
                 'title' => 'nullable|string|max:255',
-                'comment' => 'required|string|min:10',
+                'comment' => 'required|string',
                 'images' => 'nullable|array|max:5',
                 'images.*' => 'nullable|string', // ImageKit URLs
             ]);
@@ -52,13 +70,13 @@ class ReviewController extends Controller
             // Create review
             $review = Review::create([
                 'product_id' => $request->product_id,
-                'user_id' => auth()->check() ? auth()->id() : null,
+                'user_id' => auth()->id(),
                 'name' => $request->name,
                 'email' => $request->email,
                 'rating' => $request->rating,
                 'title' => $request->title,
                 'comment' => $request->comment,
-                'is_verified_purchase' => $this->checkVerifiedPurchase($request->product_id, $request->email),
+                'is_verified_purchase' => true, // Already verified above
                 'is_approved' => false, // Requires admin approval
             ]);
 
@@ -219,12 +237,12 @@ class ReviewController extends Controller
      */
     private function checkVerifiedPurchase($productId, $email)
     {
-        // Check if user with this email has purchased this product
+        // Check if user with this email has purchased and received this product
         return DB::table('orders')
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->where('orders.email', $email)
             ->where('order_items.product_id', $productId)
-            ->where('orders.status', 'completed')
+            ->where('orders.status', 'delivered') // Must be delivered
             ->exists();
     }
 

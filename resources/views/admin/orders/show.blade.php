@@ -52,12 +52,12 @@
                         @endif
                     @endif
 
-                    <button onclick="window.print()" class="inline-flex items-center px-5 py-2.5 bg-white text-gray-700 text-sm font-semibold rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                    {{-- <button onclick="window.print()" class="inline-flex items-center px-5 py-2.5 bg-white text-gray-700 text-sm font-semibold rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                         </svg>
                         Print
-                    </button>
+                    </button> --}}
                     
                     <a href="{{ route('admin.orders.invoice', $order->id) }}" target="_blank" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white text-sm font-semibold rounded-xl hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,9 +115,19 @@
                                         // Try to get variant image first if variant exists
                                         $productImage = null;
                                         
-                                        if ($item->variant && $item->variant->images && count($item->variant->images) > 0) {
-                                            $firstImg = $item->variant->images[0];
-                                            $productImage = is_array($firstImg) ? ($firstImg['url'] ?? $firstImg['path'] ?? null) : $firstImg;
+                                        if ($item->variant && $item->variant->images) {
+                                            $images = $item->variant->images;
+                                            
+                                            // Decode if it's a JSON string
+                                            if (is_string($images)) {
+                                                $images = json_decode($images, true);
+                                            }
+                                            
+                                            // Check if we have valid array with images
+                                            if (is_array($images) && count($images) > 0) {
+                                                $firstImg = $images[0];
+                                                $productImage = is_array($firstImg) ? ($firstImg['url'] ?? $firstImg['path'] ?? null) : $firstImg;
+                                            }
                                         }
                                         
                                         // Fallback to getImageUrl method
@@ -257,6 +267,14 @@
                                 </button>
                             </div>
                         </form>
+                        
+                        @if(in_array($order->status, ['pending', 'processing', 'shipped']))
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <button onclick="showCancelModal()" class="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold rounded-xl hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+                                Cancel Order
+                            </button>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -281,7 +299,7 @@
                             </div>
                             @if($order->discount > 0)
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Discount</span>
+                                <span class="text-gray-600">Discount @if($order->coupon_code)({{ $order->coupon_code }})@endif</span>
                                 <span class="font-semibold text-green-600">-₹{{ number_format($order->discount, 2) }}</span>
                             </div>
                             @endif
@@ -347,6 +365,42 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Cancellation Info Card (if cancelled) -->
+                @if($order->status === 'cancelled')
+                <div class="bg-white rounded-2xl shadow-2xl border border-red-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 border-b border-red-200">
+                        <h2 class="text-xl font-bold text-red-900 flex items-center">
+                            <span class="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-lg mr-3">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </span>
+                            Cancellation Info
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 font-medium">Cancelled By</span>
+                                <span class="text-gray-900 font-semibold capitalize">{{ $order->cancelled_by ?? 'N/A' }}</span>
+                            </div>
+                            @if($order->cancelled_at)
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 font-medium">Cancelled At</span>
+                                <span class="text-gray-900 font-semibold">{{ $order->cancelled_at->format('d M, Y h:i A') }}</span>
+                            </div>
+                            @endif
+                            @if($order->cancellation_reason)
+                            <div class="pt-3 border-t border-red-100">
+                                <p class="text-xs text-gray-500 font-medium mb-2">Reason:</p>
+                                <p class="text-sm text-gray-700 bg-red-50 p-3 rounded-lg border border-red-100">{{ $order->cancellation_reason }}</p>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
 
             </div>
         </div>
@@ -531,7 +585,94 @@
     function closeCourierModal() {
         document.getElementById('courierModal').classList.add('hidden');
     }
+
+    // Cancel Order Functions
+    function showCancelModal() {
+        document.getElementById('cancelModal').classList.remove('hidden');
+    }
+
+    function closeCancelModal() {
+        document.getElementById('cancelModal').classList.add('hidden');
+        document.getElementById('cancelReason').value = '';
+    }
+
+    function cancelOrder() {
+        const reason = document.getElementById('cancelReason').value.trim();
+        
+        if (!reason) {
+            alert('Please provide a reason for cancellation');
+            return;
+        }
+        
+        const btn = document.getElementById('confirmCancelBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        
+        fetch('{{ route('admin.orders.cancel', $order->id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Order cancelled successfully');
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to cancel order');
+                btn.disabled = false;
+                btn.textContent = 'Cancel Order';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+            btn.disabled = false;
+            btn.textContent = 'Cancel Order';
+        });
+    }
 </script>
+
+<!-- Cancel Order Modal -->
+<div id="cancelModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeCancelModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Cancel Order</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500 mb-4">Are you sure you want to cancel this order? This action cannot be undone.</p>
+                            <form id="cancelForm">
+                                @csrf
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Reason for cancellation</label>
+                                <textarea id="cancelReason" name="reason" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Please provide a reason for cancelling this order..."></textarea>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                <button type="button" onclick="cancelOrder()" id="confirmCancelBtn" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    Cancel Order
+                </button>
+                <button type="button" onclick="closeCancelModal()" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+                    Keep Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @push('scripts')

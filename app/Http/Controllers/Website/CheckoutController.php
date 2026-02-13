@@ -27,6 +27,12 @@ class CheckoutController extends Controller
 
         $user = Auth::user();
         $addresses = $user->addresses;
+        
+        // Get last order's address for prefilling
+        $lastOrder = Order::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
         $subtotal = 0;
         foreach($cart as $item) {
             $subtotal += $item['price'] * $item['quantity'];
@@ -54,7 +60,7 @@ class CheckoutController extends Controller
         // Get Razorpay Key for frontend
         $razorpayKey = Setting::get('razorpay_key_id', '');
 
-        return view('website.checkout', compact('cart', 'user', 'addresses', 'subtotal', 'tax', 'shipping', 'discount', 'total', 'razorpayKey', 'appliedCoupon'));
+        return view('website.checkout', compact('cart', 'user', 'addresses', 'lastOrder', 'subtotal', 'tax', 'shipping', 'discount', 'total', 'razorpayKey', 'appliedCoupon'));
     }
 
     public function store(Request $request)
@@ -183,6 +189,32 @@ class CheckoutController extends Controller
                 $subtotal += $item['price'] * $item['quantity'];
             }
             
+            // Validate stock availability before processing order
+            foreach($cart as $item) {
+                if (isset($item['color_id']) && isset($item['size_id'])) {
+                    $variant = \App\Models\ProductVariant::where('product_id', $item['product_id'])
+                        ->where('color_id', $item['color_id'])
+                        ->where('size_id', $item['size_id'])
+                        ->first();
+                    
+                    if (!$variant) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Product variant not found for {$item['name']}"
+                        ], 400);
+                    }
+                    
+                    if ($variant->stock < $item['quantity']) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Insufficient stock for {$item['name']}. Only {$variant->stock} available."
+                        ], 400);
+                    }
+                }
+            }
+            
             // Apply discount if coupon was applied
             $discount = 0;
             $appliedCoupon = session('applied_coupon');
@@ -201,8 +233,8 @@ class CheckoutController extends Controller
             $total = $subtotal - $discount; // Add tax/shipping logic here if needed
 
             // Generate Order Number - Pure digits with leading zeros
-            $lastOrder = Order::orderBy('id', 'desc')->first();
-            $nextNumber = $lastOrder ? $lastOrder->id + 1 : 1;
+            $previousOrder = Order::orderBy('id', 'desc')->first();
+            $nextNumber = $previousOrder ? $previousOrder->id + 1 : 1;
             $orderNumber = str_pad($nextNumber, 9, '0', STR_PAD_LEFT); // 000000001, 000000002, etc.
             
             $order = Order::create(array_merge($addressData, $billingData, [
@@ -211,6 +243,8 @@ class CheckoutController extends Controller
                 'session_id' => session()->getId(),
                 'subtotal' => $subtotal,
                 'discount' => $discount,
+                'coupon_code' => $appliedCoupon ? $appliedCoupon['code'] : null,
+                'coupon_id' => $appliedCoupon ? $appliedCoupon['id'] : null,
                 'total' => $total,
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'pending',
@@ -225,6 +259,18 @@ class CheckoutController extends Controller
                 $commissionAmount = ($itemTotal * $commissionRate) / 100;
                 $sellerAmount = $itemTotal - $commissionAmount;
                 
+                // Find variant_id if color and size are present
+                $variantId = null;
+                if (isset($item['color_id']) && isset($item['size_id'])) {
+                    $variant = \App\Models\ProductVariant::where('product_id', $item['product_id'])
+                        ->where('color_id', $item['color_id'])
+                        ->where('size_id', $item['size_id'])
+                        ->first();
+                    if ($variant) {
+                        $variantId = $variant->id;
+                    }
+                }
+                
                 $orderItem = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
@@ -236,12 +282,23 @@ class CheckoutController extends Controller
                     'commission_rate' => $commissionRate,
                     'commission_amount' => $commissionAmount,
                     'seller_amount' => $sellerAmount,
-                    'variant_id' => null,
+                    'variant_id' => $variantId,
                     'variant_name' => implode(' | ', array_filter([
                         isset($item['color_name']) ? 'Color: ' . $item['color_name'] : null,
-                        isset($item['size_name']) ? 'Size: ' . $item['size_name'] : null,
+                        isset($item['size_abbr']) ? 'Size: ' . $item['size_abbr'] : (isset($item['size_name']) ? 'Size: ' . $item['size_name'] : null),
                     ])) ?: null,
+                    'image' => $item['image'] ?? null, // Save variant-specific image from cart
                 ]);
+
+                // Decrease stock for the variant
+                if ($variantId) {
+                    $variant = \App\Models\ProductVariant::find($variantId);
+                    if ($variant) {
+                        // Decrease stock
+                        $newStock = max(0, $variant->stock - $item['quantity']);
+                        $variant->update(['stock' => $newStock]);
+                    }
+                }
 
                 // Add to seller wallet if seller exists
                 if ($item['seller_id']) {
@@ -297,17 +354,35 @@ class CheckoutController extends Controller
                 $razorpayKeyId = Setting::get('razorpay_key_id');
                 $razorpaySecret = Setting::get('razorpay_key_secret');
                 
-                $api = new Api($razorpayKeyId, $razorpaySecret);
+                // Check if Razorpay credentials are configured
+                if (empty($razorpayKeyId) || empty($razorpaySecret)) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Online payment is not configured. Please contact support or use Cash on Delivery.'
+                    ], 400);
+                }
                 
-                $razorpayOrder = $api->order->create([
-                    'amount' => $total * 100, // Amount in paise
-                    'currency' => 'INR',
-                    'receipt' => $orderNumber,
-                    'notes' => [
-                        'order_id' => $order->id,
-                        'customer_name' => $user->name,
-                    ]
-                ]);
+                try {
+                    $api = new Api($razorpayKeyId, $razorpaySecret);
+                    
+                    $razorpayOrder = $api->order->create([
+                        'amount' => $total * 100, // Amount in paise
+                        'currency' => 'INR',
+                        'receipt' => $orderNumber,
+                        'notes' => [
+                            'order_id' => $order->id,
+                            'customer_name' => $user->name,
+                        ]
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error('Razorpay API error: ' . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Payment gateway error. Please try Cash on Delivery or contact support.'
+                    ], 500);
+                }
                 
                 // Store Razorpay order ID
                 $order->update(['transaction_id' => $razorpayOrder['id']]);
@@ -374,7 +449,13 @@ class CheckoutController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Order placement failed: ' . $e->getMessage());
+            \Log::error('Checkout error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Order placement failed: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -437,7 +518,7 @@ class CheckoutController extends Controller
 
     public function success($id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with(['items.product'])->findOrFail($id);
         if($order->user_id != Auth::id()) abort(403);
         return view('website.order_success', compact('order'));
     }

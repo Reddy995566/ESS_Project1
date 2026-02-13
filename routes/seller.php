@@ -46,9 +46,9 @@ Route::middleware(['seller.auth'])->group(function () {
         Route::get('/create/step-1', [ProductController::class, 'createStep1'])->name('create.step1');
         Route::post('/create/step-1', [ProductController::class, 'processStep1'])->name('create.step1.process');
         
-        // Step 2 is now Variants (previously step 5)
-        Route::get('/create/step-2', [ProductController::class, 'createStep5'])->name('create.step2');
-        Route::post('/create/step-2', [ProductController::class, 'processStep5'])->name('create.step2.process');
+        // Step 2 is now Variants
+        Route::get('/create/step-2', [ProductController::class, 'createStep2'])->name('create.step2');
+        Route::post('/create/step-2', [ProductController::class, 'processStep2'])->name('create.step2.process');
         
         Route::get('/create/step-3', [ProductController::class, 'createStep3'])->name('create.step3');
         Route::post('/create/step-3', [ProductController::class, 'processStep3'])->name('create.step3.process');
@@ -56,13 +56,13 @@ Route::middleware(['seller.auth'])->group(function () {
         Route::get('/create/step-4', [ProductController::class, 'createStep4'])->name('create.step4');
         Route::post('/create/step-4', [ProductController::class, 'processStep4'])->name('create.step4.process');
         
-        // Step 5 is now SEO (previously step 6)
-        Route::get('/create/step-5', [ProductController::class, 'createStep6'])->name('create.step5');
-        Route::post('/create/step-5', [ProductController::class, 'processStep6'])->name('create.step5.process');
+        // Step 5 is now SEO
+        Route::get('/create/step-5', [ProductController::class, 'createStep5'])->name('create.step5');
+        Route::post('/create/step-5', [ProductController::class, 'processStep5'])->name('create.step5.process');
         
-        // Step 6 is now Settings (previously step 7)
-        Route::get('/create/step-6', [ProductController::class, 'createStep7'])->name('create.step6');
-        Route::post('/create/step-6', [ProductController::class, 'processStep7'])->name('create.step6.process');
+        // Step 6 is now Settings
+        Route::get('/create/step-6', [ProductController::class, 'createStep6'])->name('create.step6');
+        Route::post('/create/step-6', [ProductController::class, 'processStep6'])->name('create.step6.process');
         
         // Old step 6 and 7 routes redirect to new routes
         Route::get('/create/step-7', function() {
@@ -98,7 +98,9 @@ Route::middleware(['seller.auth'])->group(function () {
     // Orders
     Route::prefix('orders')->name('seller.orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/cancelled', [OrderController::class, 'cancelled'])->name('cancelled');
         Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+        Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         Route::post('/{id}/shiprocket', [OrderController::class, 'shipToShiprocket'])->name('shiprocket');
         Route::get('/{id}/shiprocket/couriers', [OrderController::class, 'getCouriers'])->name('shiprocket.couriers');
         Route::post('/{id}/shiprocket/awb', [OrderController::class, 'generateAwb'])->name('shiprocket.awb');

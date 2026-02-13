@@ -364,6 +364,6 @@
     @include('admin.seller-payouts.modals')
 @endsection
 
-@section('scripts')
+@push('scripts')
     @include('admin.seller-payouts.scripts')
-@endsection
+@endpush

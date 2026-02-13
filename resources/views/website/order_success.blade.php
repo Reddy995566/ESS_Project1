@@ -23,7 +23,43 @@
             </div>
 
             <div class="border-t border-b border-gray-100 py-8 mb-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                <!-- Order Items -->
+                <div class="mb-8">
+                    <h3 class="font-medium text-gray-900 mb-4 text-left">Order Items:</h3>
+                    <div class="space-y-3">
+                        @foreach($order->items as $item)
+                        <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                            @if($item->image)
+                            <img src="{{ $item->image }}" 
+                                 alt="{{ $item->product_name }}" 
+                                 class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                            @elseif($item->product && $item->product->image_url)
+                            <img src="{{ $item->product->image_url }}" 
+                                 alt="{{ $item->product_name }}" 
+                                 class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                            @else
+                            <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            @endif
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">{{ $item->product_name }}</h4>
+                                @if($item->variant_name)
+                                <p class="text-sm text-gray-600 mt-1">{{ $item->variant_name }}</p>
+                                @endif
+                                <p class="text-sm text-gray-500 mt-1">Qty: {{ $item->quantity }} × Rs. {{ number_format($item->price) }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium text-gray-900">Rs. {{ number_format($item->total) }}</p>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-t border-gray-100 pt-8">
                     <div>
                         <h3 class="font-medium text-gray-900 mb-2">Shipping To:</h3>
                         <p class="text-gray-600 text-sm leading-relaxed">
@@ -42,6 +78,12 @@
                                 <span>Subtotal:</span>
                                 <span>Rs. {{ number_format($order->subtotal) }}</span>
                             </div>
+                            @if($order->discount > 0)
+                            <div class="flex justify-between text-green-600">
+                                <span>Discount @if($order->coupon_code)({{ $order->coupon_code }})@endif:</span>
+                                <span>-Rs. {{ number_format($order->discount) }}</span>
+                            </div>
+                            @endif
                             <div class="flex justify-between font-medium text-[#3D0C1F] pt-2 mt-2 border-t border-gray-100">
                                 <span>Total:</span>
                                 <span>Rs. {{ number_format($order->total) }}</span>

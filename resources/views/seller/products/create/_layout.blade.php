@@ -6,12 +6,9 @@
     $pageSubtitle = $isEditMode ? 'Update your product details' : 'Build your product catalog';
 @endphp
 
-@section('title', '{{ $pageTitle }} - Step {{ $currentStep ?? 1 }} of 6')
+@section('title', $pageTitle . ' - Step ' . ($currentStep ?? 1) . ' of 6')
 
 @push('styles')
-<!-- Alpine.js -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
 <style>
 /* Quill Editor Custom Styles */
 .quill-editor-wrapper {
@@ -208,6 +205,11 @@
 </div>
 
 @push('scripts')
+<!-- Alpine.js -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<!-- SortableJS for drag & drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <script>
 const isEditMode = {{ $isEditMode ? 'true' : 'false' }};
 const editProductId = {{ $productId ?? 'null' }};
@@ -254,6 +256,14 @@ document.getElementById('clearSessionBtn')?.addEventListener('click', function()
         }).catch(error => {
             showNotification('Failed to clear progress', 'error');
         });
+    }
+});
+
+// Next button handler - submit the form
+document.getElementById('nextBtn')?.addEventListener('click', function() {
+    const form = document.getElementById('stepForm');
+    if (form) {
+        form.submit();
     }
 });
 

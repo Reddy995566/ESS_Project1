@@ -178,8 +178,53 @@ class ProductsController extends Controller
 
             self::logActivity('created', "Created new product: {$product->name}", $product);
 
-            if ($request->input('has_variants') === 'true') {
-                $this->createProductVariants($product, $request);
+            // Handle new variants format
+            if ($request->has('variants_data')) {
+                $variantsData = json_decode($request->input('variants_data'), true);
+                
+                if (!empty($variantsData)) {
+                    $allColorIds = [];
+                    $allSizeIds = [];
+                    
+                    foreach ($variantsData as $variantData) {
+                        $colorId = $variantData['color_id'];
+                        $sizeIds = $variantData['size_ids'] ?? [];
+                        $stock = $variantData['stock'];
+                        $images = json_encode($variantData['images'] ?? []);
+                        
+                        $allColorIds[] = $colorId;
+                        
+                        // Create one variant for each size
+                        foreach ($sizeIds as $sizeId) {
+                            $allSizeIds[] = $sizeId;
+                            
+                            $product->variants()->create([
+                                'color_id' => $colorId,
+                                'size_id' => $sizeId,
+                                'stock' => $stock,
+                                'images' => $images,
+                                'is_default' => false
+                            ]);
+                        }
+                    }
+                    
+                    // Set first variant as default
+                    $firstVariant = $product->variants()->first();
+                    if ($firstVariant) {
+                        $firstVariant->update(['is_default' => true]);
+                    }
+                    
+                    // Sync colors and sizes
+                    $uniqueColorIds = array_unique($allColorIds);
+                    $uniqueSizeIds = array_unique($allSizeIds);
+                    
+                    if (!empty($uniqueColorIds)) {
+                        $product->colors()->sync($uniqueColorIds);
+                    }
+                    if (!empty($uniqueSizeIds)) {
+                        $product->sizes()->sync($uniqueSizeIds);
+                    }
+                }
             }
 
             if ($request->expectsJson()) {
@@ -718,59 +763,6 @@ class ProductsController extends Controller
         }
     }
 
-    public function createStep2()
-    {
-        $productData = session('product_data', []);
-        if (empty($productData)) {
-            return redirect()->route('admin.products.create.step1')->with('error', 'Please complete Step 1 first.');
-        }
-        return view('admin.products.create.step2', compact('productData'));
-    }
-
-    public function processStep2(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'main_image' => 'nullable|string',
-                'additional_images' => 'nullable|string',
-            ]);
-
-            $productData = array_merge(session('product_data', []), $validated);
-            session(['product_data' => $productData]);
-
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Step 2 completed successfully!',
-                    'next_step_url' => route('admin.products.create.step3'),
-                    'data' => $validated
-                ]);
-            }
-
-            return redirect()->route('admin.products.create.step3');
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $e->validator->errors()
-                ], 422);
-            }
-
-            throw $e;
-        } catch (\Exception $e) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'An error occurred: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return back()->withInput()->withErrors(['error' => 'An error occurred: ' . $e->getMessage()]);
-        }
-    }
-
     public function createStep3()
     {
         $productData = session('product_data', []);
@@ -886,9 +878,17 @@ class ProductsController extends Controller
             $validated = $request->validate([
                 'price' => 'required|numeric|min:0',
                 'sale_price' => 'nullable|numeric|min:0',
-                'stock' => 'required|integer|min:0',
-                'stock_status' => 'required|in:in_stock,out_of_stock',
+                'stock' => 'nullable|integer|min:0',
+                'stock_status' => 'nullable|in:in_stock,out_of_stock',
             ]);
+
+            // Set default stock to 0 if not provided (will be managed at variant level)
+            if (!isset($validated['stock'])) {
+                $validated['stock'] = 0;
+            }
+            if (!isset($validated['stock_status'])) {
+                $validated['stock_status'] = 'in_stock';
+            }
 
             $productData = array_merge(session('product_data', []), $validated);
             session(['product_data' => $productData]);
@@ -926,7 +926,7 @@ class ProductsController extends Controller
         }
     }
 
-    public function createStep5()
+    public function createStep2()
     {
         $productData = session('product_data', []);
         if (empty($productData)) {
@@ -936,18 +936,40 @@ class ProductsController extends Controller
         $colors = Color::where('is_active', true)->orderBy('name')->get();
         $sizes = Size::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.products.create.step5', compact('productData', 'colors', 'sizes'));
+        return view('admin.products.create.step2', compact('productData', 'colors', 'sizes'));
     }
 
-    public function processStep5(Request $request)
+    public function processStep2(Request $request)
     {
         try {
             $validated = $request->validate([
-                'has_variants' => 'nullable|boolean',
-                'variant_colors' => 'nullable|string',
-                'variant_sizes' => 'nullable|string',
-                'variant_images' => 'nullable|string',
+                'variants_data' => 'required|json',
             ]);
+
+            $variantsData = json_decode($validated['variants_data'], true);
+            
+            if (empty($variantsData)) {
+                return back()->withErrors(['error' => 'Please add at least one variant']);
+            }
+
+            // Validate each variant
+            foreach ($variantsData as $variant) {
+                if (empty($variant['color_id'])) {
+                    return back()->withErrors(['error' => 'All variants must have a color selected']);
+                }
+                if (empty($variant['size_ids']) || !is_array($variant['size_ids']) || count($variant['size_ids']) === 0) {
+                    return back()->withErrors(['error' => 'All variants must have at least one size selected']);
+                }
+                // Validate size_stocks
+                if (empty($variant['size_stocks']) || !is_array($variant['size_stocks'])) {
+                    return back()->withErrors(['error' => 'All variants must have stock quantities for each size']);
+                }
+                foreach ($variant['size_ids'] as $sizeId) {
+                    if (!isset($variant['size_stocks'][$sizeId]) || $variant['size_stocks'][$sizeId] < 0) {
+                        return back()->withErrors(['error' => 'All sizes must have valid stock quantities']);
+                    }
+                }
+            }
 
             $productData = array_merge(session('product_data', []), $validated);
             session(['product_data' => $productData]);
@@ -985,16 +1007,16 @@ class ProductsController extends Controller
         }
     }
 
-    public function createStep6()
+    public function createStep5()
     {
         $productData = session('product_data', []);
         if (empty($productData)) {
             return redirect()->route('admin.products.create.step1')->with('error', 'Please complete previous steps first.');
         }
-        return view('admin.products.create.step6', compact('productData'));
+        return view('admin.products.create.step5', compact('productData'));
     }
 
-    public function processStep6(Request $request)
+    public function processStep5(Request $request)
     {
         try {
             $validated = $request->validate([
@@ -1042,16 +1064,16 @@ class ProductsController extends Controller
         }
     }
 
-    public function createStep7()
+    public function createStep6()
     {
         $productData = session('product_data', []);
         if (empty($productData)) {
             return redirect()->route('admin.products.create.step1')->with('error', 'Please complete previous steps first.');
         }
-        return view('admin.products.create.step7', compact('productData'));
+        return view('admin.products.create.step6', compact('productData'));
     }
 
-    public function processStep7(Request $request)
+    public function processStep6(Request $request)
     {
         try {
             $validated = $request->validate([
@@ -1158,7 +1180,79 @@ class ProductsController extends Controller
                     $product->collections()->sync($collections);
                 }
 
-                if ($hasVariants) {
+                // Handle new variants_data format (from step 2)
+                if (isset($productData['variants_data']) && !empty($productData['variants_data'])) {
+                    $variantsData = json_decode($productData['variants_data'], true);
+                    
+                    if (is_array($variantsData) && count($variantsData) > 0) {
+                        $allColorIds = [];
+                        $allSizeIds = [];
+                        $defaultVariantSet = false;
+                        
+                        foreach ($variantsData as $variantData) {
+                            $colorId = $variantData['color_id'];
+                            $sizeIds = $variantData['size_ids'] ?? [];
+                            $sizeStocks = $variantData['size_stocks'] ?? []; // Get size-specific stocks
+                            $images = json_encode($variantData['images'] ?? []);
+                            $isDefault = $variantData['is_default'] ?? false;
+                            
+                            $allColorIds[] = $colorId;
+                            
+                            // Create one variant for each size with its specific stock
+                            foreach ($sizeIds as $sizeId) {
+                                $allSizeIds[] = $sizeId;
+                                $stock = $sizeStocks[$sizeId] ?? 0; // Get stock for this specific size
+                                
+                                // Generate unique SKU for variant
+                                $variantSku = $product->sku;
+                                $color = \App\Models\Color::find($colorId);
+                                if ($color) {
+                                    $variantSku .= '-' . strtoupper(substr($color->name, 0, 2));
+                                }
+                                $size = \App\Models\Size::find($sizeId);
+                                if ($size) {
+                                    $variantSku .= '-' . ($size->abbreviation ?? strtoupper(substr($size->name, 0, 2)));
+                                }
+                                
+                                // Only set as default if this variant is marked as default and no default has been set yet
+                                $shouldBeDefault = $isDefault && !$defaultVariantSet;
+                                if ($shouldBeDefault) {
+                                    $defaultVariantSet = true;
+                                }
+                                
+                                $product->variants()->create([
+                                    'sku' => $variantSku,
+                                    'color_id' => $colorId,
+                                    'size_id' => $sizeId,
+                                    'stock' => $stock,
+                                    'images' => $images,
+                                    'is_default' => $shouldBeDefault
+                                ]);
+                            }
+                        }
+                        
+                        // If no default was set, set first variant as default
+                        if (!$defaultVariantSet) {
+                            $firstVariant = $product->variants()->first();
+                            if ($firstVariant) {
+                                $firstVariant->update(['is_default' => true]);
+                            }
+                        }
+                        
+                        // Sync colors and sizes
+                        $uniqueColorIds = array_unique($allColorIds);
+                        $uniqueSizeIds = array_unique($allSizeIds);
+                        
+                        if (!empty($uniqueColorIds)) {
+                            $product->colors()->sync($uniqueColorIds);
+                        }
+                        if (!empty($uniqueSizeIds)) {
+                            $product->sizes()->sync($uniqueSizeIds);
+                        }
+                    }
+                }
+                // Fallback: Handle old variant system
+                elseif ($hasVariants) {
                     $variantData = [
                         'variant_colors' => $variantColors,
                         'variant_sizes' => $variantSizes,
@@ -1222,6 +1316,7 @@ class ProductsController extends Controller
         $colors = json_decode($productData['variant_colors'] ?? '[]', true) ?? [];
         $sizes = json_decode($productData['variant_sizes'] ?? '[]', true) ?? [];
         $colorImages = json_decode($productData['variant_images'] ?? '{}', true) ?? [];
+        $colorStock = $productData['color_stock'] ?? [];
 
         $hasColors = !empty($colors);
         $hasSizes = !empty($sizes);
@@ -1231,26 +1326,29 @@ class ProductsController extends Controller
 
             foreach ($colors as $colorId) {
                 foreach ($sizes as $sizeId) {
-                    $this->createVariant($product, $colorId, $sizeId, $colorImages, $isFirstVariant);
+                    $stock = $colorStock[$colorId] ?? 0;
+                    $this->createVariant($product, $colorId, $sizeId, $colorImages, $stock, $isFirstVariant);
                     $isFirstVariant = false;
                 }
             }
         } elseif ($hasColors) {
 
             foreach ($colors as $colorId) {
-                $this->createVariant($product, $colorId, null, $colorImages, $isFirstVariant);
+                $stock = $colorStock[$colorId] ?? 0;
+                $this->createVariant($product, $colorId, null, $colorImages, $stock, $isFirstVariant);
                 $isFirstVariant = false;
             }
         } elseif ($hasSizes) {
 
             foreach ($sizes as $sizeId) {
-                $this->createVariant($product, null, $sizeId, $colorImages, $isFirstVariant);
+                $stock = $product->stock ?? 0;
+                $this->createVariant($product, null, $sizeId, $colorImages, $stock, $isFirstVariant);
                 $isFirstVariant = false;
             }
         }
     }
 
-    private function createVariant(Product $product, $colorId, $sizeId, $colorImages, $isDefault)
+    private function createVariant(Product $product, $colorId, $sizeId, $colorImages, $stock, $isDefault)
     {
 
         $sku = $product->sku;
@@ -1275,7 +1373,7 @@ class ProductsController extends Controller
             'color_id' => $colorId,
             'size_id' => $sizeId,
             'price' => $product->price, // Default to product price
-            'stock' => $product->stock, // Default to product stock
+            'stock' => $stock, // Use the stock passed from color_stock array
             'images' => $variantImages,
             'is_default' => $isDefault,
             'is_active' => true,
@@ -1457,47 +1555,180 @@ class ProductsController extends Controller
 
     public function editStep2(Product $product)
     {
+        // Eager load variants to ensure they're available in the view
+        $product->load('variants');
+        
         $editData = session('edit_product_data', []);
 
         $editData['image'] = $product->image;
         $editData['images'] = $product->images;
+        
+        // Load existing stock values from variants
+        $colorStocks = [];
+        $variants = $product->variants;
+        foreach ($variants as $variant) {
+            if ($variant->color_id) {
+                // Store the stock for this color (use first variant's stock if multiple sizes exist)
+                if (!isset($colorStocks[$variant->color_id])) {
+                    $colorStocks[$variant->color_id] = $variant->stock;
+                }
+            }
+        }
+        
+        // Add color_stock to editData if not already set
+        if (!isset($editData['color_stock']) && !empty($colorStocks)) {
+            $editData['color_stock'] = $colorStocks;
+        }
+        
         session(['edit_product_data' => $editData]);
 
         $productData = $editData;
+        
+        // Get colors and sizes for the form
+        $colors = \App\Models\Color::active()->orderBy('name')->get();
+        $sizes = \App\Models\Size::active()->orderBy('sort_order')->get();
 
-        return view('admin.products.edit.step2', compact('product', 'productData'));
+        return view('admin.products.edit.step2', compact('product', 'productData', 'colors', 'sizes'));
     }
 
     public function processEditStep2(Request $request, Product $product)
     {
-        $validated = $request->validate([
-            'main_image' => 'nullable|string',
-            'additional_images' => 'nullable|string',
-        ]);
-
-        $additionalImages = $request->input('additional_images', '[]');
-        if (is_string($additionalImages)) {
-            $additionalImages = json_decode($additionalImages, true) ?? [];
-        }
-        $validated['images'] = $additionalImages;
-        $validated['image'] = $request->input('main_image');
-
-        $product->update($validated);
-
-        $editData = session('edit_product_data', []);
-        $editData = array_merge($editData, $validated);
-        session(['edit_product_data' => $editData]);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Product images updated successfully!',
-                'redirect_url' => route('admin.products.edit.step2', $product->id)
+        try {
+            $validated = $request->validate([
+                'variants_data' => 'required|json',
             ]);
-        }
 
-        return redirect()->route('admin.products.edit.step2', $product->id)
-            ->with('success', 'Product images updated successfully!');
+            $variantsData = json_decode($validated['variants_data'], true);
+            
+            if (empty($variantsData)) {
+                return back()->withErrors(['error' => 'Please add at least one variant']);
+            }
+
+            // Validate each variant
+            foreach ($variantsData as $variant) {
+                if (empty($variant['color_id'])) {
+                    return back()->withErrors(['error' => 'All variants must have a color selected']);
+                }
+                if (empty($variant['size_ids']) || !is_array($variant['size_ids']) || count($variant['size_ids']) === 0) {
+                    return back()->withErrors(['error' => 'All variants must have at least one size selected']);
+                }
+                // Validate size_stocks
+                if (empty($variant['size_stocks']) || !is_array($variant['size_stocks'])) {
+                    return back()->withErrors(['error' => 'All variants must have stock quantities for each size']);
+                }
+                foreach ($variant['size_ids'] as $sizeId) {
+                    if (!isset($variant['size_stocks'][$sizeId]) || $variant['size_stocks'][$sizeId] < 0) {
+                        return back()->withErrors(['error' => 'All sizes must have valid stock quantities']);
+                    }
+                }
+            }
+
+            // Delete existing variants
+            $product->variants()->delete();
+
+            // Create new variants - one for each size with its own stock
+            $allColorIds = [];
+            $allSizeIds = [];
+            $defaultVariantSet = false;
+            
+            foreach ($variantsData as $variantData) {
+                $colorId = $variantData['color_id'];
+                $sizeIds = $variantData['size_ids'];
+                $sizeStocks = $variantData['size_stocks']; // Object with sizeId => stock
+                $images = json_encode($variantData['images'] ?? []);
+                $isDefault = $variantData['is_default'] ?? false;
+                
+                $allColorIds[] = $colorId;
+                
+                // Create one variant for each size with its specific stock
+                foreach ($sizeIds as $sizeId) {
+                    $allSizeIds[] = $sizeId;
+                    $stock = $sizeStocks[$sizeId] ?? 0; // Get stock for this specific size
+                    
+                    // Generate unique SKU for variant
+                    $variantSku = $product->sku;
+                    $color = \App\Models\Color::find($colorId);
+                    if ($color) {
+                        $variantSku .= '-' . strtoupper(substr($color->name, 0, 2));
+                    }
+                    $size = \App\Models\Size::find($sizeId);
+                    if ($size) {
+                        $variantSku .= '-' . ($size->abbreviation ?? strtoupper(substr($size->name, 0, 2)));
+                    }
+                    
+                    // Only set as default if this variant is marked as default and no default has been set yet
+                    $shouldBeDefault = $isDefault && !$defaultVariantSet;
+                    if ($shouldBeDefault) {
+                        $defaultVariantSet = true;
+                    }
+                    
+                    $product->variants()->create([
+                        'sku' => $variantSku,
+                        'color_id' => $colorId,
+                        'size_id' => $sizeId,
+                        'stock' => $stock,
+                        'images' => $images,
+                        'is_default' => $shouldBeDefault
+                    ]);
+                }
+            }
+
+            // If no default was set, set first variant as default
+            if (!$defaultVariantSet) {
+                $firstVariant = $product->variants()->first();
+                if ($firstVariant) {
+                    $firstVariant->update(['is_default' => true]);
+                }
+            }
+
+            // Sync colors and sizes relationships
+            $uniqueColorIds = array_unique($allColorIds);
+            $uniqueSizeIds = array_unique($allSizeIds);
+
+            if (!empty($uniqueColorIds)) {
+                $product->colors()->sync($uniqueColorIds);
+            }
+
+            if (!empty($uniqueSizeIds)) {
+                $product->sizes()->sync($uniqueSizeIds);
+            }
+
+            // Save to session for reference
+            $editData = session('edit_product_data', []);
+            $editData['variants_data'] = $validated['variants_data'];
+            session(['edit_product_data' => $editData]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Variants updated successfully!',
+                    'redirect_url' => route('admin.products.edit.step2', $product->id)
+                ]);
+            }
+
+            return redirect()->route('admin.products.edit.step2', $product->id)
+                ->with('success', 'Variants updated successfully!');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->validator->errors()
+                ], 422);
+            }
+
+            throw $e;
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->withInput()->withErrors(['error' => 'An error occurred: ' . $e->getMessage()]);
+        }
     }
 
     public function editStep3(Product $product)
@@ -1516,8 +1747,25 @@ class ProductsController extends Controller
         session(['edit_product_data' => $editData]);
 
         $productData = $editData;
+        
+        // Add all required variables for the view (step3 view has step4 content)
+        $categories = \App\Models\Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->with([
+                'children' => function ($query) {
+                    $query->where('is_active', true)->with('children')->orderBy('name');
+                }
+            ])
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.products.edit.step3', compact('product', 'productData'));
+        $allCategories = \App\Models\Category::where('is_active', true)->orderBy('name')->get();
+        $brands = \App\Models\Brand::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        $collections = \App\Models\Collection::where('is_active', true)->orderBy('name')->get();
+        $tags = \App\Models\Tag::where('is_active', true)->orderBy('usage_count', 'desc')->orderBy('name')->get();
+        $fabrics = \App\Models\Fabric::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.products.edit.step3', compact('product', 'productData', 'categories', 'allCategories', 'brands', 'collections', 'tags', 'fabrics'));
     }
 
     public function processEditStep3(Request $request, Product $product)

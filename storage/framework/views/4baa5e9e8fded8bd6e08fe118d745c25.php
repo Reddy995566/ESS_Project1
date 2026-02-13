@@ -192,9 +192,7 @@
                         <th class="px-4 py-4 text-center w-28">
                             <span class="text-xs font-black text-gray-700 uppercase">Price</span>
                         </th>
-                        <th class="px-4 py-4 text-center w-24">
-                            <span class="text-xs font-black text-gray-700 uppercase">Stock</span>
-                        </th>
+                        
                         <th class="px-4 py-4 text-center w-32">
                             <span class="text-xs font-black text-gray-700 uppercase">Submitted</span>
                         </th>
@@ -222,28 +220,8 @@
                         <td class="px-4 py-4">
                             <div class="flex items-center space-x-4">
                                 <div class="flex-shrink-0 w-12 h-12">
-                                    <?php
-                                        $firstImage = null;
-                                        // Try to get from main images first
-                                        if(is_array($product->images) && count($product->images) > 0) {
-                                            $firstImage = is_string($product->images[0]) ? $product->images[0] : (is_array($product->images[0]) && isset($product->images[0]['url']) ? $product->images[0]['url'] : null);
-                                        } elseif(is_string($product->images) && !empty($product->images)) {
-                                            $imagesArray = json_decode($product->images, true);
-                                            if(is_array($imagesArray) && count($imagesArray) > 0) {
-                                                $firstImage = is_string($imagesArray[0]) ? $imagesArray[0] : (is_array($imagesArray[0]) && isset($imagesArray[0]['url']) ? $imagesArray[0]['url'] : null);
-                                            }
-                                        }
-                                        
-                                        // Fallback: Try to get from product variants if no main image
-                                        if(!$firstImage) {
-                                            $firstVariant = $product->variants()->first();
-                                            if($firstVariant && !empty($firstVariant->images) && is_array($firstVariant->images) && count($firstVariant->images) > 0) {
-                                                $firstImage = $firstVariant->images[0];
-                                            }
-                                        }
-                                    ?>
-                                    <?php if($firstImage && is_string($firstImage)): ?>
-                                        <img src="<?php echo e($firstImage); ?>" alt="<?php echo e($product->name); ?>" class="w-12 h-12 rounded-xl object-cover border-2 border-gray-200 shadow-sm">
+                                    <?php if($product->getFirstImageUrl()): ?>
+                                        <img src="<?php echo e($product->getFirstImageUrl()); ?>" alt="<?php echo e($product->name); ?>" class="w-12 h-12 rounded-xl object-cover border-2 border-gray-200 shadow-sm">
                                     <?php else: ?>
                                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-gray-200">
                                             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,17 +283,7 @@
                             </div>
                         </td>
 
-                        <!-- Stock -->
-                        <td class="px-4 py-4 text-center">
-                            <div class="flex flex-col items-center">
-                                <span class="text-sm font-bold text-gray-900"><?php echo e($product->stock ?? 0); ?></span>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1
-                                    <?php echo e(($product->stock ?? 0) > 0 ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'); ?>">
-                                    <?php echo e(($product->stock ?? 0) > 0 ? '📦 In Stock' : '❌ Out of Stock'); ?>
-
-                                </span>
-                            </div>
-                        </td>
+                        
 
                         <!-- Submitted -->
                         <td class="px-4 py-4 text-center">

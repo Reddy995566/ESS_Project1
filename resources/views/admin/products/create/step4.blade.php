@@ -59,31 +59,17 @@
                 </div>
             </div>
 
-            <!-- Stock Section -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-800 mb-2">Stock Quantity <span class="text-red-500">*</span></label>
-                    <input type="number" name="stock" min="0" required 
-                        value="{{ old('stock', $productData['stock'] ?? '') }}"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
-                        placeholder="0">
-                    <p class="text-xs text-gray-500 mt-1">Available units in stock</p>
-                    @error('stock')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-800 mb-2">Stock Status <span class="text-red-500">*</span></label>
-                    <select name="stock_status" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400">
-                        <option value="in_stock" {{ old('stock_status', $productData['stock_status'] ?? 'in_stock') == 'in_stock' ? 'selected' : '' }}>In Stock</option>
-                        <option value="out_of_stock" {{ old('stock_status', $productData['stock_status'] ?? 'in_stock') == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Current availability status</p>
-                    @error('stock_status')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+            <!-- Info Note -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Stock Management
+                </h3>
+                <p class="text-sm text-blue-700">
+                    Stock quantities are managed at the variant level (Step 2: Product Variants). Each color-size combination can have its own stock quantity.
+                </p>
             </div>
 
             <!-- Pricing Tips -->
@@ -93,7 +79,6 @@
                     <li>• Set competitive prices by researching similar products</li>
                     <li>• Use sale price for temporary discounts and promotions</li>
                     <li>• Ensure sale price is lower than regular price for valid discounts</li>
-                    <li>• Keep adequate stock levels to avoid out-of-stock situations</li>
                 </ul>
             </div>
         </div>

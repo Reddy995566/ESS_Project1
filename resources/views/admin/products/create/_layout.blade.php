@@ -1,10 +1,17 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Create Product - Step {{ $currentStep ?? 1 }} of 6')
+@section('title')
+Create Product - Step {{ $currentStep ?? 1 }} of 6
+@endsection
 
 @push('styles')
 <!-- Alpine.js -->
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+@endpush
+
+@push('scripts')
+<!-- Sortable.js for drag and drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 @endpush
 
 @push('styles')
@@ -14,6 +21,28 @@
     border: 2px solid #d1d5db;
     border-radius: 0.5rem;
     overflow: hidden;
+}
+
+/* Sortable.js Custom Styles */
+.sortable-ghost {
+    opacity: 0.3;
+}
+
+.sortable-chosen {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-color: #9333ea !important;
+    z-index: 999;
+}
+
+.sortable-drag {
+    transform: rotate(3deg) scale(1.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    opacity: 0.9;
+}
+
+.sortable-fallback {
+    opacity: 0.8;
 }
 
 .ql-toolbar.ql-snow {
@@ -133,12 +162,11 @@
                         @php
                             $steps = [
                                 ['number' => 1, 'actual' => 1, 'title' => 'Basic Info', 'description' => 'Product details', 'route' => 'admin.products.create.step1'],
-                                ['number' => 2, 'actual' => 2, 'title' => 'Variants', 'description' => 'Colors & sizes', 'route' => 'admin.products.create.step5'],
-                                // ['number' => 2, 'actual' => 2, 'title' => 'Media', 'description' => 'Images & videos', 'route' => 'admin.products.create.step2'], // Step 2 hidden
+                                ['number' => 2, 'actual' => 2, 'title' => 'Variants', 'description' => 'Colors & sizes', 'route' => 'admin.products.create.step2'],
                                 ['number' => 3, 'actual' => 3, 'title' => 'Categories', 'description' => 'Organization', 'route' => 'admin.products.create.step3'],
                                 ['number' => 4, 'actual' => 4, 'title' => 'Inventory', 'description' => 'Stock & pricing', 'route' => 'admin.products.create.step4'],
-                                ['number' => 5, 'actual' => 5, 'title' => 'SEO', 'description' => 'Optimization', 'route' => 'admin.products.create.step6'],
-                                ['number' => 6, 'actual' => 6, 'title' => 'Settings', 'description' => 'Configuration', 'route' => 'admin.products.create.step7']
+                                ['number' => 5, 'actual' => 5, 'title' => 'SEO', 'description' => 'Optimization', 'route' => 'admin.products.create.step5'],
+                                ['number' => 6, 'actual' => 6, 'title' => 'Settings', 'description' => 'Configuration', 'route' => 'admin.products.create.step6']
                             ];
                             $current = $currentStep;
                         @endphp

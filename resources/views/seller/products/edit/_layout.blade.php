@@ -2,9 +2,11 @@
 
 @section('title', 'Edit Product - Step {{ $step ?? 1 }} of 6')
 
-@push('styles')
+@push('scripts')
 <!-- Alpine.js -->
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<!-- SortableJS for drag & drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 @endpush
 
 @push('styles')

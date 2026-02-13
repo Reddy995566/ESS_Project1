@@ -289,9 +289,6 @@
                         <th class="px-4 py-4 text-center w-28">
                             <span class="text-xs font-black text-gray-700 uppercase">Price</span>
                         </th>
-                        <th class="px-4 py-4 text-center w-24">
-                            <span class="text-xs font-black text-gray-700 uppercase">Stock</span>
-                        </th>
                         <th class="px-4 py-4 text-center w-28">
                             <span class="text-xs font-black text-gray-700 uppercase">Status</span>
                         </th>
@@ -327,21 +324,36 @@
                                 <div class="flex-shrink-0 w-12 h-12">
                                     <?php
                                         $firstImage = null;
-                                        // Try to get from main images first
-                                        if(is_array($product->images) && count($product->images) > 0) {
-                                            $firstImage = is_string($product->images[0]) ? $product->images[0] : (is_array($product->images[0]) && isset($product->images[0]['url']) ? $product->images[0]['url'] : null);
-                                        } elseif(is_string($product->images) && !empty($product->images)) {
-                                            $imagesArray = json_decode($product->images, true);
-                                            if(is_array($imagesArray) && count($imagesArray) > 0) {
-                                                $firstImage = is_string($imagesArray[0]) ? $imagesArray[0] : (is_array($imagesArray[0]) && isset($imagesArray[0]['url']) ? $imagesArray[0]['url'] : null);
+                                        
+                                        // Priority 1: Try to get from default variant first
+                                        $defaultVariant = $product->variants()->where('is_default', true)->first();
+                                        if($defaultVariant && !empty($defaultVariant->images)) {
+                                            $variantImages = is_string($defaultVariant->images) ? json_decode($defaultVariant->images, true) : $defaultVariant->images;
+                                            if(is_array($variantImages) && count($variantImages) > 0) {
+                                                $firstImage = is_string($variantImages[0]) ? $variantImages[0] : (is_array($variantImages[0]) && isset($variantImages[0]['url']) ? $variantImages[0]['url'] : null);
                                             }
                                         }
                                         
-                                        // Fallback: Try to get from product variants if no main image
+                                        // Priority 2: Try to get from main images if no default variant image
+                                        if(!$firstImage) {
+                                            if(is_array($product->images) && count($product->images) > 0) {
+                                                $firstImage = is_string($product->images[0]) ? $product->images[0] : (is_array($product->images[0]) && isset($product->images[0]['url']) ? $product->images[0]['url'] : null);
+                                            } elseif(is_string($product->images) && !empty($product->images)) {
+                                                $imagesArray = json_decode($product->images, true);
+                                                if(is_array($imagesArray) && count($imagesArray) > 0) {
+                                                    $firstImage = is_string($imagesArray[0]) ? $imagesArray[0] : (is_array($imagesArray[0]) && isset($imagesArray[0]['url']) ? $imagesArray[0]['url'] : null);
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Priority 3: Fallback to any variant image
                                         if(!$firstImage) {
                                             $firstVariant = $product->variants()->first();
-                                            if($firstVariant && !empty($firstVariant->images) && is_array($firstVariant->images) && count($firstVariant->images) > 0) {
-                                                $firstImage = $firstVariant->images[0];
+                                            if($firstVariant && !empty($firstVariant->images)) {
+                                                $variantImages = is_string($firstVariant->images) ? json_decode($firstVariant->images, true) : $firstVariant->images;
+                                                if(is_array($variantImages) && count($variantImages) > 0) {
+                                                    $firstImage = is_string($variantImages[0]) ? $variantImages[0] : (is_array($variantImages[0]) && isset($variantImages[0]['url']) ? $variantImages[0]['url'] : null);
+                                                }
                                             }
                                         }
                                     ?>
@@ -404,18 +416,6 @@
                                     <br>
                                     <span class="text-xs text-red-600 line-through">₹<?php echo e(number_format($product->sale_price, 2)); ?></span>
                                 <?php endif; ?>
-                            </div>
-                        </td>
-
-                        <!-- Stock -->
-                        <td class="px-4 py-4 text-center">
-                            <div class="flex flex-col items-center">
-                                <span class="text-sm font-bold text-gray-900"><?php echo e($product->stock ?? 0); ?></span>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1
-                                    <?php echo e($product->stock_status === 'in_stock' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'); ?>">
-                                    <?php echo e($product->stock_status === 'in_stock' ? '📦 In Stock' : '❌ Out of Stock'); ?>
-
-                                </span>
                             </div>
                         </td>
 

@@ -34,24 +34,7 @@
                         <a href="{{ route('shop') }}" class="text-xs text-[#441227]/60 hover:text-[#441227] underline">Clear All</a>
                     </div>
 
-                    <!-- Categories Filter -->
-                    @if($categories->count() > 0)
-                    <div class="mb-6 pb-6 border-b border-[#441227]/10">
-                        <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Categories</h3>
-                        <div class="space-y-2">
-                            @foreach($categories as $category)
-                            <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" name="category[]" value="{{ $category->slug }}" 
-                                       class="category-checkbox form-checkbox w-4 h-4 text-[#441227] rounded border-gray-300 focus:ring-[#441227]"
-                                       onchange="toggleCategory('{{ $category->slug }}', this.checked)">
-                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">{{ $category->name }}</span>
-                            </label>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Price Range Filter -->
+                    <!-- Price Range Filter (MOVED TO TOP) -->
                     <div class="mb-6 pb-6 border-b border-[#441227]/10">
                         <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Price</h3>
                         <p class="text-xs text-[#441227]/60 mb-3">Max: Rs. {{ number_format($maxPrice) }}</p>
@@ -70,6 +53,23 @@
                             Apply
                         </button>
                     </div>
+
+                    <!-- Categories Filter -->
+                    @if($categories->count() > 0)
+                    <div class="mb-6 pb-6 border-b border-[#441227]/10">
+                        <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Categories</h3>
+                        <div class="space-y-2">
+                            @foreach($categories as $category)
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" name="category[]" value="{{ $category->slug }}" 
+                                       class="category-checkbox form-checkbox w-4 h-4 text-[#441227] rounded border-gray-300 focus:ring-[#441227]"
+                                       onchange="toggleCategory('{{ $category->slug }}', this.checked)">
+                                <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">{{ $category->name }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Availability Filter -->
                     <div class="mb-6">
@@ -219,22 +219,7 @@
                 </button>
             </div>
             
-            @if($categories->count() > 0)
-            <div class="mb-6 pb-6 border-b border-[#441227]/10">
-                <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Categories</h3>
-                <div class="space-y-3">
-                    @foreach($categories as $category)
-                    <label class="flex items-center gap-3 cursor-pointer group">
-                        <input type="checkbox" name="category_mobile[]" value="{{ $category->slug }}" 
-                               class="category-checkbox form-checkbox w-5 h-5 text-[#441227] rounded border-gray-300 focus:ring-[#441227]"
-                               onchange="toggleCategory('{{ $category->slug }}', this.checked)">
-                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">{{ $category->name }}</span>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
+            <!-- Price Range Filter (MOVED TO TOP) -->
             <div class="mb-6 pb-6 border-b border-[#441227]/10">
                 <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Price</h3>
                 <p class="text-xs text-[#441227]/60 mb-3">Max: Rs. {{ number_format($maxPrice) }}</p>
@@ -253,6 +238,22 @@
                     Apply
                 </button>
             </div>
+
+            @if($categories->count() > 0)
+            <div class="mb-6 pb-6 border-b border-[#441227]/10">
+                <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Categories</h3>
+                <div class="space-y-3">
+                    @foreach($categories as $category)
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="category_mobile[]" value="{{ $category->slug }}" 
+                               class="category-checkbox form-checkbox w-5 h-5 text-[#441227] rounded border-gray-300 focus:ring-[#441227]"
+                               onchange="toggleCategory('{{ $category->slug }}', this.checked)">
+                        <span class="text-sm text-[#441227]/80 group-hover:text-[#441227]">{{ $category->name }}</span>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             <div class="mb-6">
                 <h3 class="text-sm font-semibold text-[#441227] uppercase tracking-wide mb-3">Availability</h3>

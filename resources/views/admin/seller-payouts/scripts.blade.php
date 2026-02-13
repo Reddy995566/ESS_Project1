@@ -1,34 +1,35 @@
 <script>
+// Global variables
 let currentPayoutId = null;
 
-// Modal functions
-function openModal(modalId) {
+// Modal functions - attach to window for global access
+window.openModal = function(modalId) {
     document.getElementById(modalId).classList.remove('hidden');
     document.getElementById(modalId).classList.add('flex');
 }
 
-function closeModal(modalId) {
+window.closeModal = function(modalId) {
     document.getElementById(modalId).classList.add('hidden');
     document.getElementById(modalId).classList.remove('flex');
 }
 
-// Payout action functions
-function approvePayout(payoutId) {
+// Payout action functions - attach to window for inline onclick
+window.approvePayout = function(payoutId) {
     currentPayoutId = payoutId;
     openModal('approveModal');
 }
 
-function rejectPayout(payoutId) {
+window.rejectPayout = function(payoutId) {
     currentPayoutId = payoutId;
     openModal('rejectModal');
 }
 
-function completePayout(payoutId) {
+window.completePayout = function(payoutId) {
     currentPayoutId = payoutId;
     openModal('completeModal');
 }
 
-function confirmApprove() {
+window.confirmApprove = function() {
     if (!currentPayoutId) {
         alert('No payout selected');
         return;
@@ -78,138 +79,161 @@ function confirmApprove() {
     });
 }
 
-// Form submissions
-document.getElementById('rejectForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (!currentPayoutId) return;
-    
-    const formData = new FormData(this);
-    
-    fetch(`/admin/seller-payouts/${currentPayoutId}/reject`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to reject payout'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while rejecting the payout');
-    });
-    
-    closeModal('rejectModal');
-});
-
-document.getElementById('completeForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (!currentPayoutId) return;
-    
-    const formData = new FormData(this);
-    
-    fetch(`/admin/seller-payouts/${currentPayoutId}/complete`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to complete payout'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while completing the payout');
-    });
-    
-    closeModal('completeModal');
-});
-
-// Bulk actions
-document.getElementById('bulkActionBtn').addEventListener('click', function() {
-    const selectedCheckboxes = document.querySelectorAll('.payout-checkbox:checked');
-    if (selectedCheckboxes.length === 0) {
-        alert('Please select at least one payout to perform bulk actions.');
-        return;
-    }
-    openModal('bulkActionModal');
-});
-
-document.getElementById('bulkActionForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const selectedCheckboxes = document.querySelectorAll('.payout-checkbox:checked');
-    const payoutIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-    const action = this.querySelector('[name="action"]').value;
-    
-    if (payoutIds.length === 0) {
-        alert('No payouts selected');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('action', action);
-    payoutIds.forEach(id => formData.append('payout_ids[]', id));
-    
-    fetch('/admin/seller-payouts/bulk-action', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to perform bulk action'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while performing bulk action');
-    });
-    
-    closeModal('bulkActionModal');
-});
-
-// Select all functionality
-document.getElementById('selectAll').addEventListener('change', function() {
-    const checkboxes = document.querySelectorAll('.payout-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = this.checked;
-    });
-});
-
-// Refresh button
-document.getElementById('refreshBtn').addEventListener('click', function() {
-    location.reload();
-});
-
-// Close modals when clicking outside
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
-        const modals = ['approveModal', 'rejectModal', 'completeModal', 'bulkActionModal'];
-        modals.forEach(modalId => {
-            if (e.target.id === modalId) {
-                closeModal(modalId);
-            }
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Form submissions
+    const rejectForm = document.getElementById('rejectForm');
+    if (rejectForm) {
+        rejectForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!currentPayoutId) return;
+            
+            const formData = new FormData(this);
+            
+            fetch(`/admin/seller-payouts/${currentPayoutId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Payout rejected successfully!');
+                    closeModal('rejectModal');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to reject payout'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while rejecting the payout');
+            });
         });
     }
+
+    const completeForm = document.getElementById('completeForm');
+    if (completeForm) {
+        completeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!currentPayoutId) return;
+            
+            const formData = new FormData(this);
+            
+            fetch(`/admin/seller-payouts/${currentPayoutId}/complete`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Payout completed successfully!');
+                    closeModal('completeModal');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to complete payout'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while completing the payout');
+            });
+        });
+    }
+
+    // Bulk actions
+    const bulkActionBtn = document.getElementById('bulkActionBtn');
+    if (bulkActionBtn) {
+        bulkActionBtn.addEventListener('click', function() {
+            const selectedCheckboxes = document.querySelectorAll('.payout-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('Please select at least one payout to perform bulk actions.');
+                return;
+            }
+            openModal('bulkActionModal');
+        });
+    }
+
+    const bulkActionForm = document.getElementById('bulkActionForm');
+    if (bulkActionForm) {
+        bulkActionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selectedCheckboxes = document.querySelectorAll('.payout-checkbox:checked');
+            const payoutIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+            const action = this.querySelector('[name="action"]').value;
+            
+            if (payoutIds.length === 0) {
+                alert('No payouts selected');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', action);
+            payoutIds.forEach(id => formData.append('payout_ids[]', id));
+            
+            fetch('/admin/seller-payouts/bulk-action', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to perform bulk action'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while performing bulk action');
+            });
+            
+            closeModal('bulkActionModal');
+        });
+    }
+
+    // Select all functionality
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.payout-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+    }
+
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            location.reload();
+        });
+    }
+
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+            const modals = ['approveModal', 'rejectModal', 'completeModal', 'bulkActionModal'];
+            modals.forEach(modalId => {
+                if (e.target.id === modalId) {
+                    closeModal(modalId);
+                }
+            });
+        }
+    });
 });
 </script>

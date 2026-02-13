@@ -10,6 +10,7 @@ use App\Services\ImageKitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -297,9 +298,13 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id . ',id,deleted_at,NULL',
-            'slug' => 'nullable|string|max:255|unique:categories,slug,' . $category->id . ',id,deleted_at,NULL',
+        // Generate the slug first to compare with current category
+        $incomingName = $request->input('name');
+        $incomingSlugInput = $request->input('slug');
+        $generatedSlug = $incomingSlugInput ? Str::slug($incomingSlugInput) : Str::slug($incomingName);
+        
+        // Prepare validation rules
+        $rules = [
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'parent_id' => 'nullable|exists:categories,id',
@@ -311,7 +316,21 @@ class CategoryController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
             'meta_keywords' => 'nullable|string|max:255'
-        ]);
+        ];
+
+        // Add name validation - only check uniqueness if name is actually changing
+        $rules['name'] = ['required', 'string', 'max:255'];
+        if ($incomingName !== $category->name) {
+            $rules['name'][] = Rule::unique('categories', 'name')->ignore($category->id)->whereNull('deleted_at');
+        }
+
+        // Add slug validation - only check uniqueness if slug is actually changing
+        $rules['slug'] = ['nullable', 'string', 'max:255'];
+        if ($generatedSlug !== $category->slug) {
+            $rules['slug'][] = Rule::unique('categories', 'slug')->ignore($category->id)->whereNull('deleted_at');
+        }
+
+        $validated = $request->validate($rules);
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);

@@ -71,6 +71,37 @@ class CartController extends Controller
                     }
                 }
             }
+            
+            // Check stock availability
+            if ($colorId && $sizeId) {
+                $variant = \App\Models\ProductVariant::where('product_id', $productId)
+                    ->where('color_id', $colorId)
+                    ->where('size_id', $sizeId)
+                    ->first();
+                
+                if (!$variant) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Product variant not found'
+                    ], 400);
+                }
+                
+                // Check if adding this quantity exceeds stock
+                $currentQtyInCart = isset($cart[$productId . '_' . $colorId . '_' . $sizeId]) 
+                    ? $cart[$productId . '_' . $colorId . '_' . $sizeId]['quantity'] 
+                    : 0;
+                $totalQty = $currentQtyInCart + $quantity;
+                
+                if ($variant->stock < $totalQty) {
+                    $availableToAdd = max(0, $variant->stock - $currentQtyInCart);
+                    return response()->json([
+                        'success' => false,
+                        'message' => $availableToAdd > 0 
+                            ? "Only {$availableToAdd} more items can be added. Total stock: {$variant->stock}"
+                            : "No more stock available. You already have {$currentQtyInCart} in cart."
+                    ], 400);
+                }
+            }
 
             $itemData = [
                 'product_id' => $product->id,
@@ -139,6 +170,14 @@ class CartController extends Controller
             'totals' => $totals
         ]);
     }
+    /**
+     * Show cart page
+     */
+    public function index()
+    {
+        return view('website.cart');
+    }
+
 
     public function removeFromCart(Request $request)
     {
@@ -174,6 +213,30 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         if (isset($cart[$cartKey])) {
+            $item = $cart[$cartKey];
+            
+            // Check stock availability if color and size are present
+            if (isset($item['color_id']) && isset($item['size_id'])) {
+                $variant = \App\Models\ProductVariant::where('product_id', $item['product_id'])
+                    ->where('color_id', $item['color_id'])
+                    ->where('size_id', $item['size_id'])
+                    ->first();
+                
+                if (!$variant) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Product variant not found'
+                    ], 400);
+                }
+                
+                if ($variant->stock < $quantity) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Only {$variant->stock} items available in stock"
+                    ], 400);
+                }
+            }
+            
             $cart[$cartKey]['quantity'] = intval($quantity);
             session()->put('cart', $cart);
         }
@@ -199,6 +262,22 @@ class CartController extends Controller
             'subtotal_formatted' => number_format($subtotal)
         ];
     }
+    
+    /**
+     * Get cart item count
+     */
+    public function getCount()
+    {
+        $cart = session()->get('cart', []);
+        $count = 0;
+        
+        foreach ($cart as $item) {
+            $count += $item['quantity'] ?? 1;
+        }
+        
+        return response()->json(['count' => $count]);
+    }
+    
     /**
      * Syncs the current session cart with the user's database cart.
      * Called after Login/Register.

@@ -101,14 +101,17 @@
 
         const toast = document.createElement('div');
         const bgColor = type === 'success' ? 'from-green-500 to-emerald-600' : 'from-red-500 to-pink-600';
+        const icon = type === 'success' ? 
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>' :
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
 
-        toast.className = `bg-gradient-to-r ${bgColor} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 transform transition-all duration-300 translate-x-full`;
+        toast.className = `bg-gradient-to-r ${bgColor} text-white px-6 py-4 rounded-xl shadow-2xl flex items-start space-x-3 transform transition-all duration-300 translate-x-full max-w-md`;
         toast.innerHTML = `
-            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                ${icon}
             </svg>
-            <span class="font-semibold">${message}</span>
-            <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+            <div class="flex-1 text-sm font-semibold">${message}</div>
+            <button onclick="this.parentElement.remove()" class="ml-2 text-white hover:text-gray-200 flex-shrink-0">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
@@ -120,7 +123,7 @@
         setTimeout(() => {
             toast.classList.add('translate-x-full');
             setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, 5000);
     }
 
     // DOMContentLoaded Event
@@ -286,7 +289,7 @@
                         deleteBtn.disabled = true;
                         deleteBtn.innerHTML = '<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
-                        fetch('/admin/categories/' + categoryId, {
+                        fetch('/seller/categories/' + categoryId, {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -325,7 +328,7 @@
                 const field = this.dataset.field;
                 const value = this.checked ? 1 : 0;
 
-                fetch('/admin/categories/' + categoryId + '/toggle', {
+                fetch('/seller/categories/' + categoryId + '/toggle', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -360,7 +363,7 @@
         const exportBtn = document.getElementById('exportBtn');
         if (exportBtn) {
             exportBtn.addEventListener('click', function() {
-                window.open('/admin/categories/export', '_blank');
+                window.open('/seller/categories/export', '_blank');
                 showToastNotification('Export started', 'success');
             });
         }
@@ -407,7 +410,7 @@
         }
 
         function performBulkAction(action, selected) {
-            fetch('/admin/categories/bulk-action', {
+            fetch('/seller/categories/bulk-action', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -438,6 +441,84 @@
             }
 
             if (count) count.textContent = selected;
+        }
+
+        // AJAX Form Submission for Create/Update Category
+        const categoryForm = document.getElementById('categoryForm');
+        if (categoryForm) {
+            categoryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submitBtn');
+                const submitBtnText = document.getElementById('submitBtnText');
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                const formData = new FormData(this);
+                const method = document.getElementById('methodField').value;
+                const categoryId = document.getElementById('categoryId').value;
+                
+                // Disable submit button
+                submitBtn.disabled = true;
+                loadingSpinner.classList.remove('hidden');
+                submitBtnText.textContent = categoryId ? 'Updating...' : 'Creating...';
+                
+                // Determine URL based on method
+                let url = categoryId ? 
+                    '{{ route("seller.categories.index") }}/' + categoryId : 
+                    '{{ route("seller.categories.store") }}';
+                
+                // For PUT, we need to add _method field
+                if (method === 'PUT') {
+                    formData.append('_method', 'PUT');
+                }
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToastNotification(data.message, 'success');
+                        closeModal();
+                        
+                        // Reload page after 1 second to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        // Handle validation errors
+                        if (data.errors) {
+                            let errorMessages = '';
+                            Object.values(data.errors).forEach(errors => {
+                                errors.forEach(error => {
+                                    errorMessages += error + '<br>';
+                                });
+                            });
+                            showToastNotification(errorMessages, 'error');
+                        } else {
+                            showToastNotification(data.message || 'An error occurred', 'error');
+                        }
+                        
+                        // Re-enable submit button
+                        submitBtn.disabled = false;
+                        loadingSpinner.classList.add('hidden');
+                        submitBtnText.textContent = categoryId ? 'Update Category' : 'Create Category';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToastNotification('Network error occurred. Please try again.', 'error');
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    loadingSpinner.classList.add('hidden');
+                    submitBtnText.textContent = categoryId ? 'Update Category' : 'Create Category';
+                });
+            });
         }
     });
 </script>

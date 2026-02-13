@@ -16,6 +16,12 @@ class ReturnController extends Controller
 {
     public function index(Request $request)
     {
+        // Debug logging
+        \Log::info('Admin Returns Index accessed', [
+            'total_returns' => ProductReturn::count(),
+            'request_params' => $request->all()
+        ]);
+
         $query = ProductReturn::with(['user', 'order', 'orderItem.product', 'seller'])
             ->orderBy('created_at', 'desc');
 
@@ -80,6 +86,13 @@ class ReturnController extends Controller
             'approved' => ProductReturn::where('status', 'approved')->count(),
             'refunded' => ProductReturn::where('status', 'refunded')->count(),
         ];
+
+        // Debug logging
+        \Log::info('Admin Returns Data', [
+            'returns_count' => $returns->count(),
+            'total_returns' => $returns->total(),
+            'stats' => $stats
+        ]);
 
         return view('admin.returns.index', compact('returns', 'stats'));
     }

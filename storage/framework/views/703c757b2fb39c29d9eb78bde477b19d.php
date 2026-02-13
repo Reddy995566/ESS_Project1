@@ -4,12 +4,9 @@
     $pageSubtitle = $isEditMode ? 'Update your product details' : 'Build your product catalog';
 ?>
 
-<?php $__env->startSection('title', '<?php echo e($pageTitle); ?> - Step <?php echo e($currentStep ?? 1); ?> of 6'); ?>
+<?php $__env->startSection('title', $pageTitle . ' - Step ' . ($currentStep ?? 1) . ' of 6'); ?>
 
 <?php $__env->startPush('styles'); ?>
-<!-- Alpine.js -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
 <style>
 /* Quill Editor Custom Styles */
 .quill-editor-wrapper {
@@ -209,6 +206,11 @@
 </div>
 
 <?php $__env->startPush('scripts'); ?>
+<!-- Alpine.js -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<!-- SortableJS for drag & drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <script>
 const isEditMode = <?php echo e($isEditMode ? 'true' : 'false'); ?>;
 const editProductId = <?php echo e($productId ?? 'null'); ?>;
@@ -255,6 +257,14 @@ document.getElementById('clearSessionBtn')?.addEventListener('click', function()
         }).catch(error => {
             showNotification('Failed to clear progress', 'error');
         });
+    }
+});
+
+// Next button handler - submit the form
+document.getElementById('nextBtn')?.addEventListener('click', function() {
+    const form = document.getElementById('stepForm');
+    if (form) {
+        form.submit();
     }
 });
 

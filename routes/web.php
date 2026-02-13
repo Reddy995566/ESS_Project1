@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Services\ImageKitService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Website\CollectionController;
@@ -25,7 +26,16 @@ Route::post('/reset-password', [App\Http\Controllers\Website\ResetPasswordContro
 // User Dashboard (Protected)
 Route::middleware('auth')->group(function () {
     Route::get('/my-account', function () {
-        return view('website.user.dashboard');
+        $user = Auth::user();
+        $orderCount = \App\Models\Order::where('user_id', $user->id)->count();
+        $cartCount = \App\Models\Cart::where('user_id', $user->id)->sum('quantity');
+        $recentOrders = \App\Models\Order::where('user_id', $user->id)
+                                        ->with(['items.product'])
+                                        ->orderBy('created_at', 'desc')
+                                        ->limit(5)
+                                        ->get();
+        
+        return view('website.user.dashboard', compact('orderCount', 'cartCount', 'recentOrders'));
     })->name('user.dashboard');
 
     Route::get('/my-account/profile', function () {
@@ -36,6 +46,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/my-account/orders', [App\Http\Controllers\Website\OrdersController::class, 'index'])->name('user.orders');
     Route::get('/my-account/orders/{id}', [App\Http\Controllers\Website\OrdersController::class, 'show'])->name('user.orders.show');
+    Route::post('/my-account/orders/{id}/cancel', [App\Http\Controllers\Website\OrdersController::class, 'cancel'])->name('user.orders.cancel');
 
     // Invoice Routes
     Route::get('/invoice/{order}', [App\Http\Controllers\InvoiceController::class, 'generate'])->name('invoice.generate');
@@ -133,13 +144,16 @@ Route::middleware('auth')->group(function () {
 });
 
 // Cart Routes
+Route::get('/cart', [App\Http\Controllers\Website\CartController::class, 'index'])->name('cart');
 Route::get('/cart/data', [App\Http\Controllers\Website\CartController::class, 'getCart'])->name('cart.data');
+Route::get('/cart/count', [App\Http\Controllers\Website\CartController::class, 'getCount'])->name('cart.count');
 Route::post('/cart/add', [App\Http\Controllers\Website\CartController::class, 'addToCart'])->name('cart.add');
 Route::post('/cart/remove', [App\Http\Controllers\Website\CartController::class, 'removeFromCart'])->name('cart.remove');
 Route::post('/cart/update', [App\Http\Controllers\Website\CartController::class, 'updateQuantity'])->name('cart.update');
 
 // Wishlist Routes
 Route::get('/wishlist/data', [App\Http\Controllers\Website\WishlistController::class, 'getWishlist'])->name('wishlist.data');
+Route::get('/wishlist/count', [App\Http\Controllers\Website\WishlistController::class, 'getCount'])->name('wishlist.count');
 Route::post('/wishlist/add', [App\Http\Controllers\Website\WishlistController::class, 'addToWishlist'])->name('wishlist.add');
 Route::post('/wishlist/remove', [App\Http\Controllers\Website\WishlistController::class, 'removeFromWishlist'])->name('wishlist.remove');
 Route::post('/wishlist/check', [App\Http\Controllers\Website\WishlistController::class, 'checkWishlist'])->name('wishlist.check');
@@ -247,9 +261,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/create/step-1', [App\Http\Controllers\Admin\ProductsController::class, 'createStep1'])->name('admin.products.create.step1');
         Route::post('/products/create/step-1', [App\Http\Controllers\Admin\ProductsController::class, 'processStep1'])->name('admin.products.create.step1.process');
 
-        // Step 2 is now Variants (previously step 5)
-        Route::get('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'createStep5'])->name('admin.products.create.step2');
-        Route::post('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'processStep5'])->name('admin.products.create.step2.process');
+        // Step 2 is now Variants
+        Route::get('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'createStep2'])->name('admin.products.create.step2');
+        Route::post('/products/create/step-2', [App\Http\Controllers\Admin\ProductsController::class, 'processStep2'])->name('admin.products.create.step2.process');
 
         Route::get('/products/create/step-3', [App\Http\Controllers\Admin\ProductsController::class, 'createStep3'])->name('admin.products.create.step3');
         Route::post('/products/create/step-3', [App\Http\Controllers\Admin\ProductsController::class, 'processStep3'])->name('admin.products.create.step3.process');
@@ -257,13 +271,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/create/step-4', [App\Http\Controllers\Admin\ProductsController::class, 'createStep4'])->name('admin.products.create.step4');
         Route::post('/products/create/step-4', [App\Http\Controllers\Admin\ProductsController::class, 'processStep4'])->name('admin.products.create.step4.process');
 
-        // Step 5 is now SEO (previously step 6)
-        Route::get('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'createStep6'])->name('admin.products.create.step5');
-        Route::post('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'processStep6'])->name('admin.products.create.step5.process');
+        // Step 5 is now SEO
+        Route::get('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'createStep5'])->name('admin.products.create.step5');
+        Route::post('/products/create/step-5', [App\Http\Controllers\Admin\ProductsController::class, 'processStep5'])->name('admin.products.create.step5.process');
 
-        // Step 6 is now Settings (previously step 7)
-        Route::get('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'createStep7'])->name('admin.products.create.step6');
-        Route::post('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'processStep7'])->name('admin.products.create.step6.process');
+        // Step 6 is now Settings
+        Route::get('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'createStep6'])->name('admin.products.create.step6');
+        Route::post('/products/create/step-6', [App\Http\Controllers\Admin\ProductsController::class, 'processStep6'])->name('admin.products.create.step6.process');
 
         // Old step 6 and 7 routes redirect to new routes
         Route::get('/products/create/step-7', function() {
@@ -278,9 +292,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/{product}/edit/step1', [App\Http\Controllers\Admin\ProductsController::class, 'editStep1'])->name('admin.products.edit.step1');
         Route::post('/products/{product}/edit/step1', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep1'])->name('admin.products.edit.step1.process');
 
-        // Step 2 is now Variants (previously step 5)
-        Route::get('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'editStep5'])->name('admin.products.edit.step2');
-        Route::post('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep5'])->name('admin.products.edit.step2.process');
+        // Step 2 - Variants
+        Route::get('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'editStep2'])->name('admin.products.edit.step2');
+        Route::post('/products/{product}/edit/step2', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep2'])->name('admin.products.edit.step2.process');
 
         Route::get('/products/{product}/edit/step3', [App\Http\Controllers\Admin\ProductsController::class, 'editStep3'])->name('admin.products.edit.step3');
         Route::post('/products/{product}/edit/step3', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep3'])->name('admin.products.edit.step3.process');
@@ -288,13 +302,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/{product}/edit/step4', [App\Http\Controllers\Admin\ProductsController::class, 'editStep4'])->name('admin.products.edit.step4');
         Route::post('/products/{product}/edit/step4', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep4'])->name('admin.products.edit.step4.process');
 
-        // Step 5 is now SEO (previously step 6)
-        Route::get('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'editStep6'])->name('admin.products.edit.step5');
-        Route::post('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep6'])->name('admin.products.edit.step5.process');
+        // Step 5 - SEO
+        Route::get('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'editStep5'])->name('admin.products.edit.step5');
+        Route::post('/products/{product}/edit/step5', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep5'])->name('admin.products.edit.step5.process');
 
-        // Step 6 is now Settings (previously step 7)
-        Route::get('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'editStep7'])->name('admin.products.edit.step6');
-        Route::post('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep7'])->name('admin.products.edit.step6.process');
+        // Step 6 - Settings
+        Route::get('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'editStep6'])->name('admin.products.edit.step6');
+        Route::post('/products/{product}/edit/step6', [App\Http\Controllers\Admin\ProductsController::class, 'processEditStep6'])->name('admin.products.edit.step6.process');
 
         // Old routes redirect to new structure
         Route::get('/products/{product}/edit/step7', function ($product) {
@@ -472,8 +486,10 @@ Route::prefix('admin')->group(function () {
         Route::resource('/orders', App\Http\Controllers\Admin\OrderController::class, [
             'as' => 'admin'
         ]);
+        Route::get('/orders-cancelled', [App\Http\Controllers\Admin\OrderController::class, 'cancelled'])->name('admin.orders.cancelled');
         Route::patch('/orders/{order}/update-status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.update-status');
         Route::post('/orders/{order}/payment-status', [App\Http\Controllers\Admin\OrderController::class, 'updatePaymentStatus'])->name('admin.orders.updatePaymentStatus');
+        Route::post('/orders/{order}/cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel'])->name('admin.orders.cancel');
         Route::post('/orders/bulk-action', [App\Http\Controllers\Admin\OrderController::class, 'bulkAction'])->name('admin.orders.bulk-action');
         Route::get('/orders/export', [App\Http\Controllers\Admin\OrderController::class, 'export'])->name('admin.orders.export');
 
@@ -628,6 +644,33 @@ Route::prefix('admin')->group(function () {
         Route::post('/returns/{return}/refund', [App\Http\Controllers\Admin\ReturnController::class, 'processRefund'])->name('admin.returns.refund');
         Route::post('/returns/bulk-action', [App\Http\Controllers\Admin\ReturnController::class, 'bulkAction'])->name('admin.returns.bulk-action');
         
+        // Debug route for testing returns
+        Route::get('/returns-debug', function() {
+            $returns = \App\Models\ProductReturn::with(['user', 'order', 'orderItem.product', 'seller'])->get();
+            $stats = [
+                'total' => \App\Models\ProductReturn::count(),
+                'pending' => \App\Models\ProductReturn::where('status', 'pending')->count(),
+                'approved' => \App\Models\ProductReturn::where('status', 'approved')->count(),
+                'refunded' => \App\Models\ProductReturn::where('status', 'refunded')->count(),
+            ];
+            
+            return response()->json([
+                'returns_count' => $returns->count(),
+                'stats' => $stats,
+                'returns' => $returns->map(function($return) {
+                    return [
+                        'id' => $return->id,
+                        'return_number' => $return->return_number,
+                        'status' => $return->status,
+                        'user' => $return->user->name,
+                        'order' => $return->order->order_number,
+                        'product' => $return->orderItem->product_name,
+                        'amount' => $return->amount
+                    ];
+                })
+            ]);
+        });
+
         // Debug route for testing
         Route::get('/seller-payouts-test/{id}', function($id) {
             $payout = \App\Models\SellerPayout::findOrFail($id);

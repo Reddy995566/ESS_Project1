@@ -11,11 +11,13 @@
 
 <form id="stepForm" action="{{ route('seller.products.update', $product->id) }}" method="POST">
     @csrf
+    @method('PUT')
+    <input type="hidden" name="step" value="1">
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+        <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
                     <span class="text-white text-xl">📝</span>
                 </div>
                 <div>
@@ -33,7 +35,7 @@
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Product Name <span class="text-red-500">*</span></label>
                     <input type="text" name="name" id="productName" required 
                         value="{{ old('name', $product->name ?? '') }}"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                         placeholder="Enter product name"
                         oninput="updateSlug()">
                     @error('name')
@@ -43,12 +45,12 @@
 
                 <!-- URL Slug -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-800 mb-2">URL Slug <span class="text-indigo-500 text-xs">(Auto-generated)</span></label>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">URL Slug <span class="text-blue-500 text-xs">(Auto-generated)</span></label>
                     <input type="text" name="slug" id="productSlug" readonly
                         value="{{ old('slug', $product->slug ?? '') }}"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
                         placeholder="will-be-generated-from-name">
-                    <p class="text-xs text-indigo-500 mt-1">✨ Automatically generated from product name</p>
+                    <p class="text-xs text-blue-500 mt-1">✨ Automatically generated from product name</p>
                     @error('slug')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -233,66 +235,20 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // Handle form submission
-document.getElementById('updateBtn')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    
-    console.log('Step 1 updateBtn clicked');
-    
-    // Update hidden fields before submission
-    document.getElementById('detailedDescriptionHidden').value = detailedDescriptionQuill.root.innerHTML;
-    document.getElementById('washingInstructionsHidden').value = washingInstructionsQuill.root.innerHTML;
-    document.getElementById('shippingInformationHidden').value = shippingInformationQuill.root.innerHTML;
-    document.getElementById('returnsRefundsHidden').value = returnsRefundsQuill.root.innerHTML;
-    
-    console.log('Hidden fields updated');
-    
-    // Submit form via AJAX
-    const formData = new FormData(document.getElementById('stepForm'));
-    
-    console.log('FormData created, sending request...');
-    
-    fetch('{{ route("seller.products.update", $product->id) }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json',
-        },
-        body: (() => {
-            const formData = new FormData(document.getElementById('stepForm'));
-            formData.append('_method', 'PUT');
-            return formData;
-        })()
-    })
-    .then(response => {
-        console.log('Response received:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Response data:', data);
-        if (data.success) {
-            showNotification('Step 1 updated successfully!', 'success');
-            // Refresh page to show updated data
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            showNotification(data.message || 'Error updating product', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        showNotification('An error occurred: ' + error.message, 'error');
-    });
+document.getElementById('nextBtn')?.addEventListener('click', function() {
+    document.getElementById('stepForm').submit();
 });
 
 document.getElementById('prevBtn')?.addEventListener('click', function() {
     window.location.href = '{{ route("seller.products.index") }}';
 });
-
 // Form submission handler to ensure fields are updated just in case
 document.getElementById('stepForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    console.log('Form submit prevented');
+    // Update hidden fields before submission
+    document.getElementById('detailedDescriptionHidden').value = detailedDescriptionQuill.root.innerHTML;
+    document.getElementById('washingInstructionsHidden').value = washingInstructionsQuill.root.innerHTML;
+    document.getElementById('shippingInformationHidden').value = shippingInformationQuill.root.innerHTML;
+    document.getElementById('returnsRefundsHidden').value = returnsRefundsQuill.root.innerHTML;
 });
 </script>
 @endpush

@@ -55,7 +55,7 @@
                             <div class="space-y-4 mb-4">
                                 @foreach($order->items->take(2) as $item)
                                 <div class="flex gap-4">
-                                    <img src="{{ $item->product->image_url ?? 'https://via.placeholder.com/100' }}" alt="{{ $item->product_name }}" class="w-20 h-20 object-cover rounded-lg bg-gray-50" loading="lazy">
+                                    <img src="{{ $item->image ?? $item->product->image_url ?? 'https://via.placeholder.com/100' }}" alt="{{ $item->product_name }}" class="w-20 h-20 object-cover rounded-lg bg-gray-50" loading="lazy">
                                     <div class="flex-1">
                                         <h4 class="font-medium text-gray-900 line-clamp-1">{{ $item->product_name }}</h4>
                                         @if($item->variant_name)

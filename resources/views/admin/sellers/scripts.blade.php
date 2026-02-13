@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900">${product.sku || 'N/A'}</td>
                 <td class="px-4 py-3 text-sm text-gray-900">₹${product.price}</td>
-                <td class="px-4 py-3 text-sm text-gray-900">${product.stock}</td>
+                {{-- <td class="px-4 py-3 text-sm text-gray-900">${product.stock}</td> --}}
                 <td class="px-4 py-3">${statusBadge}</td>
                 <td class="px-4 py-3">${approvalBadge}</td>
                 <td class="px-4 py-3">

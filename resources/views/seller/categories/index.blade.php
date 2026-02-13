@@ -856,8 +856,8 @@
         function openEditModal(data) {
             document.getElementById('modalTitle').textContent = 'Edit Category';
             document.getElementById('submitBtnText').textContent = 'Update Category';
-            document.getElementById('categoryForm').action = '/admin/categories/' + data.id;
-            document.getElementById('methodField').value = 'PATCH';
+            document.getElementById('categoryForm').action = '/seller/categories/' + data.id;
+            document.getElementById('methodField').value = 'PUT';
             document.getElementById('categoryId').value = data.id;
             
             document.querySelector('input[name="name"]').value = data.name;

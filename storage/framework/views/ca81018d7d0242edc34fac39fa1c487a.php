@@ -273,6 +273,67 @@
         };
     </script>
 
+    <!-- Cart & Wishlist Count Update Script -->
+    <script>
+        // Function to update cart count badge
+        function updateCartCount() {
+            fetch('<?php echo e(route("cart.count")); ?>', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('cart-count-badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            })
+            .catch(error => console.error('Error updating cart count:', error));
+        }
+
+        // Function to update wishlist count badge
+        function updateWishlistCount() {
+            fetch('<?php echo e(route("wishlist.count")); ?>', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('wishlist-count-badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            })
+            .catch(error => console.error('Error updating wishlist count:', error));
+        }
+
+        // Update counts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCount();
+            updateWishlistCount();
+        });
+
+        // Make functions globally available for other scripts to call
+        window.updateCartCount = updateCartCount;
+        window.updateWishlistCount = updateWishlistCount;
+    </script>
+
     <?php echo $__env->yieldPushContent('scripts'); ?>
 
 </body>

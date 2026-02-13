@@ -76,6 +76,15 @@ class SellerController extends Controller
             }
         }
         
+        // Send email notification when seller is rejected
+        if ($request->status === 'rejected') {
+            try {
+                Mail::to($seller->user->email)->send(new \App\Mail\SellerRejectedNotification($seller));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send seller rejection email: ' . $e->getMessage());
+            }
+        }
+        
         // Create notification for seller
         $seller->notifications()->create([
             'type' => 'status_updated',
@@ -86,7 +95,9 @@ class SellerController extends Controller
         
         return response()->json([
             'success' => true,
-            'message' => 'Seller status updated successfully!' . ($request->status === 'active' ? ' Approval email sent to seller.' : ''),
+            'message' => 'Seller status updated successfully!' . 
+                        ($request->status === 'active' ? ' Approval email sent to seller.' : '') .
+                        ($request->status === 'rejected' ? ' Rejection email sent to seller.' : ''),
         ]);
     }
 

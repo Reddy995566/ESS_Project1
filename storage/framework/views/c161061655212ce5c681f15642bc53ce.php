@@ -1,12 +1,15 @@
 <?php
     // Auto-detect active menu from current route
     $routeName = request()->route()->getName() ?? '';
+    $currentPath = request()->path();
     $activeMenu = 'dashboard';
     $productMenuOpen = false;
     $sellerMenuOpen = false;
 
     if (str_contains($routeName, 'dashboard')) {
         $activeMenu = 'dashboard';
+    } elseif (str_contains($routeName, 'seller-payout') || str_contains($routeName, 'payouts')) {
+        $activeMenu = 'seller-payouts';
     } elseif (str_contains($routeName, 'seller') || str_starts_with($routeName, 'admin.sellers') || str_contains($routeName, 'pending-products') || str_contains($routeName, 'approved-products') || str_contains($routeName, 'rejected-products') || str_contains($routeName, 'document-verification')) {
         $activeMenu = 'sellers';
         $sellerMenuOpen = true;
@@ -34,20 +37,26 @@
     } elseif (str_contains($routeName, 'tags') || str_starts_with($routeName, 'admin.tags')) {
         $activeMenu = 'products';
         $productMenuOpen = true;
+    } elseif (str_contains($routeName, 'orders.cancelled')) {
+        $activeMenu = 'cancelled-orders';
+    } elseif (str_contains($routeName, 'order') && !str_contains($routeName, 'bulk-order')) {
+        $activeMenu = 'orders';
     } elseif (str_contains($routeName, 'bulk-order') || str_starts_with($routeName, 'admin.bulk-orders')) {
         $activeMenu = 'bulk-orders';
     } elseif (str_contains($routeName, 'contact') || str_starts_with($routeName, 'admin.contacts')) {
         $activeMenu = 'contacts';
-    } elseif (str_contains($routeName, 'order')) {
-        $activeMenu = 'orders';
+    } elseif (str_contains($routeName, 'activity-log') || str_contains($routeName, 'login-history') || str_contains($currentPath, 'activity-logs') || str_contains($currentPath, 'login-history')) {
+        $activeMenu = 'activity-logs';
+    } elseif (str_contains($routeName, 'admin-user')) {
+        $activeMenu = 'admin-management';
     } elseif (str_contains($routeName, 'user') || str_starts_with($routeName, 'admin.users')) {
         $activeMenu = 'users';
     } elseif (str_contains($routeName, 'coupon') || str_starts_with($routeName, 'admin.coupons')) {
         $activeMenu = 'coupons';
+    } elseif (str_contains($routeName, 'promotional-banner') || str_starts_with($routeName, 'admin.promotional-banners')) {
+        $activeMenu = 'promotional-banners';
     } elseif (str_contains($routeName, 'banner') || str_starts_with($routeName, 'admin.banners')) {
         $activeMenu = 'banners';
-    } elseif (str_contains($routeName, 'admin-user') || str_contains($routeName, 'activity-log') || str_contains($routeName, 'login-history')) {
-        $activeMenu = 'admin-management';
     } elseif (str_contains($routeName, 'customer')) {
         $activeMenu = 'customers';
     } elseif (str_contains($routeName, 'analytics')) {
@@ -58,12 +67,10 @@
         $activeMenu = 'testimonials';
     } elseif (str_contains($routeName, 'video-reel') || str_starts_with($routeName, 'admin.video-reels')) {
         $activeMenu = 'video-reels';
-    } elseif (str_contains($routeName, 'promotional-banner') || str_starts_with($routeName, 'admin.promotional-banners')) {
-        $activeMenu = 'promotional-banners';
     } elseif (str_contains($routeName, 'budget-card') || str_starts_with($routeName, 'admin.budget-cards')) {
         $activeMenu = 'budget-cards';
-    } elseif (str_contains($routeName, 'seller-payout') || str_contains($routeName, 'payouts')) {
-        $activeMenu = 'seller-payouts';
+    } elseif (str_contains($routeName, 'return')) {
+        $activeMenu = 'returns';
     } elseif (str_contains($routeName, 'setting')) {
         $activeMenu = 'settings';
     }
@@ -241,6 +248,18 @@
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                     <span class="text-sm font-medium">Orders</span>
+                </a>
+            </li>
+
+            <!-- Cancelled Orders -->
+            <li>
+                <a href="<?php echo e(route('admin.orders.cancelled')); ?>"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg <?php echo e($activeMenu === 'cancelled-orders' ? 'bg-black text-white' : 'text-gray-700 hover:bg-white'); ?> transition-all duration-150">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm font-medium">Cancelled Orders</span>
                 </a>
             </li>
 
@@ -439,7 +458,7 @@
             <!-- Activity Logs -->
             <li>
                 <a href="<?php echo e(url('/admin/activity-logs')); ?>"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-white transition-all duration-150">
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg <?php echo e($activeMenu === 'activity-logs' ? 'bg-black text-white' : 'text-gray-700 hover:bg-white'); ?> transition-all duration-150">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

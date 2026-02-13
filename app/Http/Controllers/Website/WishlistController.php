@@ -176,4 +176,19 @@ class WishlistController extends Controller
             'in_wishlist' => $inWishlist,
         ]);
     }
+    
+    /**
+     * Get wishlist item count
+     */
+    public function getCount()
+    {
+        $userId = Auth::id();
+        $sessionId = session()->getId();
+        
+        $count = Wishlist::when($userId, fn($q) => $q->where('user_id', $userId))
+            ->when(!$userId, fn($q) => $q->where('session_id', $sessionId))
+            ->count();
+        
+        return response()->json(['count' => $count]);
+    }
 }
