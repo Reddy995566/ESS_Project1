@@ -4,11 +4,13 @@
 <?php $__env->startSection('step_content'); ?>
     <?php
         $currentStep = 3;
-        $prevStepRoute = route('seller.products.create.step2');
+        $prevStepRoute = '/seller/products/' . $product->id . '/edit?step=2';
     ?>
 
-    <form id="stepForm" action="<?php echo e(route('seller.products.create.step3.process')); ?>" method="POST">
+    <form id="stepForm" action="<?php echo e(route('seller.products.update', $product->id)); ?>" method="POST">
         <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
+        <input type="hidden" name="step" value="3">
 
         <div class="bg-white rounded-xl shadow-lg border border-gray-200">
             <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50">
@@ -125,7 +127,7 @@ unset($__errorArgs, $__bag); ?>
                         <label class="block text-sm font-semibold text-gray-800 mb-2">SKU <span
                                 class="text-blue-500 text-xs">(Auto)</span></label>
                         <input type="text" name="sku" id="productSku" readonly
-                            value="<?php echo e(old('sku', $productData['sku'] ?? '')); ?>"
+                            value="<?php echo e(old('sku', $product->sku ?? '')); ?>"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
                             placeholder="PRD-XXXXXXXX">
                         <p class="text-xs text-blue-500 mt-1">✨ Auto-generated code</p>
@@ -193,7 +195,52 @@ unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <!-- Tags -->
-                
+                <div x-data="tagsDropdown()">
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Tags <span
+                            class="text-gray-500 text-xs">(Multiple)</span></label>
+                    <div class="relative w-full">
+                        <button @click="open = !open" type="button"
+                            class="w-full px-4 py-3 text-left border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 flex justify-between items-center min-h-[48px]">
+                            <div class="flex flex-wrap gap-1" x-show="selectedTags.length > 0">
+                                <template x-for="tag in selectedTags" :key="tag.id">
+                                    <span
+                                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm flex items-center gap-1">
+                                        <span x-text="tag.name"></span>
+                                        <button type="button" @click.stop="removeTag(tag)"
+                                            class="hover:text-blue-900">×</button>
+                                    </span>
+                                </template>
+                            </div>
+                            <span x-show="selectedTags.length === 0" class="text-gray-500">Select Tags</span>
+                            <svg class="w-4 h-4 ml-2 text-gray-500 transition-transform duration-200"
+                                :class="{'rotate-180': open}" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false"
+                            class="absolute z-20 mt-2 w-full bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            <input type="text" placeholder="Search tags..." x-model="search"
+                                class="w-full px-3 py-2 border-b border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <template x-for="tag in filteredTags" :key="tag.id">
+                                <div @click="toggleTag(tag)"
+                                    class="px-4 py-2 cursor-pointer hover:bg-blue-100 flex items-center justify-between"
+                                    :class="{ 'bg-blue-50': isSelected(tag) }">
+                                    <span x-text="tag.name"></span>
+                                    <span x-show="isSelected(tag)" class="text-blue-600">✓</span>
+                                </div>
+                            </template>
+                            <div x-show="filteredTags.length === 0" class="px-4 py-2 text-gray-400">No results found.</div>
+                        </div>
+                        <select name="tags[]" multiple class="hidden" id="tagsSelect">
+                            <?php $__currentLoopData = $tags; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($tag->id); ?>"><?php echo e($tag->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Add multiple tags for better product discovery</p>
+                </div>
 
             </div>
         </div>
@@ -240,8 +287,8 @@ unset($__errorArgs, $__bag); ?>
                     },
 
                     init() {
-                        // Initialize selected category from existing data
-                        const existingCategoryId = '<?php echo e(old('category_id', $productData['category_id'] ?? '')); ?>';
+                        // Initialize selected category from product model
+                        const existingCategoryId = '<?php echo e(old('category_id', $product->category_id ?? '')); ?>';
                         if (existingCategoryId) {
                             const category = this.categories.find(c => c.id == existingCategoryId);
                             if (category) {
@@ -275,8 +322,8 @@ unset($__errorArgs, $__bag); ?>
                     },
                     
                     init() {
-                        // Initialize selected fabric from existing data
-                        const existingFabricId = '<?php echo e(old('fabric_id', $productData['fabric_id'] ?? '')); ?>';
+                        // Initialize selected fabric from product model
+                        const existingFabricId = '<?php echo e(old('fabric_id', $product->fabric_id ?? '')); ?>';
                         if (existingFabricId) {
                             const fabric = this.fabrics.find(f => f.id == existingFabricId);
                             if (fabric) {
@@ -313,8 +360,8 @@ unset($__errorArgs, $__bag); ?>
                     },
 
                     init() {
-                        // Initialize selected brand from existing data
-                        const existingBrandId = '<?php echo e(old('brand_id', $productData['brand_id'] ?? '')); ?>';
+                        // Initialize selected brand from product model
+                        const existingBrandId = '<?php echo e(old('brand_id', $product->brand_id ?? '')); ?>';
                         if (existingBrandId) {
                             const brand = this.brands.find(b => b.id == existingBrandId);
                             if (brand) {
@@ -330,7 +377,7 @@ unset($__errorArgs, $__bag); ?>
                 return {
                     open: false,
                     search: '',
-                    selectedCollections: <?php echo json_encode(old('collections', isset($productData['collections']) ? $productData['collections'] : []), 512) ?>,
+                    selectedCollections: [],
                     collections: <?php echo json_encode($collections, 15, 512) ?>,
 
                     get filteredCollections() {
@@ -362,14 +409,20 @@ unset($__errorArgs, $__bag); ?>
                         Array.from(selectElement.options).forEach(option => {
                             option.selected = this.selectedCollections.find(c => c.id == option.value) !== undefined;
                         });
+                        console.log('Collections select field updated:', this.selectedCollections.map(c => c.id));
                     },
 
                     init() {
-                        // Initialize selected collections from existing data
-                        const existingCollections = <?php echo json_encode(old('collections', isset($productData['collections']) ? $productData['collections'] : []), 512) ?>;
+                        // Initialize selected collections from product model
+                        const existingCollections = <?php echo json_encode(optional($product->collections)->pluck('id') ?? [], 15, 512) ?>;
                         const existingIds = existingCollections.map(id => parseInt(id));
                         this.selectedCollections = this.collections.filter(c => existingIds.includes(parseInt(c.id)));
                         this.updateSelectField();
+                        
+                        // Listen for form submission event to update select field
+                        window.addEventListener('beforeFormSubmit', () => {
+                            this.updateSelectField();
+                        });
                     }
                 };
             }
@@ -378,7 +431,7 @@ unset($__errorArgs, $__bag); ?>
                 return {
                     open: false,
                     search: '',
-                    selectedTags: <?php echo json_encode(old('tags', isset($productData['tags']) ? $productData['tags'] : []), 512) ?>,
+                    selectedTags: [],
                     tags: <?php echo json_encode($tags, 15, 512) ?>,
 
                     get filteredTags() {
@@ -406,18 +459,26 @@ unset($__errorArgs, $__bag); ?>
                     },
 
                     updateSelectField() {
-                        const selectElement = document.querySelector('select[name="tags[]"]');
-                        Array.from(selectElement.options).forEach(option => {
-                            option.selected = this.selectedTags.find(t => t.id == option.value) !== undefined;
-                        });
+                        const selectElement = document.getElementById('tagsSelect');
+                        if (selectElement) {
+                            Array.from(selectElement.options).forEach(option => {
+                                option.selected = this.selectedTags.find(t => t.id == option.value) !== undefined;
+                            });
+                            console.log('Tags select field updated:', this.selectedTags.map(t => t.id));
+                        }
                     },
 
                     init() {
-                        // Initialize selected tags from existing data
-                        const existingTags = <?php echo json_encode(old('tags', isset($productData['tags']) ? $productData['tags'] : []), 512) ?>;
+                        // Initialize selected tags from product model
+                        const existingTags = <?php echo json_encode(optional($product->tags)->pluck('id') ?? [], 15, 512) ?>;
                         const existingIds = existingTags.map(id => parseInt(id));
                         this.selectedTags = this.tags.filter(t => existingIds.includes(parseInt(t.id)));
                         this.updateSelectField();
+                        
+                        // Listen for form submission event to update select field
+                        window.addEventListener('beforeFormSubmit', () => {
+                            this.updateSelectField();
+                        });
                     }
                 };
             }
@@ -484,4 +545,4 @@ unset($__errorArgs, $__bag); ?>
         </script>
     <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('seller.products.create._layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/seller/products/create/step3.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('seller.products.edit._layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/seller/products/edit/step3.blade.php ENDPATH**/ ?>

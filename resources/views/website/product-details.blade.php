@@ -449,6 +449,24 @@
                                     <div class="pb-4 text-sm text-[#4b0f27]/80 leading-relaxed font-sans-premium">
                                         <p>{!! $product->description ?? 'Premium quality fabric tailored for comfort and elegance. Perfect for any occasion.' !!}
                                         </p>
+                                        
+                                        <!-- Tags Display -->
+                                        @if($product->tags && $product->tags->count() > 0)
+                                        <div class="mt-4 pt-4 border-t border-[#4b0f27]/10">
+                                            <p class="text-xs font-semibold text-[#4b0f27] uppercase tracking-wide mb-2">Tags:</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach($product->tags as $tag)
+                                                <a href="{{ route('search') }}?tag={{ $tag->slug }}" 
+                                                   class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#4b0f27]/5 text-[#4b0f27] hover:bg-[#4b0f27]/10 transition-colors duration-200">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    {{ $tag->name }}
+                                                </a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

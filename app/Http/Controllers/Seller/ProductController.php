@@ -920,16 +920,17 @@ class ProductController extends Controller
         $stepViewMap = [
             1 => 'step1', // Basic Info
             2 => 'step2', // Variants
-            3 => 'step3', // Categories
-            4 => 'step4', // Inventory
-            5 => 'step6', // SEO (old step 6)
-            6 => 'step7', // Settings (old step 7)
+            3 => 'step3', // Categories & Organization
+            4 => 'step4', // Pricing & Inventory
+            5 => 'step5', // SEO
+            6 => 'step6', // Settings
         ];
         
         $viewFile = $stepViewMap[$step] ?? 'step1';
         
         // Load seller-specific data
         $categories = Category::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
+        $allCategories = Category::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
         $collections = Collection::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
         $colors = Color::where('seller_id', $seller->id)->where('is_active', true)->orderBy('name')->get();
         $sizes = Size::where('seller_id', $seller->id)->where('is_active', true)->orderBy('sort_order')->get();
@@ -941,6 +942,7 @@ class ProductController extends Controller
             'step',
             'product',
             'categories',
+            'allCategories',
             'collections',
             'colors',
             'sizes',
@@ -1004,6 +1006,8 @@ class ProductController extends Controller
                 'is_limited_edition' => 'sometimes|nullable|boolean',
                 'collections' => 'sometimes|nullable|array',
                 'collections.*' => 'exists:collections,id',
+                'tags' => 'sometimes|nullable|array',
+                'tags.*' => 'exists:tags,id',
                 // Step-based validation
                 'step' => 'sometimes|nullable|string',
                 'has_variants' => 'sometimes|nullable|boolean',
@@ -1014,13 +1018,21 @@ class ProductController extends Controller
             
             \Log::info('Validation passed', ['validated_data' => $validated]);
             
-            // Always set approval_status to pending on update
-            $validated['approval_status'] = 'pending';
+            // IMPORTANT: If product is already approved, keep it approved regardless of changes
+            // Seller can make any updates without requiring re-approval
+            if ($wasApproved) {
+                $validated['approval_status'] = 'approved';
+                \Log::info('Product was approved, keeping approval status as approved');
+            } elseif (!$wasApproved) {
+                // If it wasn't approved before, keep it pending
+                $validated['approval_status'] = 'pending';
+                \Log::info('Product was not approved, keeping as pending');
+            }
             
             // Update only provided fields
             $product->update($validated);
             
-            \Log::info('Product updated', ['product_id' => $product->id]);
+            \Log::info('Product updated', ['product_id' => $product->id, 'approval_status' => $product->approval_status]);
             
             // Handle step-based updates
             if ($request->has('step') && $request->step == '2') {
@@ -1117,7 +1129,7 @@ class ProductController extends Controller
                     }
                 }
             } else {
-                // Regular sync for non-step updates
+                // Regular sync for non-step updates OR step 4 (categories & organization)
                 if ($request->has('collections')) {
                     \Log::info('Syncing collections', ['collections' => $request->collections]);
                     $product->collections()->sync($request->collections);
@@ -1139,27 +1151,29 @@ class ProductController extends Controller
                 }
             }
             
+            // Always sync collections and tags if provided (for step 3 - categories)
+            if ($request->has('step') && $request->step == '3') {
+                if ($request->has('collections')) {
+                    \Log::info('Syncing collections (step 3)', ['collections' => $request->collections]);
+                    $product->collections()->sync($request->collections ?? []);
+                }
+                
+                if ($request->has('tags')) {
+                    \Log::info('Syncing tags (step 3)', ['tags' => $request->tags]);
+                    $product->tags()->sync($request->tags ?? []);
+                }
+            }
+            
             // Log activity
             $seller->logActivity('product_updated', 'Updated product: ' . $product->name);
             
-            // Add notification if product was previously approved
-            if ($wasApproved) {
-                $seller->notifications()->create([
-                    'type' => 'product_resubmitted',
-                    'title' => 'Product Resubmitted',
-                    'message' => 'Product "' . $product->name . '" was edited and resubmitted for approval.',
-                    'data' => json_encode(['product_id' => $product->id]),
-                    'is_read' => false,
-                ]);
-            }
+            // No notification needed - product stays approved
             
             DB::commit();
             
             \Log::info('Product update completed successfully', ['product_id' => $product->id]);
             
-            $message = $wasApproved 
-                ? 'Product updated successfully! Since this was an approved product, it has been resubmitted for approval.'
-                : 'Product updated successfully!';
+            $message = 'Product updated successfully!';
             
             return response()->json([
                 'success' => true,

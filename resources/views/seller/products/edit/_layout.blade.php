@@ -139,8 +139,8 @@
                             $steps = [
                                 ['number' => 1, 'title' => 'Basic Info', 'description' => 'Product details', 'route' => 'seller.products.edit'],
                                 ['number' => 2, 'title' => 'Variants', 'description' => 'Colors & sizes', 'route' => 'seller.products.edit'],
-                                ['number' => 3, 'title' => 'Pricing', 'description' => 'Price & inventory', 'route' => 'seller.products.edit'],
-                                ['number' => 4, 'title' => 'Categories', 'description' => 'Organization', 'route' => 'seller.products.edit'],
+                                ['number' => 3, 'title' => 'Categories', 'description' => 'Organization', 'route' => 'seller.products.edit'],
+                                ['number' => 4, 'title' => 'Pricing', 'description' => 'Price & inventory', 'route' => 'seller.products.edit'],
                                 ['number' => 5, 'title' => 'SEO', 'description' => 'Optimization', 'route' => 'seller.products.edit'],
                                 ['number' => 6, 'title' => 'Settings', 'description' => 'Status & publish', 'route' => 'seller.products.edit']
                             ];
@@ -197,6 +197,86 @@
 
 @push('scripts')
 <script>
+// Handle Update button click with AJAX
+document.addEventListener('DOMContentLoaded', function() {
+    const updateBtn = document.getElementById('updateBtn');
+    const stepForm = document.getElementById('stepForm');
+    
+    if (updateBtn && stepForm) {
+        updateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Force update all Alpine.js select fields before submission
+            // Trigger a custom event that Alpine components can listen to
+            window.dispatchEvent(new CustomEvent('beforeFormSubmit'));
+            
+            // Small delay to let Alpine update
+            setTimeout(() => {
+                // Show loading state
+                updateBtn.disabled = true;
+                const originalText = updateBtn.innerHTML;
+                updateBtn.innerHTML = '<svg class="animate-spin h-5 w-5 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Updating...';
+                
+                // Get form data
+                const formData = new FormData(stepForm);
+                
+                // Debug: Log form data
+                console.log('Form data being sent:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(key + ': ' + value);
+                }
+                
+                // Submit via AJAX
+                fetch(stepForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message || 'Product updated successfully!', 'success');
+                        
+                        // Move to next step after a short delay
+                        setTimeout(() => {
+                            const currentStep = {{ $currentStep }};
+                            if (currentStep < 6) {
+                                navigateToStep(currentStep + 1);
+                            } else {
+                                window.location.href = '{{ route("seller.products.index") }}';
+                            }
+                        }, 1000);
+                    } else {
+                        showNotification(data.message || 'Failed to update product', 'error');
+                        updateBtn.disabled = false;
+                        updateBtn.innerHTML = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('An error occurred while updating', 'error');
+                    updateBtn.disabled = false;
+                    updateBtn.innerHTML = originalText;
+                });
+            }, 100); // 100ms delay to let Alpine update
+        });
+    }
+    
+    // Handle Previous button
+    const prevBtn = document.getElementById('prevBtn');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            const currentStep = {{ $currentStep }};
+            if (currentStep > 1) {
+                navigateToStep(currentStep - 1);
+            }
+        });
+    }
+});
+
 function navigateToStep(stepNumber) {
     const productId = '{{ $product->id ?? 0 }}';
     if (!productId) {

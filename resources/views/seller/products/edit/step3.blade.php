@@ -115,7 +115,7 @@
                         <label class="block text-sm font-semibold text-gray-800 mb-2">SKU <span
                                 class="text-blue-500 text-xs">(Auto)</span></label>
                         <input type="text" name="sku" id="productSku" readonly
-                            value="{{ old('sku', $productData['sku'] ?? '') }}"
+                            value="{{ old('sku', $product->sku ?? '') }}"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
                             placeholder="PRD-XXXXXXXX">
                         <p class="text-xs text-blue-500 mt-1">✨ Auto-generated code</p>
@@ -176,7 +176,6 @@
                 </div>
 
                 <!-- Tags -->
-                {{--
                 <div x-data="tagsDropdown()">
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Tags <span
                             class="text-gray-500 text-xs">(Multiple)</span></label>
@@ -215,15 +214,14 @@
                             </template>
                             <div x-show="filteredTags.length === 0" class="px-4 py-2 text-gray-400">No results found.</div>
                         </div>
-                        <select name="tags[]" multiple class="hidden">
+                        <select name="tags[]" multiple class="hidden" id="tagsSelect">
                             @foreach($tags as $tag)
-                            <option :value="{{ $tag->id }}" :selected="selectedTags.find(t => t.id === {{ $tag->id }})">{{
-                                $tag->name }}</option>
+                            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
                             @endforeach
                         </select>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">Add multiple tags for better product discovery</p>
                 </div>
-                --}}
 
             </div>
         </div>
@@ -270,8 +268,8 @@
                     },
 
                     init() {
-                        // Initialize selected category from existing data
-                        const existingCategoryId = '{{ old('category_id', $productData['category_id'] ?? '') }}';
+                        // Initialize selected category from product model
+                        const existingCategoryId = '{{ old('category_id', $product->category_id ?? '') }}';
                         if (existingCategoryId) {
                             const category = this.categories.find(c => c.id == existingCategoryId);
                             if (category) {
@@ -305,8 +303,8 @@
                     },
                     
                     init() {
-                        // Initialize selected fabric from existing data
-                        const existingFabricId = '{{ old('fabric_id', $productData['fabric_id'] ?? '') }}';
+                        // Initialize selected fabric from product model
+                        const existingFabricId = '{{ old('fabric_id', $product->fabric_id ?? '') }}';
                         if (existingFabricId) {
                             const fabric = this.fabrics.find(f => f.id == existingFabricId);
                             if (fabric) {
@@ -343,8 +341,8 @@
                     },
 
                     init() {
-                        // Initialize selected brand from existing data
-                        const existingBrandId = '{{ old('brand_id', $productData['brand_id'] ?? '') }}';
+                        // Initialize selected brand from product model
+                        const existingBrandId = '{{ old('brand_id', $product->brand_id ?? '') }}';
                         if (existingBrandId) {
                             const brand = this.brands.find(b => b.id == existingBrandId);
                             if (brand) {
@@ -360,7 +358,7 @@
                 return {
                     open: false,
                     search: '',
-                    selectedCollections: @json(old('collections', isset($productData['collections']) ? $productData['collections'] : [])),
+                    selectedCollections: [],
                     collections: @json($collections),
 
                     get filteredCollections() {
@@ -392,14 +390,20 @@
                         Array.from(selectElement.options).forEach(option => {
                             option.selected = this.selectedCollections.find(c => c.id == option.value) !== undefined;
                         });
+                        console.log('Collections select field updated:', this.selectedCollections.map(c => c.id));
                     },
 
                     init() {
-                        // Initialize selected collections from existing data
-                        const existingCollections = @json(old('collections', isset($productData['collections']) ? $productData['collections'] : []));
+                        // Initialize selected collections from product model
+                        const existingCollections = @json(optional($product->collections)->pluck('id') ?? []);
                         const existingIds = existingCollections.map(id => parseInt(id));
                         this.selectedCollections = this.collections.filter(c => existingIds.includes(parseInt(c.id)));
                         this.updateSelectField();
+                        
+                        // Listen for form submission event to update select field
+                        window.addEventListener('beforeFormSubmit', () => {
+                            this.updateSelectField();
+                        });
                     }
                 };
             }
@@ -408,7 +412,7 @@
                 return {
                     open: false,
                     search: '',
-                    selectedTags: @json(old('tags', isset($productData['tags']) ? $productData['tags'] : [])),
+                    selectedTags: [],
                     tags: @json($tags),
 
                     get filteredTags() {
@@ -436,18 +440,26 @@
                     },
 
                     updateSelectField() {
-                        const selectElement = document.querySelector('select[name="tags[]"]');
-                        Array.from(selectElement.options).forEach(option => {
-                            option.selected = this.selectedTags.find(t => t.id == option.value) !== undefined;
-                        });
+                        const selectElement = document.getElementById('tagsSelect');
+                        if (selectElement) {
+                            Array.from(selectElement.options).forEach(option => {
+                                option.selected = this.selectedTags.find(t => t.id == option.value) !== undefined;
+                            });
+                            console.log('Tags select field updated:', this.selectedTags.map(t => t.id));
+                        }
                     },
 
                     init() {
-                        // Initialize selected tags from existing data
-                        const existingTags = @json(old('tags', isset($productData['tags']) ? $productData['tags'] : []));
+                        // Initialize selected tags from product model
+                        const existingTags = @json(optional($product->tags)->pluck('id') ?? []);
                         const existingIds = existingTags.map(id => parseInt(id));
                         this.selectedTags = this.tags.filter(t => existingIds.includes(parseInt(t.id)));
                         this.updateSelectField();
+                        
+                        // Listen for form submission event to update select field
+                        window.addEventListener('beforeFormSubmit', () => {
+                            this.updateSelectField();
+                        });
                     }
                 };
             }

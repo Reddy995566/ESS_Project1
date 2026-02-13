@@ -4,11 +4,13 @@
 <?php $__env->startSection('step_content'); ?>
 <?php
     $currentStep = 4;
-    $prevStepRoute = route('seller.products.create.step3');
+    $prevStepRoute = '/seller/products/' . $product->id . '/edit?step=3';
 ?>
 
-<form id="stepForm" action="<?php echo e(route('seller.products.create.step4.process')); ?>" method="POST">
+<form id="stepForm" action="<?php echo e(route('seller.products.update', $product->id)); ?>" method="POST">
     <?php echo csrf_field(); ?>
+    <?php echo method_field('PUT'); ?>
+    <input type="hidden" name="step" value="4">
     
     <div class="bg-white rounded-xl shadow-lg border border-gray-200">
         <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-cyan-50 to-blue-50">
@@ -31,7 +33,7 @@
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
                         <input type="number" name="price" step="0.01" min="0" required 
-                            value="<?php echo e(old('price', $productData['price'] ?? '')); ?>"
+                            value="<?php echo e(old('price', $product->price ?? '')); ?>"
                             class="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                             placeholder="0.00">
                     </div>
@@ -53,7 +55,7 @@ unset($__errorArgs, $__bag); ?>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
                         <input type="number" name="sale_price" step="0.01" min="0" 
-                            value="<?php echo e(old('sale_price', $productData['sale_price'] ?? '')); ?>"
+                            value="<?php echo e(old('sale_price', $product->sale_price ?? '')); ?>"
                             class="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                             placeholder="0.00">
                     </div>
@@ -111,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show warning if sale price is higher than regular price
         if (salePrice > 0 && salePrice >= price && price > 0) {
             salePriceInput.style.borderColor = '#ef4444';
-            } else {
+        } else {
             salePriceInput.style.borderColor = '';
         }
     }
@@ -122,4 +124,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('seller.products.create._layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/seller/products/create/step4.blade.php ENDPATH**/ ?>
+
+<?php echo $__env->make('seller.products.edit._layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/seller/products/edit/step4.blade.php ENDPATH**/ ?>

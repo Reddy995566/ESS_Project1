@@ -51,9 +51,9 @@
                         <label class="block text-sm font-semibold text-gray-800 mb-2">Product Status <span class="text-red-500">*</span></label>
                         <select name="status" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400">
                             <option value="">Select status</option>
-                            <option value="active" {{ old('status', $productData['status'] ?? '') == 'active' ? 'selected' : '' }}>Active - Live on website</option>
-                            <option value="draft" {{ old('status', $productData['status'] ?? '') == 'draft' ? 'selected' : '' }}>Draft - Save for later</option>
-                            <option value="inactive" {{ old('status', $productData['status'] ?? '') == 'inactive' ? 'selected' : '' }}>Inactive - Hidden from website</option>
+                            <option value="active" {{ old('status', $product->status ?? '') == 'active' ? 'selected' : '' }}>Active - Live on website</option>
+                            <option value="draft" {{ old('status', $product->status ?? '') == 'draft' ? 'selected' : '' }}>Draft - Save for later</option>
+                            <option value="inactive" {{ old('status', $product->status ?? '') == 'inactive' ? 'selected' : '' }}>Inactive - Hidden from website</option>
                         </select>
                         @error('status')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -65,10 +65,10 @@
                         <label class="block text-sm font-semibold text-gray-800 mb-2">Visibility <span class="text-red-500">*</span></label>
                         <select name="visibility" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400">
                             <option value="">Select visibility</option>
-                            <option value="visible" {{ old('visibility', $productData['visibility'] ?? '') == 'visible' ? 'selected' : '' }}>Visible - Everywhere</option>
-                            <option value="catalog" {{ old('visibility', $productData['visibility'] ?? '') == 'catalog' ? 'selected' : '' }}>Catalog Only</option>
-                            <option value="search" {{ old('visibility', $productData['visibility'] ?? '') == 'search' ? 'selected' : '' }}>Search Only</option>
-                            <option value="hidden" {{ old('visibility', $productData['visibility'] ?? '') == 'hidden' ? 'selected' : '' }}>Hidden</option>
+                            <option value="visible" {{ old('visibility', $product->visibility ?? '') == 'visible' ? 'selected' : '' }}>Visible - Everywhere</option>
+                            <option value="catalog" {{ old('visibility', $product->visibility ?? '') == 'catalog' ? 'selected' : '' }}>Catalog Only</option>
+                            <option value="search" {{ old('visibility', $product->visibility ?? '') == 'search' ? 'selected' : '' }}>Search Only</option>
+                            <option value="hidden" {{ old('visibility', $product->visibility ?? '') == 'hidden' ? 'selected' : '' }}>Hidden</option>
                         </select>
                         @error('visibility')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -93,8 +93,8 @@
 <script>
 // Load summary from product data
 document.addEventListener('DOMContentLoaded', function() {
-    // This would be populated from session data or product data
-    const productData = @json($productData ?? []);
+    // Product data from model
+    const productData = @json($product ?? []);
     
 
 });

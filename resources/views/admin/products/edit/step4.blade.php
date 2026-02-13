@@ -174,7 +174,6 @@
                 </div>
 
                 <!-- Tags -->
-                {{--
                 <div x-data="tagsDropdown()">
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Tags <span
                             class="text-gray-500 text-xs">(Multiple)</span></label>
@@ -220,8 +219,8 @@
                             @endforeach
                         </select>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">Add multiple tags for better product discovery</p>
                 </div>
-                --}}
 
             </div>
         </div>
@@ -395,20 +394,10 @@
                     },
 
                     init() {
-                        // Get existing collection IDs from product data
-                        const existingCollections = @json($productData['collections'] ?? []);
-
-                        // Ensure we have an array of IDs
-                        let existingIds = [];
-                        if (Array.isArray(existingCollections)) {
-                            // Convert all values to integers
-                            existingIds = existingCollections.map(id => {
-                                // Handle both numeric and string IDs
-                                const numId = parseInt(id);
-                                return isNaN(numId) ? null : numId;
-                            }).filter(id => id !== null);
-                        }
-
+                        // Get existing collection IDs from product model
+                        const existingCollections = @json(optional($product->collections)->pluck('id') ?? []);
+                        const existingIds = existingCollections.map(id => parseInt(id));
+                        
                         // Filter collections that match the existing IDs
                         if (existingIds.length > 0) {
                             this.selectedCollections = this.collections.filter(c => {
@@ -462,11 +451,11 @@
                     },
 
                     init() {
-                        const existingTags = @json($productData['tags'] ?? []);
+                        // Get existing tag IDs from product model
+                        const existingTags = @json(optional($product->tags)->pluck('id') ?? []);
                         const existingIds = existingTags.map(id => parseInt(id));
                         this.selectedTags = this.tags.filter(t => existingIds.includes(parseInt(t.id)));
                         this.updateSelectField();
-                        this.$nextTick(() => { });
                     }
                 };
             }

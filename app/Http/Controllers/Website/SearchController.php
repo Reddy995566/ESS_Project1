@@ -46,6 +46,14 @@ class SearchController extends Controller
             \Log::info('After category filter: ' . $productsQuery->count() . ' (categories: ' . implode(',', $categories) . ')');
         }
 
+        // Apply tag filter
+        if ($request->has('tag') && $request->tag) {
+            $productsQuery->whereHas('tags', function($q) use ($request) {
+                $q->where('slug', $request->tag);
+            });
+            \Log::info('After tag filter: ' . $productsQuery->count() . ' (tag: ' . $request->tag . ')');
+        }
+
         // Apply price range filter
         if ($request->has('min_price') && $request->min_price) {
             $productsQuery->whereRaw('COALESCE(sale_price, price) >= ?', [$request->min_price]);

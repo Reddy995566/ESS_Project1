@@ -43,7 +43,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Meta Title <span class="text-gray-500 text-xs">(50-60 characters)</span></label>
                     <input type="text" name="meta_title" maxlength="60" 
-                        value="{{ old('meta_title', $productData['meta_title'] ?? '') }}"
+                        value="{{ old('meta_title', $product->meta_title ?? '') }}"
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                         placeholder="Enter SEO title for search engines">
                     <div class="flex justify-between text-xs text-gray-500 mt-1">
@@ -60,7 +60,7 @@
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Meta Description <span class="text-gray-500 text-xs">(150-160 characters)</span></label>
                     <textarea name="meta_description" maxlength="160" rows="3" 
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
-                        placeholder="Brief description that appears in search results">{{ old('meta_description', $productData['meta_description'] ?? '') }}</textarea>
+                        placeholder="Brief description that appears in search results">{{ old('meta_description', $product->meta_description ?? '') }}</textarea>
                     <div class="flex justify-between text-xs text-gray-500 mt-1">
                         <span>Shown in search results below the title</span>
                         <span id="metaDescCount">0/160</span>
@@ -74,7 +74,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Focus Keywords</label>
                     <input type="text" name="focus_keywords" 
-                        value="{{ old('focus_keywords', $productData['focus_keywords'] ?? '') }}"
+                        value="{{ old('focus_keywords', $product->focus_keywords ?? '') }}"
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                         placeholder="keyword1, keyword2, keyword3">
                     <p class="text-xs text-gray-500 mt-1">Comma-separated keywords you want to rank for</p>
@@ -87,7 +87,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Canonical URL</label>
                     <input type="url" name="canonical_url" 
-                        value="{{ old('canonical_url', $productData['canonical_url'] ?? '') }}"
+                        value="{{ old('canonical_url', $product->canonical_url ?? '') }}"
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                         placeholder="https://example.com/product-url">
                     <p class="text-xs text-gray-500 mt-1">Preferred URL for this product (prevents duplicate content)</p>
@@ -132,7 +132,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Open Graph Title <span class="text-gray-500 text-xs">(Facebook, LinkedIn)</span></label>
                     <input type="text" name="og_title" maxlength="60" 
-                        value="{{ old('og_title', $productData['og_title'] ?? '') }}"
+                        value="{{ old('og_title', $product->og_title ?? '') }}"
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                         placeholder="Title for social media shares">
                     <p class="text-xs text-gray-500 mt-1">Title shown when shared on Facebook, LinkedIn</p>
@@ -146,7 +146,7 @@
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Open Graph Description</label>
                     <textarea name="og_description" maxlength="160" rows="3" 
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
-                        placeholder="Description for social media shares">{{ old('og_description', $productData['og_description'] ?? '') }}</textarea>
+                        placeholder="Description for social media shares">{{ old('og_description', $product->og_description ?? '') }}</textarea>
                     <p class="text-xs text-gray-500 mt-1">Description shown when shared on social media</p>
                     @error('og_description')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -338,9 +338,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewUrl = document.getElementById('previewUrl');
     const previewDescription = document.getElementById('previewDescription');
     
-    // Get product name and slug from existing data
-    const productName = '{{ $productData["name"] ?? "Product Name" }}';
-    const productSlug = '{{ $productData["slug"] ?? "product-name" }}';
+    // Get product name and slug from product model
+    const productName = '{{ $product->name ?? "Product Name" }}';
+    const productSlug = '{{ $product->slug ?? "product-name" }}';
 
     function updateCount(input, counter) {
         const current = input.value.length;
