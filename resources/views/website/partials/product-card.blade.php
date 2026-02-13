@@ -1,5 +1,14 @@
 <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-    <a href="{{ route('product.show', $product->slug) }}" class="block">
+    @php
+        // Get default variant's color to pass in URL
+        $defaultVariant = $product->defaultVariant;
+        $defaultColorId = $defaultVariant ? $defaultVariant->color_id : null;
+        $productUrl = route('product.show', $product->slug);
+        if ($defaultColorId) {
+            $productUrl .= '?color=' . $defaultColorId;
+        }
+    @endphp
+    <a href="{{ $productUrl }}" class="block">
         <!-- Product Image -->
         <div class="relative aspect-square overflow-hidden bg-gray-100">
             @if($product->image_url)

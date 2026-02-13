@@ -1771,14 +1771,26 @@ class ProductsController extends Controller
     public function processEditStep3(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'price' => 'required|numeric|min:0',
-            'sale_price' => 'nullable|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'stock_status' => 'required|in:in_stock,out_of_stock',
-            'track_inventory' => 'nullable|boolean',
+            'category_id' => 'required|exists:categories,id',
+            'fabric_id' => 'nullable|exists:fabrics,id',
+            'sku' => 'nullable|string|max:255',
+            'collections' => 'nullable|array',
+            'collections.*' => 'exists:collections,id',
         ]);
 
-        $product->update($validated);
+        // Update product
+        $product->update([
+            'category_id' => $validated['category_id'],
+            'fabric_id' => $validated['fabric_id'] ?? null,
+            'sku' => $validated['sku'] ?? $product->sku,
+        ]);
+
+        // Sync collections
+        if (isset($validated['collections'])) {
+            $product->collections()->sync($validated['collections']);
+        } else {
+            $product->collections()->detach();
+        }
 
         $editData = session('edit_product_data', []);
         $editData = array_merge($editData, $validated);
@@ -1787,13 +1799,13 @@ class ProductsController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Pricing & Inventory updated successfully!',
-                'redirect_url' => route('admin.products.edit.step3', $product->id)
+                'message' => 'Categories & Organization updated successfully!',
+                'redirect_url' => route('admin.products.edit.step4', $product->id)
             ]);
         }
 
-        return redirect()->route('admin.products.edit.step3', $product->id)
-            ->with('success', 'Pricing & Inventory updated successfully!');
+        return redirect()->route('admin.products.edit.step4', $product->id)
+            ->with('success', 'Categories & Organization updated successfully!');
     }
 
     public function editStep4(Product $product)
@@ -1875,67 +1887,27 @@ class ProductsController extends Controller
 
     public function processEditStep4(Request $request, Product $product)
     {
-        \Log::info('Processing Edit Step 4 for product ' . $product->id, [
-            'request_collections' => $request->input('collections'),
-            'request_all' => $request->all()
-        ]);
-
         $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'brand_id' => 'nullable|exists:brands,id',
-            'fabric_id' => 'nullable|exists:fabrics,id',
-            'sku' => 'nullable|string|max:100',
-            'collections' => 'nullable|array',
-            'collections.*' => 'exists:collections,id',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
+            'price' => 'required|numeric|min:0',
+            'sale_price' => 'nullable|numeric|min:0',
         ]);
-
-        if (!array_key_exists('collections', $validated)) {
-            $validated['collections'] = [];
-        }
-        if (!array_key_exists('tags', $validated)) {
-            $validated['tags'] = [];
-        }
-
-        $collections = $validated['collections'] ?? [];
-        $tags = $validated['tags'] ?? [];
-
-        \Log::info('Collections to sync:', ['collections' => $collections]);
-
-        unset($validated['collections'], $validated['tags']);
 
         $product->update($validated);
 
-        $product->collections()->sync($collections);
-        $product->tags()->sync($tags);
-
-        // Verify the sync worked
-        $product->load('collections');
-        // Use getRelation to avoid collision with 'collections' column
-        $syncedCollections = $product->getRelation('collections');
-
-        \Log::info('Collections after sync:', [
-            'count' => $syncedCollections ? $syncedCollections->count() : 0,
-            'ids' => $syncedCollections ? $syncedCollections->pluck('id')->toArray() : []
-        ]);
-
         $editData = session('edit_product_data', []);
         $editData = array_merge($editData, $validated);
-        $editData['collections'] = $collections;
-        $editData['tags'] = $tags;
         session(['edit_product_data' => $editData]);
 
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Category & Brand updated successfully!',
-                'redirect_url' => route('admin.products.edit.step4', $product->id)
+                'message' => 'Pricing updated successfully!',
+                'redirect_url' => route('admin.products.edit.step5', $product->id)
             ]);
         }
 
-        return redirect()->route('admin.products.edit.step4', $product->id)
-            ->with('success', 'Category & Brand updated successfully!');
+        return redirect()->route('admin.products.edit.step5', $product->id)
+            ->with('success', 'Pricing updated successfully!');
     }
 
     public function editStep5(Product $product)

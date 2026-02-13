@@ -35,6 +35,11 @@ class ProductController extends Controller
         // Get selected color and size from query params
         $selectedColorId = request()->query('color');
         $selectedSizeId = request()->query('size');
+        
+        // If no color is selected, use the default variant's color
+        if (!$selectedColorId && $product->defaultVariant) {
+            $selectedColorId = $product->defaultVariant->color_id;
+        }
 
         // Prepare variant stock data for JavaScript
         $variantStockData = [];

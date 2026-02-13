@@ -48,7 +48,7 @@ class HomeController extends Controller
         // Fetch Best Sellers (Products marked as is_bestseller)
         $bestSellers = Product::activeAndApproved()
             ->where('is_bestseller', true)
-            ->with('variants')
+            ->with(['variants', 'defaultVariant'])
             ->latest()
             ->take(8)
             ->get();
@@ -56,7 +56,7 @@ class HomeController extends Controller
         // Fetch New Arrivals (Products marked as is_new)
         $newArrivals = Product::activeAndApproved()
             ->where('is_new', true)
-            ->with('variants')
+            ->with(['variants', 'defaultVariant'])
             ->latest()
             ->take(8)
             ->get();
@@ -103,7 +103,7 @@ class HomeController extends Controller
 
         // Get 4 products to show for ALL fabrics (same products in each tab)
         $fabricProducts = Product::activeAndApproved()
-            ->with('variants')
+            ->with(['variants', 'defaultVariant'])
             ->latest()
             ->take(4)
             ->get();
@@ -119,7 +119,7 @@ class HomeController extends Controller
         // Fetch Best Sellers (Products marked as is_bestseller) - Used in All-Time Favorites tabs
         $bestSellers = Product::activeAndApproved()
             ->where('is_bestseller', true)
-            ->with('variants')
+            ->with(['variants', 'defaultVariant'])
             ->latest()
             ->take(8)
             ->get();
@@ -127,7 +127,7 @@ class HomeController extends Controller
         // Fetch New Arrivals (Products marked as is_new) - Used in All-Time Favorites tabs
         $newArrivals = Product::activeAndApproved()
             ->where('is_new', true)
-            ->with('variants')
+            ->with(['variants', 'defaultVariant'])
             ->latest()
             ->take(8)
             ->get();
