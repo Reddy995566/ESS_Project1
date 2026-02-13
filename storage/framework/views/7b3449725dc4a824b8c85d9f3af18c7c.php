@@ -46,9 +46,9 @@
                         <label class="block text-sm font-semibold text-gray-800 mb-2">Product Status <span class="text-red-500">*</span></label>
                         <select name="status" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400">
                             <option value="">Select status</option>
-                            <option value="active" <?php echo e(old('status', $productData['status'] ?? '') == 'active' ? 'selected' : ''); ?>>Active - Live on website</option>
-                            <option value="draft" <?php echo e(old('status', $productData['status'] ?? '') == 'draft' ? 'selected' : ''); ?>>Draft - Save for later</option>
-                            <option value="inactive" <?php echo e(old('status', $productData['status'] ?? '') == 'inactive' ? 'selected' : ''); ?>>Inactive - Hidden from website</option>
+                            <option value="active" <?php echo e(old('status', $product->status ?? '') == 'active' ? 'selected' : ''); ?>>Active - Live on website</option>
+                            <option value="draft" <?php echo e(old('status', $product->status ?? '') == 'draft' ? 'selected' : ''); ?>>Draft - Save for later</option>
+                            <option value="inactive" <?php echo e(old('status', $product->status ?? '') == 'inactive' ? 'selected' : ''); ?>>Inactive - Hidden from website</option>
                         </select>
                         <?php $__errorArgs = ['status'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -67,10 +67,10 @@ unset($__errorArgs, $__bag); ?>
                         <label class="block text-sm font-semibold text-gray-800 mb-2">Visibility <span class="text-red-500">*</span></label>
                         <select name="visibility" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400">
                             <option value="">Select visibility</option>
-                            <option value="visible" <?php echo e(old('visibility', $productData['visibility'] ?? '') == 'visible' ? 'selected' : ''); ?>>Visible - Everywhere</option>
-                            <option value="catalog" <?php echo e(old('visibility', $productData['visibility'] ?? '') == 'catalog' ? 'selected' : ''); ?>>Catalog Only</option>
-                            <option value="search" <?php echo e(old('visibility', $productData['visibility'] ?? '') == 'search' ? 'selected' : ''); ?>>Search Only</option>
-                            <option value="hidden" <?php echo e(old('visibility', $productData['visibility'] ?? '') == 'hidden' ? 'selected' : ''); ?>>Hidden</option>
+                            <option value="visible" <?php echo e(old('visibility', $product->visibility ?? '') == 'visible' ? 'selected' : ''); ?>>Visible - Everywhere</option>
+                            <option value="catalog" <?php echo e(old('visibility', $product->visibility ?? '') == 'catalog' ? 'selected' : ''); ?>>Catalog Only</option>
+                            <option value="search" <?php echo e(old('visibility', $product->visibility ?? '') == 'search' ? 'selected' : ''); ?>>Search Only</option>
+                            <option value="hidden" <?php echo e(old('visibility', $product->visibility ?? '') == 'hidden' ? 'selected' : ''); ?>>Hidden</option>
                         </select>
                         <?php $__errorArgs = ['visibility'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -83,6 +83,66 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                     </div>
+                </div>
+            </div>
+
+            <!-- Homepage Display Options -->
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">🏠 Homepage Display Options</h3>
+                <p class="text-sm text-gray-600">Control where your product appears on the homepage</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- New Arrival -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-all">
+                        <input type="checkbox" name="is_new" id="is_new" value="1" 
+                            <?php echo e(old('is_new', $product->is_new ?? false) ? 'checked' : ''); ?>
+
+                            class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <div>
+                            <label for="is_new" class="font-semibold text-gray-800 cursor-pointer">🆕 New Arrival</label>
+                            <p class="text-xs text-gray-600 mt-1">Show in "New Arrivals" section</p>
+                        </div>
+                    </div>
+
+                    <!-- Best Seller -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-400 transition-all">
+                        <input type="checkbox" name="is_bestseller" id="is_bestseller" value="1" 
+                            <?php echo e(old('is_bestseller', $product->is_bestseller ?? false) ? 'checked' : ''); ?>
+
+                            class="mt-1 w-5 h-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                        <div>
+                            <label for="is_bestseller" class="font-semibold text-gray-800 cursor-pointer">⭐ Best Seller</label>
+                            <p class="text-xs text-gray-600 mt-1">Mark as best selling product</p>
+                        </div>
+                    </div>
+
+                    <!-- Featured -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-purple-400 transition-all">
+                        <input type="checkbox" name="is_featured" id="is_featured" value="1" 
+                            <?php echo e(old('is_featured', $product->is_featured ?? false) ? 'checked' : ''); ?>
+
+                            class="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <div>
+                            <label for="is_featured" class="font-semibold text-gray-800 cursor-pointer">✨ Featured</label>
+                            <p class="text-xs text-gray-600 mt-1">Highlight as featured product</p>
+                        </div>
+                    </div>
+
+                    <!-- Show on Homepage -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-400 transition-all">
+                        <input type="checkbox" name="show_in_homepage" id="show_in_homepage" value="1" 
+                            <?php echo e(old('show_in_homepage', $product->show_in_homepage ?? false) ? 'checked' : ''); ?>
+
+                            class="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <div>
+                            <label for="show_in_homepage" class="font-semibold text-gray-800 cursor-pointer">🏠 Show on Homepage</label>
+                            <p class="text-xs text-gray-600 mt-1">Display in homepage sections</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm text-blue-800">💡 <strong>Tip:</strong> Select multiple options to increase product visibility. Products marked as "New Arrival" or "Best Seller" will appear in special homepage sections.</p>
                 </div>
             </div>
 

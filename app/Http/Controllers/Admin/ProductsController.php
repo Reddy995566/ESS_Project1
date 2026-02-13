@@ -2058,6 +2058,12 @@ class ProductsController extends Controller
     public function processEditStep6(Request $request, Product $product)
     {
         $validated = $request->validate([
+            'status' => 'required|in:active,draft,inactive',
+            'visibility' => 'required|in:visible,catalog,search,hidden',
+            'is_new' => 'nullable|boolean',
+            'is_bestseller' => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
+            'show_in_homepage' => 'nullable|boolean',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:160',
             'focus_keywords' => 'nullable|string',
@@ -2065,6 +2071,12 @@ class ProductsController extends Controller
             'og_title' => 'nullable|string|max:60',
             'og_description' => 'nullable|string|max:160',
         ]);
+
+        // Handle boolean checkboxes
+        $validated['is_new'] = $request->has('is_new');
+        $validated['is_bestseller'] = $request->has('is_bestseller');
+        $validated['is_featured'] = $request->has('is_featured');
+        $validated['show_in_homepage'] = $request->has('show_in_homepage');
 
         $product->update($validated);
 
@@ -2075,13 +2087,13 @@ class ProductsController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'SEO settings updated successfully!',
-                'redirect_url' => route('admin.products.edit.step6', $product->id)
+                'message' => 'Product settings updated successfully!',
+                'redirect_url' => route('admin.products')
             ]);
         }
 
-        return redirect()->route('admin.products.edit.step6', $product->id)
-            ->with('success', 'SEO settings updated successfully!');
+        return redirect()->route('admin.products')
+            ->with('success', 'Product updated successfully!');
     }
 
     public function editStep7(Product $product)
