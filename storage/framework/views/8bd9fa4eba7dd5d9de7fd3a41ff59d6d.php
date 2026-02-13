@@ -135,8 +135,12 @@ unset($__errorArgs, $__bag); ?>
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Collections <span class="text-gray-500 text-xs">(Multiple - Hold Ctrl/Cmd to select multiple)</span></label>
                     <select name="collections[]" id="collectionsSelect" multiple size="5" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <?php $__currentLoopData = $collections; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $collection): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $existingCollections = $product->collections ? $product->collections->pluck('id')->toArray() : [];
+                                $selectedCollections = old('collections', $existingCollections);
+                            ?>
                             <option value="<?php echo e($collection->id); ?>" 
-                                <?php echo e(in_array($collection->id, old('collections', optional($product->collections)->pluck('id')->toArray() ?? [])) ? 'selected' : ''); ?>>
+                                <?php echo e(in_array($collection->id, $selectedCollections) ? 'selected' : ''); ?>>
                                 <?php echo e($collection->name); ?>
 
                             </option>
@@ -151,8 +155,12 @@ unset($__errorArgs, $__bag); ?>
                     <label class="block text-sm font-semibold text-gray-800 mb-2">Tags <span class="text-gray-500 text-xs">(Multiple - Hold Ctrl/Cmd to select multiple)</span></label>
                     <select name="tags[]" id="tagsSelect" multiple size="5" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <?php $__currentLoopData = $tags; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $existingTags = $product->tags ? $product->tags->pluck('id')->toArray() : [];
+                                $selectedTags = old('tags', $existingTags);
+                            ?>
                             <option value="<?php echo e($tag->id); ?>" 
-                                <?php echo e(in_array($tag->id, old('tags', optional($product->tags)->pluck('id')->toArray() ?? [])) ? 'selected' : ''); ?>>
+                                <?php echo e(in_array($tag->id, $selectedTags) ? 'selected' : ''); ?>>
                                 <?php echo e($tag->name); ?>
 
                             </option>
