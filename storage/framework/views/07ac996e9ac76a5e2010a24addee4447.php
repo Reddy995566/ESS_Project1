@@ -1,19 +1,17 @@
-@extends('seller.products.edit._layout')
+<?php $__env->startSection('step_title', 'Step 6: Final Settings'); ?>
+<?php $__env->startSection('step_description', 'Complete product configuration and publish settings'); ?>
 
-@section('step_title', 'Step 6: Final Settings')
-@section('step_description', 'Complete product configuration and publish settings')
-
-@section('step_content')
-    @php
+<?php $__env->startSection('step_content'); ?>
+    <?php
         $currentStep = 6;
         $prevStepRoute = '/seller/products/' . $product->id . '/edit?step=5';
-    @endphp
+    ?>
 
-    <form id="stepForm" action="{{ route('seller.products.update', $product->id) }}" method="POST">
-        @csrf
-        @method('PUT')
+    <form id="stepForm" action="<?php echo e(route('seller.products.update', $product->id)); ?>" method="POST">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
         <input type="hidden" name="step" value="6">
-        @csrf
+        <?php echo csrf_field(); ?>
 
         <div class="bg-white rounded-xl shadow-lg border border-gray-200">
             <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
@@ -31,16 +29,16 @@
 
             <div class="p-8 space-y-8">
                 <!-- Error Messages -->
-                @if($errors->any())
+                <?php if($errors->any()): ?>
                     <div class="bg-red-50 border-2 border-red-500 rounded-xl p-6">
                         <h3 class="text-lg font-bold text-red-800 mb-2">❌ Error Updating Product</h3>
                         <ul class="list-disc list-inside text-red-700">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
-                @endif
+                <?php endif; ?>
 
                 <!-- Product Status & Visibility -->
                 <div class="space-y-6">
@@ -54,13 +52,20 @@
                             <select name="status" required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400">
                                 <option value="">Select status</option>
-                                <option value="active" {{ old('status', $product->status ?? '') == 'active' ? 'selected' : '' }}>Active - Live on website</option>
-                                <option value="draft" {{ old('status', $product->status ?? '') == 'draft' ? 'selected' : '' }}>Draft - Save for later</option>
-                                <option value="inactive" {{ old('status', $product->status ?? '') == 'inactive' ? 'selected' : '' }}>Inactive - Hidden from website</option>
+                                <option value="active" <?php echo e(old('status', $product->status ?? '') == 'active' ? 'selected' : ''); ?>>Active - Live on website</option>
+                                <option value="draft" <?php echo e(old('status', $product->status ?? '') == 'draft' ? 'selected' : ''); ?>>Draft - Save for later</option>
+                                <option value="inactive" <?php echo e(old('status', $product->status ?? '') == 'inactive' ? 'selected' : ''); ?>>Inactive - Hidden from website</option>
                             </select>
-                            @error('status')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-sm mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <!-- Visibility -->
@@ -70,14 +75,21 @@
                             <select name="visibility" required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400">
                                 <option value="">Select visibility</option>
-                                <option value="visible" {{ old('visibility', $product->visibility ?? '') == 'visible' ? 'selected' : '' }}>Visible - Everywhere</option>
-                                <option value="catalog" {{ old('visibility', $product->visibility ?? '') == 'catalog' ? 'selected' : '' }}>Catalog Only</option>
-                                <option value="search" {{ old('visibility', $product->visibility ?? '') == 'search' ? 'selected' : '' }}>Search Only</option>
-                                <option value="hidden" {{ old('visibility', $product->visibility ?? '') == 'hidden' ? 'selected' : '' }}>Hidden</option>
+                                <option value="visible" <?php echo e(old('visibility', $product->visibility ?? '') == 'visible' ? 'selected' : ''); ?>>Visible - Everywhere</option>
+                                <option value="catalog" <?php echo e(old('visibility', $product->visibility ?? '') == 'catalog' ? 'selected' : ''); ?>>Catalog Only</option>
+                                <option value="search" <?php echo e(old('visibility', $product->visibility ?? '') == 'search' ? 'selected' : ''); ?>>Search Only</option>
+                                <option value="hidden" <?php echo e(old('visibility', $product->visibility ?? '') == 'hidden' ? 'selected' : ''); ?>>Hidden</option>
                             </select>
-                            @error('visibility')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['visibility'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-sm mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
                 </div>
@@ -91,7 +103,8 @@
                         <!-- Show as New Arrival -->
                         <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-all">
                             <input type="checkbox" name="is_new" id="is_new" value="1" 
-                                {{ old('is_new', $product->is_new ?? false) ? 'checked' : '' }}
+                                <?php echo e(old('is_new', $product->is_new ?? false) ? 'checked' : ''); ?>
+
                                 class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             <div>
                                 <label for="is_new" class="font-semibold text-gray-800 cursor-pointer">🆕 New Arrival</label>
@@ -102,7 +115,8 @@
                         <!-- Show as Best Seller -->
                         <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-400 transition-all">
                             <input type="checkbox" name="is_bestseller" id="is_bestseller" value="1" 
-                                {{ old('is_bestseller', $product->is_bestseller ?? false) ? 'checked' : '' }}
+                                <?php echo e(old('is_bestseller', $product->is_bestseller ?? false) ? 'checked' : ''); ?>
+
                                 class="mt-1 w-5 h-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
                             <div>
                                 <label for="is_bestseller" class="font-semibold text-gray-800 cursor-pointer">⭐ Best Seller</label>
@@ -113,7 +127,8 @@
                         <!-- Show as Featured -->
                         <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-purple-400 transition-all">
                             <input type="checkbox" name="is_featured" id="is_featured" value="1" 
-                                {{ old('is_featured', $product->is_featured ?? false) ? 'checked' : '' }}
+                                <?php echo e(old('is_featured', $product->is_featured ?? false) ? 'checked' : ''); ?>
+
                                 class="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <div>
                                 <label for="is_featured" class="font-semibold text-gray-800 cursor-pointer">✨ Featured</label>
@@ -124,7 +139,8 @@
                         <!-- Show as Trending -->
                         <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-pink-400 transition-all">
                             <input type="checkbox" name="is_trending" id="is_trending" value="1" 
-                                {{ old('is_trending', $product->is_trending ?? false) ? 'checked' : '' }}
+                                <?php echo e(old('is_trending', $product->is_trending ?? false) ? 'checked' : ''); ?>
+
                                 class="mt-1 w-5 h-5 text-pink-600 border-gray-300 rounded focus:ring-pink-500">
                             <div>
                                 <label for="is_trending" class="font-semibold text-gray-800 cursor-pointer">🔥 Trending</label>
@@ -135,7 +151,8 @@
                         <!-- Show on Homepage -->
                         <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-400 transition-all">
                             <input type="checkbox" name="show_in_homepage" id="show_in_homepage" value="1" 
-                                {{ old('show_in_homepage', $product->show_in_homepage ?? false) ? 'checked' : '' }}
+                                <?php echo e(old('show_in_homepage', $product->show_in_homepage ?? false) ? 'checked' : ''); ?>
+
                                 class="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
                             <div>
                                 <label for="show_in_homepage" class="font-semibold text-gray-800 cursor-pointer">🏠 Show on Homepage</label>
@@ -146,7 +163,8 @@
                         <!-- Show as Sale -->
                         <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-red-400 transition-all">
                             <input type="checkbox" name="is_sale" id="is_sale" value="1" 
-                                {{ old('is_sale', $product->is_sale ?? false) ? 'checked' : '' }}
+                                <?php echo e(old('is_sale', $product->is_sale ?? false) ? 'checked' : ''); ?>
+
                                 class="mt-1 w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
                             <div>
                                 <label for="is_sale" class="font-semibold text-gray-800 cursor-pointer">🏷️ On Sale</label>
@@ -175,12 +193,12 @@
         </div>
     </form>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <script>
             // Load summary from product data
             document.addEventListener('DOMContentLoaded', function () {
                 // Product data from model
-                const productData = @json($product ?? []);
+                const productData = <?php echo json_encode($product ?? [], 15, 512) ?>;
 
                 // Handle Update Button Click
                 const updateBtn = document.getElementById('updateBtn');
@@ -217,7 +235,7 @@
 
                                     // Redirect to products list after a short delay
                                     setTimeout(() => {
-                                        window.location.href = "{{ route('seller.products.index') }}";
+                                        window.location.href = "<?php echo e(route('seller.products.index')); ?>";
                                     }, 1500);
                                 } else {
                                     const errorMsg = data.message || 'Update failed';
@@ -253,6 +271,7 @@
                 }
             });
         </script>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('seller.products.edit._layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\ESS_Project1\resources\views/seller/products/edit/step6.blade.php ENDPATH**/ ?>

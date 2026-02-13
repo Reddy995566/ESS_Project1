@@ -136,25 +136,29 @@
                 </h2>
 
                 <div class="flex items-center gap-4 md:gap-6">
-                    <?php $__currentLoopData = $mainCategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <button onclick="switchTab(<?php echo e($index); ?>)" 
-                            id="tab-btn-<?php echo e($index); ?>"
-                            class="<?php echo e($index === 0 ? 'border-b-2 pb-1' : ''); ?> text-xs md:text-sm font-semibold transition-all uppercase"
-                            style="color: <?php echo e($index === 0 ? 'var(--color-text-primary)' : 'var(--color-text-muted)'); ?>; border-color: var(--color-text-primary);">
-                        <?php echo e($category->name); ?>
-
+                    <button onclick="switchTab(0)" 
+                            id="tab-btn-0"
+                            class="border-b-2 pb-1 text-xs md:text-sm font-semibold transition-all uppercase"
+                            style="color: var(--color-text-primary); border-color: var(--color-text-primary);">
+                        Best Sellers
                     </button>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    
+                    <button onclick="switchTab(1)" 
+                            id="tab-btn-1"
+                            class="text-xs md:text-sm font-semibold transition-all uppercase"
+                            style="color: var(--color-text-muted);">
+                        New Arrivals
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Products Grid -->
         <div class="max-w-[1800px] mx-auto px-4 sm:px-6 md:px-8">
-            <?php $__currentLoopData = $mainCategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <div id="tab-content-<?php echo e($index); ?>" class="<?php echo e($index === 0 ? 'block' : 'hidden'); ?>">
+            <!-- Best Sellers Tab Content -->
+            <div id="tab-content-0" class="block">
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-                    <?php $__empty_1 = true; $__currentLoopData = $category->products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php $__empty_1 = true; $__currentLoopData = $bestSellers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="flex flex-col group items-center">
                         <div class="relative w-full h-auto rounded-lg overflow-hidden bg-gray-100 group">
                             
@@ -220,12 +224,161 @@
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-full text-center text-gray-500 py-10">
-                        No products found in <?php echo e($category->name); ?>.
+                        No best seller products found.
                     </div>
                     <?php endif; ?>
                 </div>
             </div>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            
+            <!-- New Arrivals Tab Content -->
+            <div id="tab-content-1" class="hidden">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+                    <?php $__empty_1 = true; $__currentLoopData = $bestSellers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <div class="flex flex-col group items-center">
+                        <div class="relative w-full h-auto rounded-lg overflow-hidden bg-gray-100 group">
+                            
+                            <!-- Product Image Slider -->
+                            <div class="swiper product-swiper w-full h-auto">
+                                <div class="swiper-wrapper">
+                                    <?php $displayImages = $product->display_images; ?>
+                                    <?php if(count($displayImages) > 0): ?>
+                                        <?php $__currentLoopData = $displayImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <div class="swiper-slide">
+                                            <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                                <img src="<?php echo e($img); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto" loading="lazy" />
+                                            </a>
+                                        </div>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php else: ?>
+                                        <div class="swiper-slide">
+                                            <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                                <img src="<?php echo e(asset('website/assets/images/product-1.jpg')); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto" />
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <!-- Slider Navigation Buttons (Visible on Hover) -->
+                                <div class="swiper-button-next !w-6 !h-6 !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md" style="--swiper-navigation-size: 20px;"></div>
+                                <div class="swiper-button-prev !w-6 !h-6 !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md" style="--swiper-navigation-size: 20px;"></div>
+                            </div>
+
+                            <!-- Wishlist Button -->
+                            <button onclick="addToWishlist(<?php echo e($product->id); ?>)" data-product-id="<?php echo e($product->id); ?>" class="absolute bottom-2 right-2 md:bottom-3 md:right-3 z-10 text-white text-lg md:text-xl p-2 rounded-full hover:bg-white/20 transition-colors">
+                                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-2 md:mt-3 pb-2">
+                            <a href="<?php echo e(route('product.show', $product->slug)); ?>">
+                                <p class="text-xs md:text-sm font-normal truncate px-2 transition-colors" style="color: var(--color-text-primary);">
+                                    <?php echo e($product->name); ?>
+
+                                </p>
+                            </a>
+                            <div class="flex items-center justify-center gap-2 mt-1">
+                                <?php if($product->sale_price > 0): ?>
+                                    <p class="text-[10px] md:text-xs text-red-500 line-through">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->sale_price)); ?>
+
+                                    </p>
+                                <?php else: ?>
+                                    <p class="text-xs md:text-sm font-medium" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <div class="col-span-full text-center text-gray-500 py-10">
+                        No best seller products found.
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- New Arrivals Tab Content -->
+            <div id="tab-content-1" class="hidden">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+                    <?php $__empty_1 = true; $__currentLoopData = $newArrivals; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <div class="flex flex-col group items-center">
+                        <div class="relative w-full h-auto rounded-lg overflow-hidden bg-gray-100 group">
+                            
+                            <!-- Product Image Slider -->
+                            <div class="swiper product-swiper w-full h-auto">
+                                <div class="swiper-wrapper">
+                                    <?php $displayImages = $product->display_images; ?>
+                                    <?php if(count($displayImages) > 0): ?>
+                                        <?php $__currentLoopData = $displayImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <div class="swiper-slide">
+                                            <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                                <img src="<?php echo e($img); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto" loading="lazy" />
+                                            </a>
+                                        </div>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php else: ?>
+                                        <div class="swiper-slide">
+                                            <a href="<?php echo e(route('product.show', $product->slug)); ?>" class="block w-full h-auto">
+                                                <img src="<?php echo e(asset('website/assets/images/product-1.jpg')); ?>" alt="<?php echo e($product->name); ?>" class="w-full h-auto" />
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <!-- Slider Navigation Buttons (Visible on Hover) -->
+                                <div class="swiper-button-next !w-6 !h-6 !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md" style="--swiper-navigation-size: 20px;"></div>
+                                <div class="swiper-button-prev !w-6 !h-6 !text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md" style="--swiper-navigation-size: 20px;"></div>
+                            </div>
+
+                            <!-- Wishlist Button -->
+                            <button onclick="addToWishlist(<?php echo e($product->id); ?>)" data-product-id="<?php echo e($product->id); ?>" class="absolute bottom-2 right-2 md:bottom-3 md:right-3 z-10 text-white text-lg md:text-xl p-2 rounded-full hover:bg-white/20 transition-colors">
+                                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-2 md:mt-3 pb-2">
+                            <a href="<?php echo e(route('product.show', $product->slug)); ?>">
+                                <p class="text-xs md:text-sm font-normal truncate px-2 transition-colors" style="color: var(--color-text-primary);">
+                                    <?php echo e($product->name); ?>
+
+                                </p>
+                            </a>
+                            <div class="flex items-center justify-center gap-2 mt-1">
+                                <?php if($product->sale_price > 0): ?>
+                                    <p class="text-[10px] md:text-xs text-red-500 line-through">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                    <p class="text-xs md:text-sm font-bold" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->sale_price)); ?>
+
+                                    </p>
+                                <?php else: ?>
+                                    <p class="text-xs md:text-sm font-medium" style="color: var(--color-text-primary);">
+                                        Rs. <?php echo e(number_format($product->price)); ?>
+
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <div class="col-span-full text-center text-gray-500 py-10">
+                        No new arrival products found.
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
 
     </section>

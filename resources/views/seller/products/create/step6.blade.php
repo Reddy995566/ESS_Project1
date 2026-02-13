@@ -74,6 +74,86 @@
                 </div>
             </div>
 
+            <!-- Homepage Display Options -->
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">🏠 Homepage Display Options</h3>
+                <p class="text-sm text-gray-600">Control where your product appears on the homepage</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Show as New Arrival -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-all">
+                        <input type="checkbox" name="is_new" id="is_new" value="1" 
+                            {{ old('is_new', $productData['is_new'] ?? false) ? 'checked' : '' }}
+                            class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <div>
+                            <label for="is_new" class="font-semibold text-gray-800 cursor-pointer">🆕 New Arrival</label>
+                            <p class="text-xs text-gray-600 mt-1">Show in "New Arrivals" section</p>
+                        </div>
+                    </div>
+
+                    <!-- Show as Best Seller -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-400 transition-all">
+                        <input type="checkbox" name="is_bestseller" id="is_bestseller" value="1" 
+                            {{ old('is_bestseller', $productData['is_bestseller'] ?? false) ? 'checked' : '' }}
+                            class="mt-1 w-5 h-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                        <div>
+                            <label for="is_bestseller" class="font-semibold text-gray-800 cursor-pointer">⭐ Best Seller</label>
+                            <p class="text-xs text-gray-600 mt-1">Mark as best selling product</p>
+                        </div>
+                    </div>
+
+                    <!-- Show as Featured -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-purple-400 transition-all">
+                        <input type="checkbox" name="is_featured" id="is_featured" value="1" 
+                            {{ old('is_featured', $productData['is_featured'] ?? false) ? 'checked' : '' }}
+                            class="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <div>
+                            <label for="is_featured" class="font-semibold text-gray-800 cursor-pointer">✨ Featured</label>
+                            <p class="text-xs text-gray-600 mt-1">Highlight as featured product</p>
+                        </div>
+                    </div>
+
+                    <!-- Show as Trending -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-pink-400 transition-all">
+                        <input type="checkbox" name="is_trending" id="is_trending" value="1" 
+                            {{ old('is_trending', $productData['is_trending'] ?? false) ? 'checked' : '' }}
+                            class="mt-1 w-5 h-5 text-pink-600 border-gray-300 rounded focus:ring-pink-500">
+                        <div>
+                            <label for="is_trending" class="font-semibold text-gray-800 cursor-pointer">🔥 Trending</label>
+                            <p class="text-xs text-gray-600 mt-1">Show in trending products</p>
+                        </div>
+                    </div>
+
+                    <!-- Show on Homepage -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-400 transition-all">
+                        <input type="checkbox" name="show_in_homepage" id="show_in_homepage" value="1" 
+                            {{ old('show_in_homepage', $productData['show_in_homepage'] ?? false) ? 'checked' : '' }}
+                            class="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <div>
+                            <label for="show_in_homepage" class="font-semibold text-gray-800 cursor-pointer">🏠 Show on Homepage</label>
+                            <p class="text-xs text-gray-600 mt-1">Display in homepage sections</p>
+                        </div>
+                    </div>
+
+                    <!-- Show as Sale -->
+                    <div class="flex items-start space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-red-400 transition-all">
+                        <input type="checkbox" name="is_sale" id="is_sale" value="1" 
+                            {{ old('is_sale', $productData['is_sale'] ?? false) ? 'checked' : '' }}
+                            class="mt-1 w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                        <div>
+                            <label for="is_sale" class="font-semibold text-gray-800 cursor-pointer">🏷️ On Sale</label>
+                            <p class="text-xs text-gray-600 mt-1">Mark as sale product</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm text-blue-800">
+                        <strong>💡 Tip:</strong> Select multiple options to increase product visibility. Products marked as "New Arrival" or "Best Seller" will appear in special homepage sections.
+                    </p>
+                </div>
+            </div>
+
             <!-- Summary Section -->
 
 

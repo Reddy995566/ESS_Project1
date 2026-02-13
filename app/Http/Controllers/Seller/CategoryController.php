@@ -148,7 +148,8 @@ class CategoryController extends Controller
         $validated['is_active'] = $request->has('is_active');
         $validated['is_featured'] = $request->has('is_featured');
         $validated['show_in_navbar'] = $request->has('show_in_navbar');
-        $validated['show_in_homepage'] = $request->has('show_in_homepage');
+        // Automatically enable show_in_homepage for seller categories so products appear on homepage
+        $validated['show_in_homepage'] = true;
         $validated['show_in_circle'] = $request->has('show_in_circle');
         
         // Circle settings

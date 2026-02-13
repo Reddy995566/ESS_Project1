@@ -334,8 +334,35 @@ class Product extends Model
             return $allImages;
         }
 
-        // 5. Fallback to Variants (if no product images at all)
+        // 5. Fallback to Default Variant first (if no product images at all)
         if ($this->variants->isNotEmpty()) {
+            // First try to get default variant images
+            $defaultVariant = $this->variants->where('is_default', true)->first();
+            
+            if ($defaultVariant) {
+                $vImages = $defaultVariant->images;
+
+                if (is_string($vImages)) {
+                    $decoded = json_decode($vImages, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $vImages = $decoded;
+                    }
+                }
+
+                if (is_array($vImages)) {
+                    $urls = [];
+                    foreach ($vImages as $img) {
+                        $u = is_array($img) ? ($img['url'] ?? $img['path'] ?? null) : $img;
+                        if ($u)
+                            $urls[] = $u;
+                    }
+                    if (!empty($urls)) {
+                        return array_values(array_unique($urls));
+                    }
+                }
+            }
+            
+            // If no default variant or no images, fallback to all variants
             $urls = [];
             foreach ($this->variants as $variant) {
                 $vImages = $variant->images;
@@ -367,8 +394,31 @@ class Product extends Model
     {
         $grouped = [];
         if ($this->variants->isNotEmpty()) {
+            // First, add default variant images if exists
+            $defaultVariant = $this->variants->where('is_default', true)->first();
+            if ($defaultVariant && $defaultVariant->color_id) {
+                $images = $defaultVariant->images;
+
+                if (is_string($images)) {
+                    $images = json_decode($images, true);
+                }
+
+                if (is_array($images)) {
+                    $urls = [];
+                    foreach ($images as $img) {
+                        $u = is_array($img) ? ($img['url'] ?? $img['path'] ?? null) : $img;
+                        if ($u && is_string($u))
+                            $urls[] = trim($u);
+                    }
+                    if (!empty($urls)) {
+                        $grouped[$defaultVariant->color_id] = $urls;
+                    }
+                }
+            }
+            
+            // Then add other variants
             foreach ($this->variants as $variant) {
-                if ($variant->color_id) {
+                if ($variant->color_id && !isset($grouped[$variant->color_id])) {
                     $images = $variant->images;
 
                     if (is_string($images)) {

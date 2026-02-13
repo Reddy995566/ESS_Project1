@@ -38,34 +38,28 @@ class HomeController extends Controller
             ->orderBy('order')
             ->get();
 
-        // Dynamic Main Categories for 'All-Time Favorites' Section
-        $mainCategories = Category::whereNull('parent_id')
-            ->where('is_active', true)
-            ->where('show_in_homepage', true)
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->take(2)
+        // Fetch All-Time Favorites (All active and approved products)
+        $allTimeFavorites = Product::activeAndApproved()
+            ->with('variants')
+            ->latest()
+            ->take(8)
             ->get();
 
-        // Load products for each category (including ALL sub-categories recursively)
-        foreach ($mainCategories as $category) {
-            // Get all Category IDs (Parent + ALL descendants)
-            $allCategoryIds = [$category->id];
-            $childIds = $this->getAllChildCategoryIds($category->id);
-            $allCategoryIds = array_merge($allCategoryIds, $childIds);
+        // Fetch Best Sellers (Products marked as is_bestseller)
+        $bestSellers = Product::activeAndApproved()
+            ->where('is_bestseller', true)
+            ->with('variants')
+            ->latest()
+            ->take(8)
+            ->get();
 
-            $products = Product::whereIn('category_id', $allCategoryIds)
-                ->activeAndApproved()
-                ->with('variants')
-                ->latest()
-                ->take(8)
-                ->get();
-
-            // Manually set the relation so the view code ($category->products) works as is
-            $category->setRelation('products', $products);
-        }
-
-        // Fetch Homepage Collections
+        // Fetch New Arrivals (Products marked as is_new)
+        $newArrivals = Product::activeAndApproved()
+            ->where('is_new', true)
+            ->with('variants')
+            ->latest()
+            ->take(8)
+            ->get();
         $collections = \App\Models\Collection::where('is_active', true)
             ->where('show_in_homepage', true)
             ->orderBy('sort_order')
@@ -122,28 +116,33 @@ class HomeController extends Controller
         // Fetch Budget Cards for 'Shop By Budget' Section
         $budgetCards = BudgetCard::active()->ordered()->get();
 
-        // Fetch Best Sellers (Top 8 products by order count)
+        // Fetch Best Sellers (Products marked as is_bestseller) - Used in All-Time Favorites tabs
         $bestSellers = Product::activeAndApproved()
-            ->withCount(['orderItems as total_sold' => function ($query) {
-                $query->select(\DB::raw('SUM(quantity)'));
-            }])
-            ->having('total_sold', '>', 0)
-            ->orderByDesc('total_sold')
-            ->with(['variants', 'seller'])
+            ->where('is_bestseller', true)
+            ->with('variants')
+            ->latest()
+            ->take(8)
+            ->get();
+
+        // Fetch New Arrivals (Products marked as is_new) - Used in All-Time Favorites tabs
+        $newArrivals = Product::activeAndApproved()
+            ->where('is_new', true)
+            ->with('variants')
+            ->latest()
             ->take(8)
             ->get();
 
         return view('website.home', compact(
             'heroBanners',
-            'mainCategories', 
+            'bestSellers',
+            'newArrivals',
             'collections', 
             'testimonials', 
             'videoReels', 
             'circleCategories',
             'promotionalBanners',
             'homepageFabrics',
-            'budgetCards',
-            'bestSellers'
+            'budgetCards'
         ));
     }
 }
